@@ -1,0 +1,6 @@
+@TecnoEcommerce.API_HostAddress = http://localhost:5284
+
+GET {{TecnoEcommerce.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

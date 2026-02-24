@@ -1,0 +1,2 @@
+# Esta carpeta contendrá el DbContext y configuraciones de EF Core
+# Mantener este archivo para preservar la estructura de carpetas en Git
