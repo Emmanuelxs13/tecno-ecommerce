@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\TecnoEcommerce.Domain\TecnoEcommerce.Domain.csproj" />
-    <ProjectReference Include="..\TecnoEcommerce.Application\TecnoEcommerce.Application.csproj" />
+    <ProjectReference Include="..\TecnoEcommerce.Modelos\TecnoEcommerce.Modelos.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

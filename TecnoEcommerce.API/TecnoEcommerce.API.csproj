@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TecnoEcommerce.Application\TecnoEcommerce.Application.csproj" />
-    <ProjectReference Include="..\TecnoEcommerce.Infrastructure\TecnoEcommerce.Infrastructure.csproj" />
+    <ProjectReference Include="..\TecnoEcommerce.Modelos\TecnoEcommerce.Modelos.csproj" />
+    <ProjectReference Include="..\TecnoEcommerce.Datos\TecnoEcommerce.Datos.csproj" />
   </ItemGroup>
 
 </Project>

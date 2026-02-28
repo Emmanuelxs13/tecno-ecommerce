@@ -3,13 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TecnoEcommerce.Domain", "TecnoEcommerce.Domain\TecnoEcommerce.Domain.csproj", "{1AC78FBA-AE8E-470B-96F1-67EB91DB0C83}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TecnoEcommerce.Modelos", "TecnoEcommerce.Modelos\TecnoEcommerce.Modelos.csproj", "{A820DB62-8313-4993-A2A8-3779A47AD978}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TecnoEcommerce.Application", "TecnoEcommerce.Application\TecnoEcommerce.Application.csproj", "{0E1B4B1F-4780-46FE-A5F7-CFBD0DC3EDC3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TecnoEcommerce.Datos", "TecnoEcommerce.Datos\TecnoEcommerce.Datos.csproj", "{406B696F-8F2E-403C-8640-5B4115DD2365}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TecnoEcommerce.Infrastructure", "TecnoEcommerce.Infrastructure\TecnoEcommerce.Infrastructure.csproj", "{86A6E0A3-F141-4E89-BF55-A61D4D0008F6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TecnoEcommerce.API", "TecnoEcommerce.API\TecnoEcommerce.API.csproj", "{7445A884-0F98-4EF2-A1B8-2401AF5536D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TecnoEcommerce.API", "TecnoEcommerce.API\TecnoEcommerce.API.csproj", "{22CC2705-EB29-4641-B399-C7799CC5C62E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,21 +18,17 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1AC78FBA-AE8E-470B-96F1-67EB91DB0C83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1AC78FBA-AE8E-470B-96F1-67EB91DB0C83}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1AC78FBA-AE8E-470B-96F1-67EB91DB0C83}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1AC78FBA-AE8E-470B-96F1-67EB91DB0C83}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0E1B4B1F-4780-46FE-A5F7-CFBD0DC3EDC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0E1B4B1F-4780-46FE-A5F7-CFBD0DC3EDC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E1B4B1F-4780-46FE-A5F7-CFBD0DC3EDC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E1B4B1F-4780-46FE-A5F7-CFBD0DC3EDC3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{86A6E0A3-F141-4E89-BF55-A61D4D0008F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86A6E0A3-F141-4E89-BF55-A61D4D0008F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{86A6E0A3-F141-4E89-BF55-A61D4D0008F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86A6E0A3-F141-4E89-BF55-A61D4D0008F6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7445A884-0F98-4EF2-A1B8-2401AF5536D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7445A884-0F98-4EF2-A1B8-2401AF5536D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7445A884-0F98-4EF2-A1B8-2401AF5536D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7445A884-0F98-4EF2-A1B8-2401AF5536D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A820DB62-8313-4993-A2A8-3779A47AD978}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A820DB62-8313-4993-A2A8-3779A47AD978}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A820DB62-8313-4993-A2A8-3779A47AD978}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A820DB62-8313-4993-A2A8-3779A47AD978}.Release|Any CPU.Build.0 = Release|Any CPU
+		{406B696F-8F2E-403C-8640-5B4115DD2365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{406B696F-8F2E-403C-8640-5B4115DD2365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{406B696F-8F2E-403C-8640-5B4115DD2365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{406B696F-8F2E-403C-8640-5B4115DD2365}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22CC2705-EB29-4641-B399-C7799CC5C62E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22CC2705-EB29-4641-B399-C7799CC5C62E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22CC2705-EB29-4641-B399-C7799CC5C62E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22CC2705-EB29-4641-B399-C7799CC5C62E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

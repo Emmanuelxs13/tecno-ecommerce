@@ -1,0 +1,2 @@
+# Interfaces de repositorios y servicios (Sprint 1)
+# Aquí van: IRepositorio, IProductoRepositorio, ICarritoRepositorio, IPedidoRepositorio, IPago, IEnvioServicio
