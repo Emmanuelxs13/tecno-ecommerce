@@ -1,0 +1,3 @@
+# Servicios de la capa de negocio (Sprint 2)
+# Aquí van: UsuarioServicio, ProductoServicio, CategoriaServicio, CarritoServicio, PedidoServicio
+# También: PagoSimuladoServicio, EnvioSimuladoServicio
