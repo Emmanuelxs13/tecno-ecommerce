@@ -235,7 +235,7 @@ Configurada en `TecnoEcommerce.API/appsettings.json`:
 ## Autores
 
 - Juan Esteban Correa
-- Andres
+- Andrés Quiroz Gomez
 - Emmanuel Berrio
 
 ---
