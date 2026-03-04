@@ -8,84 +8,316 @@
 @inject SesionServicio        Sesion
 
 @*
-    Página principal: catálogo de productos con filtros por categoría y búsqueda.
-    Principio SRP: orquesta la visualización del catálogo y la adición al carrito.
+    Página principal del e-commerce.
+    Secciones: Hero · Trust strip · Categorías · Destacados · Promo · Catálogo completo.
+    Principio SRP: orquesta la experiencia de inicio y delega cada bloque visual a sus componentes.
 *@
 
-<PageTitle>Catálogo – TecnoEcommerce</PageTitle>
+<PageTitle>TecnoEcommerce – Tu tienda de tecnología</PageTitle>
 
 <CargandoSpinner Visible="@_cargando" />
 
-<!-- Banner hero -->
-<div class="hero-banner mb-4 d-flex align-items-center justify-content-between">
-    <div>
-        <h2 class="hero-title"><i class="bi bi-cpu me-2"></i>Catálogo</h2>
-        <p class="hero-sub">Encuentra la tecnología que necesitas</p>
-    </div>
-    <i class="bi bi-laptop hero-icon d-none d-md-block"></i>
-</div>
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 1 — Hero principal
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="hero-main">
+    <div class="row align-items-center g-4">
 
-<!-- Filtros -->
-<div class="filtros-container row g-3 align-items-center mb-4">
-    <div class="col-12 col-md-6">
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input type="text" class="form-control" placeholder="Buscar productos..."
-                   @bind="_busqueda" @bind:after="FiltrarProductos" />
+        <!-- Texto + CTA -->
+        <div class="col-12 col-lg-7">
+            <div class="hero-eyebrow">
+                <i class="bi bi-lightning-fill"></i>
+                Nueva temporada &middot; Mejores precios
+            </div>
+
+            <h1 class="hero-headline">
+                Encuentra la tecnología<br />
+                que <span class="highlight">necesitas hoy</span>
+            </h1>
+
+            <p class="hero-description">
+                Smartphones, laptops, accesorios y más. Envío rápido, garantía extendida
+                y las mejores marcas del mercado a tu alcance.
+            </p>
+
+            <div class="hero-cta-group">
+                <a class="btn-hero-primary" href="#catalogo">
+                    <i class="bi bi-grid-fill"></i>Ver catálogo
+                </a>
+                @if (!Sesion.EstaAutenticado)
+                {
+                    <a class="btn-hero-secondary" href="/registro">
+                        <i class="bi bi-person-plus"></i>Crear cuenta gratis
+                    </a>
+                }
+                else
+                {
+                    <a class="btn-hero-secondary" href="/carrito">
+                        <i class="bi bi-cart3"></i>Mi carrito
+                    </a>
+                }
+            </div>
+
+            <!-- Estadísticas rápidas -->
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-num">+500</div>
+                    <div class="hero-stat-label">Productos</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">+1.2k</div>
+                    <div class="hero-stat-label">Clientes felices</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">4.9&nbsp;★</div>
+                    <div class="hero-stat-label">Calificación</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visual flotante (solo desktop) -->
+        <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+            <div class="hero-visual-wrapper" style="height:280px;width:100%;max-width:320px;">
+                <i class="bi bi-pc-display hero-device-icon"></i>
+                <div class="d-flex flex-column gap-3" style="position:relative;z-index:1;">
+                    <div class="hero-floating-card" style="align-self:flex-end;">
+                        <div class="fc-icon"><i class="bi bi-truck"></i></div>
+                        <div>
+                            <div class="fc-title">Envío express</div>
+                            <div class="fc-sub">Recibe en 24–48 hrs</div>
+                        </div>
+                    </div>
+                    <div class="hero-floating-card" style="align-self:flex-start;animation-delay:2s;">
+                        <div class="fc-icon"><i class="bi bi-shield-check"></i></div>
+                        <div>
+                            <div class="fc-title">Garantía oficial</div>
+                            <div class="fc-sub">Hasta 24 meses</div>
+                        </div>
+                    </div>
+                    <div class="hero-floating-card" style="align-self:flex-end;animation-delay:1s;">
+                        <div class="fc-icon"><i class="bi bi-star-fill"></i></div>
+                        <div>
+                            <div class="fc-title">Top valorados</div>
+                            <div class="fc-sub">Calidad garantizada</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 2 — Trust strip (propuestas de valor)
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="trust-strip">
+    <div class="trust-item">
+        <div class="trust-item-icon trust-icon-blue"><i class="bi bi-truck-front-fill"></i></div>
+        <div class="trust-item-text">
+            <strong>Envío gratuito</strong>
+            <span>En pedidos mayores a $500</span>
         </div>
     </div>
-    <div class="col-12 col-md-4">
-        <select class="form-select" @bind="_categoriaSeleccionada" @bind:after="FiltrarProductos">
-            <option value="0">Todas las categorías</option>
-            @foreach (var cat in _categorias)
-            {
-                <option value="@cat.Id">@cat.Nombre</option>
-            }
-        </select>
+    <div class="trust-item">
+        <div class="trust-item-icon trust-icon-green"><i class="bi bi-shield-fill-check"></i></div>
+        <div class="trust-item-text">
+            <strong>Garantía oficial</strong>
+            <span>Hasta 24 meses incluida</span>
+        </div>
     </div>
-    <div class="col-12 col-md-2">
-        <button class="btn btn-outline-secondary w-100" @onclick="LimpiarFiltros">
-            <i class="bi bi-x-circle me-1"></i>Limpiar
-        </button>
+    <div class="trust-item">
+        <div class="trust-item-icon trust-icon-purple"><i class="bi bi-headset"></i></div>
+        <div class="trust-item-text">
+            <strong>Soporte 24/7</strong>
+            <span>Siempre disponible para ti</span>
+        </div>
+    </div>
+    <div class="trust-item">
+        <div class="trust-item-icon trust-icon-cyan"><i class="bi bi-lock-fill"></i></div>
+        <div class="trust-item-text">
+            <strong>Pago 100% seguro</strong>
+            <span>Cifrado SSL certificado</span>
+        </div>
     </div>
 </div>
 
-<MensajeAlerta Mensaje="@_mensaje" Tipo="@_tipoMensaje" OnCerrar="() => _mensaje = string.Empty" />
-
-<!-- Grilla de productos -->
-@if (!_cargando && _productosFiltrados.Count == 0)
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 3 — Categorías
+     ═══════════════════════════════════════════════════════════════ -->
+@if (!_cargando && _categorias.Count > 0)
 {
-    <div class="empty-state">
-        <i class="bi bi-search"></i>
-        <p>No se encontraron productos con esos filtros.</p>
-        <button class="btn btn-outline-primary" @onclick="LimpiarFiltros">
-            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
-        </button>
-    </div>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
-        @foreach (var producto in _productosFiltrados)
-        {
+    <section class="mb-4">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="bi bi-grid-1x2-fill title-accent"></i>
+                Explorar por <span class="title-accent">&nbsp;categoría</span>
+            </h2>
+        </div>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+            <!-- Opción "Todos" -->
             <div class="col">
-                <ProductoCard Producto="producto" OnAgregar="AgregarAlCarrito" />
+                <CategoriaCard Nombre="Todos"
+                               Icono="bi-grid-fill"
+                               ColorIcono="cat-icon-blue"
+                               CantidadProductos="@_productos.Count"
+                               Activa="@(_categoriaSeleccionada == 0)"
+                               OnSeleccionar="@(() => SeleccionarCategoriaYScrollCatalogo(0))" />
             </div>
+            @foreach (var cat in _categorias)
+            {
+                var catId = cat.Id;
+                var count = _productos.Count(p => p.CategoriaId == catId);
+                <div class="col">
+                    <CategoriaCard Nombre="@cat.Nombre"
+                                   Icono="@ObtenerIconoCategoria(cat.Nombre)"
+                                   ColorIcono="@ObtenerColorCategoria(cat.Nombre)"
+                                   CantidadProductos="@count"
+                                   Activa="@(_categoriaSeleccionada == catId)"
+                                   OnSeleccionar="@(() => SeleccionarCategoriaYScrollCatalogo(catId))" />
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 4 — Productos más populares (scroll horizontal)
+     ═══════════════════════════════════════════════════════════════ -->
+@if (!_cargando && _productosDestacados.Count > 0)
+{
+    <section class="mb-4">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="bi bi-fire title-accent"></i>
+                Lo más <span class="title-accent">&nbsp;popular</span>
+            </h2>
+            <a href="#catalogo" class="btn-ver-todo">
+                Ver todo <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        <div class="productos-scroll">
+            @foreach (var producto in _productosDestacados)
+            {
+                <div class="producto-scroll-item">
+                    <ProductoCard Producto="producto" OnAgregar="AgregarAlCarrito" />
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 5 — Banner promocional
+     ═══════════════════════════════════════════════════════════════ -->
+@if (!_cargando)
+{
+    <PromocionBanner Titulo="Temporada de Ofertas Tech"
+                     Subtitulo="Finds the best gadgets and accessories with exclusive discounts. Limited time offer on selected items."
+                     Etiqueta="Oferta especial"
+                     IconoEtiqueta="bi-lightning-fill"
+                     PrecioDestacado="$999"
+                     PrecioAnterior="$1,499"
+                     LabelPrecio="Desde"
+                     DescuentoPorcentaje="33"
+                     TextoBoton="Aprovechar oferta"
+                     UrlBoton="#catalogo"
+                     IconoBoton="bi-arrow-right-circle me-2"
+                     IconoFondo="bi-bag-heart-fill"
+                     Variante="offer" />
+}
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 6 — Catálogo completo con filtros
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="catalogo" class="catalog-wrapper">
+
+    <!-- Encabezado con contador -->
+    <div class="section-header">
+        <h2 class="section-title">
+            <i class="bi bi-list-ul title-accent"></i>
+            Catálogo <span class="title-accent">&nbsp;completo</span>
+        </h2>
+        @if (!_cargando)
+        {
+            <span class="result-count">
+                @_productosFiltrados.Count resultado@(_productosFiltrados.Count == 1 ? "" : "s")
+            </span>
         }
     </div>
-}
+
+    <!-- Barra de filtros -->
+    <div class="catalog-filters">
+        <div class="filter-search-wrap">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" placeholder="Buscar productos…"
+                       @bind="_busqueda" @bind:after="FiltrarProductos" />
+            </div>
+        </div>
+        <div class="filter-select-wrap">
+            <select class="form-select" @bind="_categoriaSeleccionada" @bind:after="FiltrarProductos">
+                <option value="0">Todas las categorías</option>
+                @foreach (var cat in _categorias)
+                {
+                    <option value="@cat.Id">@cat.Nombre</option>
+                }
+            </select>
+        </div>
+        <div class="filter-sort-wrap">
+            <select class="form-select" @bind="_ordenamiento" @bind:after="FiltrarProductos">
+                <option value="relevancia">Relevancia</option>
+                <option value="precio-asc">Precio: menor a mayor</option>
+                <option value="precio-desc">Precio: mayor a menor</option>
+                <option value="nombre">Nombre A–Z</option>
+            </select>
+        </div>
+        @if (!string.IsNullOrEmpty(_busqueda) || _categoriaSeleccionada != 0)
+        {
+            <button class="btn btn-outline-secondary btn-sm" @onclick="LimpiarFiltros">
+                <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+            </button>
+        }
+    </div>
+
+    <MensajeAlerta Mensaje="@_mensaje" Tipo="@_tipoMensaje" OnCerrar="() => _mensaje = string.Empty" />
+
+    <!-- Grilla de productos -->
+    @if (!_cargando && _productosFiltrados.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="bi bi-search"></i>
+            <p>No se encontraron productos con esos filtros.</p>
+            <button class="btn btn-outline-primary" @onclick="LimpiarFiltros">
+                <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
+            @foreach (var producto in _productosFiltrados)
+            {
+                <div class="col">
+                    <ProductoCard Producto="producto" OnAgregar="AgregarAlCarrito" />
+                </div>
+            }
+        </div>
+    }
+</section>
 
 @code {
-    private List<ProductoDto>  _productos         = new();
-    private List<ProductoDto>  _productosFiltrados = new();
-    private List<CategoriaDto> _categorias        = new();
-    private string             _busqueda          = string.Empty;
+    private List<ProductoDto>  _productos            = new();
+    private List<ProductoDto>  _productosFiltrados   = new();
+    private List<ProductoDto>  _productosDestacados  = new();
+    private List<CategoriaDto> _categorias           = new();
+    private string             _busqueda             = string.Empty;
     private int                _categoriaSeleccionada;
-    private bool               _cargando          = true;
-    private string             _mensaje           = string.Empty;
-    private string             _tipoMensaje       = "success";
+    private string             _ordenamiento         = "relevancia";
+    private bool               _cargando             = true;
+    private string             _mensaje              = string.Empty;
+    private string             _tipoMensaje          = "success";
 
-    /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         var taskProductos  = ProductoServicio.ObtenerTodosAsync();
@@ -94,43 +326,96 @@ else
 
         _productos  = await taskProductos;
         _categorias = await taskCategorias;
-        _productosFiltrados = new List<ProductoDto>(_productos);
+
+        _productosFiltrados  = new List<ProductoDto>(_productos);
+        _productosDestacados = _productos.Where(p => p.Stock > 0).Take(8).ToList();
         _cargando = false;
     }
 
-    /// <summary>Filtra la lista según búsqueda y categoría seleccionada.</summary>
+    /// <summary>Selecciona una categoría y aplica filtros.</summary>
+    private void SeleccionarCategoriaYScrollCatalogo(int categoriaId)
+    {
+        _categoriaSeleccionada = categoriaId;
+        FiltrarProductos();
+    }
+
+    /// <summary>Filtra y ordena según búsqueda, categoría y criterio de ordenamiento.</summary>
     private void FiltrarProductos()
     {
-        _productosFiltrados = _productos
+        var resultado = _productos
             .Where(p =>
                 (string.IsNullOrEmpty(_busqueda) ||
-                 p.Nombre.Contains(_busqueda, StringComparison.OrdinalIgnoreCase)) &&
+                 p.Nombre.Contains(_busqueda, StringComparison.OrdinalIgnoreCase) ||
+                 p.Descripcion.Contains(_busqueda, StringComparison.OrdinalIgnoreCase)) &&
                 (_categoriaSeleccionada == 0 || p.CategoriaId == _categoriaSeleccionada))
             .ToList();
+
+        _productosFiltrados = _ordenamiento switch
+        {
+            "precio-asc"  => resultado.OrderBy(p => p.Precio).ToList(),
+            "precio-desc" => resultado.OrderByDescending(p => p.Precio).ToList(),
+            "nombre"      => resultado.OrderBy(p => p.Nombre).ToList(),
+            _             => resultado
+        };
     }
 
-    /// <summary>Limpia todos los filtros activos.</summary>
+    /// <summary>Restablece todos los filtros al estado inicial.</summary>
     private void LimpiarFiltros()
     {
-        _busqueda = string.Empty;
+        _busqueda              = string.Empty;
         _categoriaSeleccionada = 0;
-        _productosFiltrados = new List<ProductoDto>(_productos);
+        _ordenamiento          = "relevancia";
+        _productosFiltrados    = new List<ProductoDto>(_productos);
     }
 
-    /// <summary>Agrega el producto al carrito del usuario autenticado.</summary>
+    /// <summary>Agrega el producto indicado al carrito del usuario autenticado.</summary>
     private async Task AgregarAlCarrito(int productoId)
     {
         if (!Sesion.EstaAutenticado)
         {
             _tipoMensaje = "warning";
-            _mensaje = "Debes iniciar sesión para agregar productos al carrito.";
+            _mensaje     = "Debes iniciar sesión para agregar productos al carrito.";
             return;
         }
 
-        var dto      = new AgregarItemCarritoDto { ProductoId = productoId, Cantidad = 1 };
-        var carrito  = await CarritoServicio.AgregarItemAsync(dto);
+        var dto     = new AgregarItemCarritoDto { ProductoId = productoId, Cantidad = 1 };
+        var carrito = await CarritoServicio.AgregarItemAsync(dto);
 
         _tipoMensaje = carrito is not null ? "success" : "danger";
-        _mensaje     = carrito is not null ? "Producto agregado al carrito." : "No se pudo agregar el producto.";
+        _mensaje     = carrito is not null
+            ? "✓ Producto agregado al carrito."
+            : "No se pudo agregar el producto. Inténtalo de nuevo.";
     }
+
+    // ── Helpers de UI para categorías ────────────────────────────
+
+    private static string ObtenerIconoCategoria(string nombre) => nombre.ToLowerInvariant() switch
+    {
+        var n when n.Contains("laptop")   || n.Contains("computadora") || n.Contains("pc")                    => "bi-laptop",
+        var n when n.Contains("celular")  || n.Contains("móvil")       || n.Contains("smartphone") || n.Contains("telefono") => "bi-phone-fill",
+        var n when n.Contains("tablet")   || n.Contains("ipad")                                                => "bi-tablet-landscape-fill",
+        var n when n.Contains("audio")    || n.Contains("audifon")     || n.Contains("bocina")                 => "bi-headphones",
+        var n when n.Contains("camara")   || n.Contains("cámara")      || n.Contains("foto")                   => "bi-camera-fill",
+        var n when n.Contains("gaming")   || n.Contains("gamer")       || n.Contains("juego")                  => "bi-controller",
+        var n when n.Contains("accesorio")                                                                      => "bi-bag-fill",
+        var n when n.Contains("monitor")  || n.Contains("pantalla")                                            => "bi-display",
+        var n when n.Contains("teclado")  || n.Contains("mouse")       || n.Contains("periférico")             => "bi-keyboard-fill",
+        var n when n.Contains("almacenam") || n.Contains("disco")      || n.Contains("ssd") || n.Contains("memoria") => "bi-device-hdd-fill",
+        var n when n.Contains("red")      || n.Contains("router")      || n.Contains("internet")               => "bi-wifi",
+        var n when n.Contains("impresora")                                                                      => "bi-printer-fill",
+        _                                                                                                        => "bi-cpu-fill"
+    };
+
+    private static string ObtenerColorCategoria(string nombre) => nombre.ToLowerInvariant() switch
+    {
+        var n when n.Contains("laptop")   || n.Contains("computadora") || n.Contains("pc")         => "cat-icon-blue",
+        var n when n.Contains("celular")  || n.Contains("móvil")       || n.Contains("smartphone") => "cat-icon-cyan",
+        var n when n.Contains("tablet")                                                              => "cat-icon-purple",
+        var n when n.Contains("audio")    || n.Contains("audifon")                                  => "cat-icon-green",
+        var n when n.Contains("camara")   || n.Contains("cámara")                                   => "cat-icon-pink",
+        var n when n.Contains("gaming")   || n.Contains("gamer")                                    => "cat-icon-red",
+        var n when n.Contains("accesorio")                                                           => "cat-icon-yellow",
+        var n when n.Contains("monitor")  || n.Contains("pantalla")                                 => "cat-icon-slate",
+        _                                                                                             => "cat-icon-blue"
+    };
 }

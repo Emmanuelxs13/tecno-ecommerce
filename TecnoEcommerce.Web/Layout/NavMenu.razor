@@ -2,17 +2,17 @@
 @using TecnoEcommerce.Web.Servicios
 @implements IDisposable
 
-@inject SesionServicio Sesion
+@inject SesionServicio    Sesion
 @inject NavigationManager Navegacion
 
 @*
     Menú de navegación principal.
-    Principio SRP: solo gestiona la barra de navegación y el estado de sesión visible.
-    Se suscribe a OnCambio para reaccionar cuando el usuario inicia o cierra sesión.
+    Principio SRP: gestiona la barra de navegación, búsqueda rápida y estado de sesión visible.
 *@
 
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-tecno">
     <div class="container">
+
         <!-- Marca -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="/">
             <span class="brand-icon"><i class="bi bi-cpu-fill"></i></span>
@@ -20,20 +20,21 @@
         </a>
 
         <!-- Botón colapso móvil -->
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navPrincipal">
+        <button class="navbar-toggler border-0" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navPrincipal"
+                aria-controls="navPrincipal" aria-expanded="false">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navPrincipal">
-            <!-- Enlace catálogo -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
-                        <i class="bi bi-grid-fill me-1"></i>Catálogo
-                    </NavLink>
-                </li>
-            </ul>
+
+            <!-- Buscador rápido (centro) -->
+            <form class="d-flex mx-auto my-2 my-lg-0 navbar-search" role="search"
+                  @onsubmit="BuscarYNavegar" @onsubmit:preventDefault>
+                <input class="form-control" type="search" placeholder="Buscar productos…"
+                       aria-label="Buscar" @bind="_terminoBusqueda" />
+                <i class="bi bi-search search-icon"></i>
+            </form>
 
             <!-- Acciones de usuario -->
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
@@ -42,8 +43,9 @@
                 {
                     <!-- Carrito -->
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="/carrito">
+                        <NavLink class="nav-link position-relative" href="/carrito" title="Mi carrito">
                             <i class="bi bi-cart3 fs-5"></i>
+                            <span class="visually-hidden">Carrito</span>
                         </NavLink>
                     </li>
 
@@ -57,11 +59,32 @@
                     <!-- Nombre + logout -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center gap-1"
-                           href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i>
-                            <span>@Sesion.UsuarioActual?.Nombre</span>
+                           href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="d-flex align-items-center justify-content-center"
+                                  style="background:rgba(255,255,255,0.18);border-radius:50%;
+                                         width:30px;height:30px;font-size:1rem;">
+                                <i class="bi bi-person-fill"></i>
+                            </span>
+                            <span class="d-none d-lg-inline">@Sesion.UsuarioActual?.Nombre</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <span class="dropdown-item-text text-muted small">
+                                    <i class="bi bi-envelope me-1"></i>@Sesion.UsuarioActual?.Email
+                                </span>
+                            </li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <NavLink class="dropdown-item" href="/mis-pedidos">
+                                    <i class="bi bi-bag-check me-2"></i>Mis pedidos
+                                </NavLink>
+                            </li>
+                            <li>
+                                <NavLink class="dropdown-item" href="/carrito">
+                                    <i class="bi bi-cart3 me-2"></i>Mi carrito
+                                </NavLink>
+                            </li>
+                            <li><hr class="dropdown-divider" /></li>
                             <li>
                                 <button class="dropdown-item text-danger" @onclick="CerrarSesion">
                                     <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
@@ -89,33 +112,36 @@
 </nav>
 
 @code {
-    /// <summary>Refleja si hay un usuario autenticado en la sesión actual.</summary>
-    private bool _autenticado;
+    private bool   _autenticado;
+    private string _terminoBusqueda = string.Empty;
 
-    /// <inheritdoc/>
     protected override void OnInitialized()
     {
         _autenticado = Sesion.EstaAutenticado;
         Sesion.OnCambio += ActualizarEstado;
     }
 
-    /// <summary>Actualiza la UI cuando cambia el estado de sesión.</summary>
     private void ActualizarEstado()
     {
         _autenticado = Sesion.EstaAutenticado;
         InvokeAsync(StateHasChanged);
     }
 
-    /// <summary>Cierra la sesión del usuario y redirige al inicio.</summary>
+    private void BuscarYNavegar()
+    {
+        if (!string.IsNullOrWhiteSpace(_terminoBusqueda))
+        {
+            Navegacion.NavigateTo($"/?q={Uri.EscapeDataString(_terminoBusqueda.Trim())}");
+            _terminoBusqueda = string.Empty;
+        }
+    }
+
     private void CerrarSesion()
     {
         Sesion.CerrarSesion();
         Navegacion.NavigateTo("/");
     }
 
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        Sesion.OnCambio -= ActualizarEstado;
-    }
+    public void Dispose() => Sesion.OnCambio -= ActualizarEstado;
 }
+
