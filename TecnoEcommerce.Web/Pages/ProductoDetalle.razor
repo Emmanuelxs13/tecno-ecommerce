@@ -140,7 +140,7 @@ else
             @foreach (var p in _relacionados)
             {
                 <div class="col-6 col-md-3">
-                    <div class="producto-card cursor-pointer h-100" @onclick="() => Navegacion.NavigateTo($\"/producto/{p.Id}\")">
+                    <div class="producto-card cursor-pointer h-100" @onclick="() => IrAProducto(p.Id)">
                         <img class="card-img-top" src="@p.ImagenUrl" alt="@p.Nombre"
                              onerror="this.src='https://placehold.co/400x300/f5f5f7/0071e3?text=TecnoE'" />
                         <div class="card-body">
@@ -261,6 +261,8 @@ else
         _agregando = false;
         await MostrarToast($"✓ {_producto.Nombre} añadido al carrito");
     }
+
+    private void IrAProducto(int id) => Navegacion.NavigateTo("/producto/" + id);
 
     private void ComprarAhora()
     {

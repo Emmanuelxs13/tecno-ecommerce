@@ -103,7 +103,7 @@ else
                 <div class="resumen-row">
                     <span>Envío</span>
                     <span class="@(_envioGratis ? "text-success fw-semibold" : "")">
-                        @(_envioGratis ? "Gratis" : "$@_costoEnvio.ToString("N2")")
+                        @(_envioGratis ? "Gratis" : "$" + _costoEnvio.ToString("N2"))
                     </span>
                 </div>
                 <div class="resumen-row">
