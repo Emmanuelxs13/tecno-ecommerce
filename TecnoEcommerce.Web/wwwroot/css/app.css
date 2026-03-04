@@ -18,7 +18,7 @@
   --shadow-hover: 0 8px 36px rgba(0, 0, 0, 0.14);
   --radius-card: 18px;
   --radius-btn: 980px;
-  --nav-h: 44px;
+  --nav-h: 52px;
 }
 
 /* ── Reset / Base ──────────────────────────────────────────────── */
@@ -61,29 +61,37 @@ img {
   top: 0;
   z-index: 9000;
   height: var(--nav-h);
-  background: rgba(255, 255, 255, 0.85) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: none !important;
   padding: 0 !important;
 }
-.navbar-tecno .container {
-  max-width: 980px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0;
+/* Overrride Bootstrap container to keep Apple 980px centered track */
+.navbar-tecno > .container {
+  max-width: 1200px !important;
+  width: 100%;
+  height: var(--nav-h);
+  display: flex !important;
+  flex-direction: row;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  padding: 0 24px !important;
+  gap: 0 !important;
 }
 .navbar-brand {
-  font-size: 1.1rem !important;
+  font-size: 1rem !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em;
   color: var(--apple-dark) !important;
   display: flex;
   align-items: center;
   gap: 6px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  margin-right: 20px !important;
+  text-decoration: none !important;
 }
 .navbar-brand .brand-icon {
   background: var(--apple-dark) !important;
@@ -92,22 +100,42 @@ img {
   padding: 3px 6px;
   font-size: 0.85rem;
 }
+/* Categories nav — centered, takes remaining middle space */
+.navbar-tecno #navPrincipal {
+  flex: 1;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+}
+.navbar-tecno #navPrincipal .navbar-nav.mx-auto {
+  /* center categories between search and brand using flex margins */
+  margin: 0 auto !important;
+  gap: 0 !important;
+  align-items: center;
+  height: var(--nav-h);
+}
 .navbar-tecno .navbar-nav .nav-link {
   color: var(--apple-dark) !important;
-  font-size: 0.75rem !important;
+  font-size: 0.78rem !important;
   font-weight: 400;
-  padding: 0 0.75rem !important;
-  opacity: 0.85;
+  padding: 0 0.65rem !important;
+  line-height: var(--nav-h);
+  height: var(--nav-h);
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.82;
   border-radius: 0;
   background: none !important;
   transition: opacity 0.15s;
+  text-decoration: none !important;
+  white-space: nowrap;
 }
 .navbar-tecno .navbar-nav .nav-link:hover,
 .navbar-tecno .navbar-nav .nav-link.active {
   opacity: 1;
   background: none !important;
+  text-decoration: none !important;
 }
-
 /* Subrayado activo en categorías */
 .navbar-tecno .navbar-nav .nav-link.active {
   font-weight: 600 !important;
@@ -116,10 +144,10 @@ img {
 .navbar-tecno .navbar-nav .nav-link.active::after {
   content: "";
   position: absolute;
-  bottom: -4px;
+  bottom: 2px;
   left: 50%;
   transform: translateX(-50%);
-  width: 20px;
+  width: 18px;
   height: 2px;
   background: var(--apple-blue);
   border-radius: 2px;
@@ -170,28 +198,46 @@ img {
   background: var(--apple-blue-hv) !important;
   opacity: 1 !important;
 }
+/* Search pill */
 .navbar-search {
   background: rgba(0, 0, 0, 0.06) !important;
   border: none !important;
   border-radius: 8px !important;
-  padding: 0.3rem 0.6rem 0.3rem 0.8rem !important;
-  min-width: 200px;
-  position: relative;
+  padding: 0 0.5rem 0 0.75rem !important;
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  margin-right: 12px !important;
 }
 .navbar-search .form-control {
   background: transparent !important;
   border: none !important;
   color: var(--apple-dark) !important;
-  font-size: 0.82rem !important;
-  padding-left: 0 !important;
+  font-size: 0.78rem !important;
+  padding: 0 !important;
   box-shadow: none !important;
+  height: auto;
+  line-height: 1;
+  min-width: 0;
+  flex: 1;
 }
 .navbar-search .form-control::placeholder {
   color: var(--apple-gray);
 }
+/* Right-side actions: cart + user */
+.navbar-tecno .navbar-nav.mb-2 {
+  flex: 0 0 auto;
+  gap: 4px !important;
+  display: flex;
+  align-items: center;
+  height: var(--nav-h);
+}
 .nav-cart-wrap {
   position: relative;
   display: inline-flex;
+  align-items: center;
 }
 .cart-badge {
   position: absolute;
