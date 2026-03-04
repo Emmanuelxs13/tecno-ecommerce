@@ -1,0 +1,59 @@
+@*
+    Tarjeta de reseña de cliente.
+    Muestra avatar, nombre, rating, fecha, comentario y producto referenciado.
+    Principio OCP: contenido 100% parametrizable sin modificar el componente.
+*@
+
+<article class="resena-card fade-in-up" aria-label="Reseña de @NombreCliente">
+    <!-- Cabecera: avatar + datos del cliente -->
+    <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="resena-avatar" aria-hidden="true">
+            @(_initiales)
+        </div>
+        <div>
+            <div class="resena-nombre">@NombreCliente</div>
+            <div class="resena-fecha">
+                <i class="bi bi-clock me-1" aria-hidden="true"></i>@Fecha
+            </div>
+        </div>
+    </div>
+
+    <!-- Estrellas -->
+    <div aria-label="Calificación: @Calificacion de 5 estrellas">
+        <RatingEstrellas Valor="@Calificacion" />
+    </div>
+
+    <!-- Texto -->
+    <p class="resena-texto">@Texto</p>
+
+    <!-- Producto referenciado -->
+    @if (!string.IsNullOrEmpty(NombreProducto))
+    {
+        <div class="resena-producto">
+            <i class="bi bi-bag-check" aria-hidden="true"></i>@NombreProducto
+        </div>
+    }
+</article>
+
+@code {
+    /// <summary>Nombre del cliente que dejó la reseña.</summary>
+    [Parameter, EditorRequired] public string NombreCliente { get; set; } = default!;
+
+    /// <summary>Texto completo de la reseña.</summary>
+    [Parameter, EditorRequired] public string Texto { get; set; } = default!;
+
+    /// <summary>Calificación entre 1 y 5.</summary>
+    [Parameter] public int Calificacion { get; set; } = 5;
+
+    /// <summary>Fecha en formato legible.</summary>
+    [Parameter] public string Fecha { get; set; } = string.Empty;
+
+    /// <summary>Nombre del producto reseñado.</summary>
+    [Parameter] public string NombreProducto { get; set; } = string.Empty;
+
+    /// <summary>Iniciales calculadas para el avatar.</summary>
+    private string _initiales => string.IsNullOrEmpty(NombreCliente) ? "?" :
+        string.Concat(NombreCliente.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2)
+            .Select(p => p[0].ToString().ToUpper()));
+}

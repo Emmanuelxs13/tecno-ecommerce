@@ -65,6 +65,33 @@ public class CarritoApiServicio
     }
 
     /// <summary>
+    /// Vacía por completo el carrito del usuario autenticado.
+    /// </summary>
+    public async Task VaciarCarritoAsync()
+    {
+        if (!_sesion.EstaAutenticado) return;
+        AgregarTokenAlCliente();
+        await _http.DeleteAsync($"api/carrito/{_sesion.UsuarioActual!.Id}");
+    }
+
+    /// <summary>
+    /// Actualiza la cantidad de un ítem específico del carrito.
+    /// </summary>
+    /// <param name="itemId">Identificador del ítem a actualizar.</param>
+    /// <param name="nuevaCantidad">Nueva cantidad. Si es 0, el ítem se elimina.</param>
+    /// <returns>El carrito actualizado, o <c>null</c> si la operación falla.</returns>
+    public async Task<CarritoDto?> ActualizarCantidadAsync(int itemId, int nuevaCantidad)
+    {
+        if (!_sesion.EstaAutenticado) return null;
+        AgregarTokenAlCliente();
+        var respuesta = await _http.PutAsJsonAsync(
+            $"api/carrito/{_sesion.UsuarioActual!.Id}/items/{itemId}",
+            new { Cantidad = nuevaCantidad });
+        if (!respuesta.IsSuccessStatusCode) return null;
+        return await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+    }
+
+    /// <summary>
     /// Agrega el token JWT de la sesión actual como cabecera de autorización.
     /// Se llama antes de cada petición protegida.
     /// </summary>

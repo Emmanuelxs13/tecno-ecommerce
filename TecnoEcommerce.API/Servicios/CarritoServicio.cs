@@ -120,6 +120,37 @@ public class CarritoServicio : ICarritoServicio
     }
 
     /// <inheritdoc/>
+    public async Task<CarritoDto> ActualizarCantidadItemAsync(int usuarioId, int itemId, int nuevaCantidad)
+    {
+        // Si cantidad <= 0, simplemente eliminar el ítem
+        if (nuevaCantidad <= 0)
+            return await EliminarItemAsync(usuarioId, itemId);
+
+        var carrito = await _carritoRepositorio.ObtenerPorUsuarioAsync(usuarioId)
+            ?? throw new InvalidOperationException("El usuario no tiene carrito activo.");
+
+        var item = carrito.Items.FirstOrDefault(i => i.Id == itemId)
+            ?? throw new InvalidOperationException("El ítem no pertenece al carrito del usuario.");
+
+        // Validar stock
+        var producto = await _productoRepositorio.ObtenerPorIdAsync(item.ProductoId)
+            ?? throw new InvalidOperationException($"El producto con Id {item.ProductoId} no existe.");
+
+        if (producto.Stock < nuevaCantidad)
+            throw new InvalidOperationException(
+                $"Stock insuficiente. Disponible: {producto.Stock}, solicitado: {nuevaCantidad}.");
+
+        item.Cantidad = nuevaCantidad;
+        await _carritoRepositorio.ActualizarAsync(carrito);
+
+        _logger.LogInformation(
+            "Ítem Id {ItemId} actualizado a cantidad {Cantidad} en carrito del usuario Id {UsuarioId}.",
+            itemId, nuevaCantidad, usuarioId);
+
+        return await ObtenerCarritoAsync(usuarioId);
+    }
+
+    /// <inheritdoc/>
     public async Task VaciarCarritoAsync(int usuarioId)
     {
         var carrito = await _carritoRepositorio.ObtenerPorUsuarioAsync(usuarioId);

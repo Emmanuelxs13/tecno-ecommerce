@@ -39,6 +39,16 @@ public interface ICarritoServicio
     Task<CarritoDto> EliminarItemAsync(int usuarioId, int itemId);
 
     /// <summary>
+    /// Actualiza la cantidad de un ítem del carrito.
+    /// Si la nueva cantidad es 0 o menor, elimina el ítem.
+    /// </summary>
+    /// <param name="usuarioId">Identificador del usuario propietario del carrito.</param>
+    /// <param name="itemId">Identificador del ítem a actualizar.</param>
+    /// <param name="nuevaCantidad">Nueva cantidad deseada. Si es <= 0 el ítem se elimina.</param>
+    /// <returns>El carrito actualizado.</returns>
+    Task<CarritoDto> ActualizarCantidadItemAsync(int usuarioId, int itemId, int nuevaCantidad);
+
+    /// <summary>
     /// Vacía por completo el carrito del usuario eliminando todos sus ítems.
     /// </summary>
     /// <param name="usuarioId">Identificador del usuario.</param>

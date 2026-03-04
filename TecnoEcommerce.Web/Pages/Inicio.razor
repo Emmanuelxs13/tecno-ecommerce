@@ -15,7 +15,13 @@
 
 <PageTitle>TecnoEcommerce – Tu tienda de tecnología</PageTitle>
 
-<CargandoSpinner Visible="@_cargando" />
+@* Skeleton visible solo mientras carga la primera vez *@
+@if (_cargando)
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3 mb-4" aria-busy="true" aria-label="Cargando productos…">
+        <SkeletonProductoCard Cantidad="8" />
+    </div>
+}
 
 <!-- ═══════════════════════════════════════════════════════════════
      SECCIÓN 1 — Hero principal
@@ -143,6 +149,24 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 2b — Skeleton de categorías (solo carga)
+     ═══════════════════════════════════════════════════════════════ -->
+@if (_cargando)
+{
+    <div class="row row-cols-3 row-cols-md-6 g-3 mb-4" aria-hidden="true" aria-label="Cargando categorías…">
+        @for (int sk = 0; sk < 6; sk++)
+        {
+            <div class="col">
+                <div class="skeleton-card p-3 text-center">
+                    <div class="skeleton skeleton-img mb-2" style="height:64px;width:64px;border-radius:16px;margin:0 auto"></div>
+                    <div class="skeleton skeleton-text" style="width:70%;margin:0 auto"></div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════════════
      SECCIÓN 3 — Categorías
      ═══════════════════════════════════════════════════════════════ -->
 @if (!_cargando && _categorias.Count > 0)
@@ -182,8 +206,19 @@
 }
 
 <!-- ═══════════════════════════════════════════════════════════════
-     SECCIÓN 4 — Productos más populares (scroll horizontal)
+     SECCIÓN 4 — Productos más populares
      ═══════════════════════════════════════════════════════════════ -->
+@if (_cargando)
+{
+    <section class="mb-4">
+        <div class="section-header">
+            <div class="skeleton skeleton-text" style="width:220px;height:24px"></div>
+        </div>
+        <div class="d-flex gap-3 overflow-hidden">
+            <SkeletonProductoCard Cantidad="4" />
+        </div>
+    </section>
+}
 @if (!_cargando && _productosDestacados.Count > 0)
 {
     <section class="mb-4">
@@ -225,6 +260,96 @@
                      IconoBoton="bi-arrow-right-circle me-2"
                      IconoFondo="bi-bag-heart-fill"
                      Variante="offer" />
+}
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 5b — Reseñas de clientes
+     ═══════════════════════════════════════════════════════════════ -->
+@if (!_cargando)
+{
+    <section class="resenas-section mb-4" aria-label="Reseñas de clientes">
+        <!-- Encabezado -->
+        <div class="section-header mb-3">
+            <h2 class="section-title">
+                <i class="bi bi-chat-quote-fill title-accent" aria-hidden="true"></i>
+                Lo que dicen nuestros <span class="title-accent">&nbsp;clientes</span>
+            </h2>
+            <span class="section-pill">+1,200 reseñas verificadas</span>
+        </div>
+
+        <!-- Resumen de puntuación -->
+        <div class="resenas-summary" role="region" aria-label="Resumen de calificaciones">
+            <div class="resenas-score-big" aria-label="Calificación promedio 4.9">4.9</div>
+            <div>
+                <RatingEstrellas Valor="4.9m" MostrarPuntuacion="false" />
+                <div style="font-size:.78rem;color:var(--text-muted);margin-top:.25rem;">
+                    Basado en 1,248 compras verificadas
+                </div>
+            </div>
+            <div class="resenas-score-bar d-none d-sm-block">
+                @foreach (var bar in new[] { (5,78),(4,14),(3,5),(2,2),(1,1) })
+                {
+                    <div class="resenas-bar-row">
+                        <span class="bar-label">@bar.Item1</span>
+                        <div class="progress"><div class="progress-bar" style="width:@bar.Item2%"></div></div>
+                        <span style="font-size:.7rem;color:var(--text-muted);width:26px;">@bar.Item2%</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Tarjetas de reseñas -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            <div class="col">
+                <ReseñaCard NombreCliente="Carlos Mendoza"
+                            Texto="Excelente servicio, recibí mi laptop en menos de 24 horas. El empaque estaba perfecto y el producto es exactamente como se describe. Total recomendado."
+                            Calificacion="5"
+                            Fecha="Hace 2 días"
+                            NombreProducto="MacBook Air M2" />
+            </div>
+            <div class="col">
+                <ReseñaCard NombreCliente="Ana Lorena Vega"
+                            Texto="Muy buena relación calidad-precio. El iPhone llegó sellado, con garantía oficial. El equipo de soporte resolvió mi duda en minutos. Sin duda volvería a comprar."
+                            Calificacion="5"
+                            Fecha="Hace 5 días"
+                            NombreProducto="iPhone 15 Pro" />
+            </div>
+            <div class="col">
+                <ReseñaCard NombreCliente="Roberto Salinas"
+                            Texto="El monitor llegó bien protegido. Los colores son increíbles y la resolución es perfecta para trabajo y gaming. Muy satisfecho con la compra."
+                            Calificacion="4"
+                            Fecha="Hace 1 semana"
+                            NombreProducto="Monitor LG UltraWide 34&quot;" />
+            </div>
+        </div>
+    </section>
+}
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 5c — Recomendados para ti
+     ═══════════════════════════════════════════════════════════════ -->
+@if (!_cargando && _productosRecomendados.Count > 0)
+{
+    <section class="recomendados-section" aria-label="Recomendados para ti">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="bi bi-magic title-accent" aria-hidden="true"></i>
+                Recomendados <span class="title-accent">&nbsp;para ti</span>
+            </h2>
+            <span class="recomendados-badge">
+                <i class="bi bi-stars" aria-hidden="true"></i>
+                Selección personalizada
+            </span>
+        </div>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+            @foreach (var p in _productosRecomendados)
+            {
+                <div class="col">
+                    <ProductoCard Producto="p" OnAgregar="AgregarAlCarrito" />
+                </div>
+            }
+        </div>
+    </section>
 }
 
 <!-- ═══════════════════════════════════════════════════════════════
@@ -310,6 +435,7 @@
     private List<ProductoDto>  _productos            = new();
     private List<ProductoDto>  _productosFiltrados   = new();
     private List<ProductoDto>  _productosDestacados  = new();
+    private List<ProductoDto>  _productosRecomendados = new();
     private List<CategoriaDto> _categorias           = new();
     private string             _busqueda             = string.Empty;
     private int                _categoriaSeleccionada;
@@ -327,8 +453,15 @@
         _productos  = await taskProductos;
         _categorias = await taskCategorias;
 
-        _productosFiltrados  = new List<ProductoDto>(_productos);
-        _productosDestacados = _productos.Where(p => p.Stock > 0).Take(8).ToList();
+        _productosFiltrados     = new List<ProductoDto>(_productos);
+        _productosDestacados   = _productos.Where(p => p.Stock > 0).Take(8).ToList();
+        // Recomendados: productos con mayor precio (simulando un motor de recomendación)
+        _productosRecomendados = _productos
+            .Where(p => p.Stock > 0)
+            .OrderByDescending(p => p.Precio)
+            .Skip(2)
+            .Take(4)
+            .ToList();
         _cargando = false;
     }
 

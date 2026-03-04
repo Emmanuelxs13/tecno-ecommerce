@@ -14,88 +14,180 @@
 
 <PageTitle>@(_producto?.Nombre ?? "Producto") – TecnoEcommerce</PageTitle>
 
-<CargandoSpinner Visible="@_cargando" />
-
-@if (!_cargando && _producto is not null)
+@if (_cargando)
+{
+    <!-- Skeleton de carga -->
+    <div class="detalle-wrapper skeleton-detalle" aria-busy="true" aria-label="Cargando producto…">
+        <div class="detalle-img-col">
+            <div class="skeleton" style="height:380px;border-radius:1rem;"></div>
+        </div>
+        <div class="detalle-info-col">
+            <div class="skeleton skeleton-text" style="width:40%;height:14px;"></div>
+            <div class="skeleton skeleton-text mt-2" style="width:80%;height:28px;"></div>
+            <div class="skeleton skeleton-text mt-2" style="width:60%;height:28px;"></div>
+            <div class="skeleton skeleton-text mt-3" style="width:100%;height:14px;"></div>
+            <div class="skeleton skeleton-text mt-1" style="width:90%;height:14px;"></div>
+            <div class="skeleton skeleton-btn mt-4" style="width:55%;height:48px;"></div>
+        </div>
+    </div>
+}
+else if (_producto is not null)
 {
     <!-- Miga de pan -->
-    <nav aria-label="breadcrumb" class="mb-3">
+    <nav aria-label="Ruta de navegación" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Catálogo</a></li>
-            <li class="breadcrumb-item active">@_producto.Nombre</li>
+            <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+            @if (!string.IsNullOrEmpty(_producto.NombreCategoria))
+            {
+                <li class="breadcrumb-item">@_producto.NombreCategoria</li>
+            }
+            <li class="breadcrumb-item active" aria-current="page">@_producto.Nombre</li>
         </ol>
     </nav>
 
-    <div class="row g-4">
-        <!-- Imagen -->
-        <div class="col-12 col-md-5">
-            <img src="@(string.IsNullOrEmpty(_producto.ImagenUrl) ? "img/sin-imagen.png" : _producto.ImagenUrl)"
-                 class="img-fluid rounded shadow" alt="@_producto.Nombre"
-                 style="width:100%;max-height:380px;object-fit:cover;" />
+    <!-- Card principal -->
+    <div class="detalle-wrapper">
+
+        <!-- Columna imagen -->
+        <div class="detalle-img-col">
+            <figure class="detalle-img" aria-label="Imagen de @_producto.Nombre">
+                <img src="@(string.IsNullOrEmpty(_producto.ImagenUrl) ? "img/sin-imagen.png" : _producto.ImagenUrl)"
+                     alt="@_producto.Nombre"
+                     loading="eager" />
+            </figure>
         </div>
 
-        <!-- Info -->
-        <div class="col-12 col-md-7">
-            <span class="producto-categoria-badge mb-2">@_producto.NombreCategoria</span>
-            <h2 class="fw-bold">@_producto.Nombre</h2>
-            <p class="text-muted">@_producto.Descripcion</p>
+        <!-- Columna info -->
+        <div class="detalle-info-col">
 
-            <h3 class="producto-precio my-3">$@_producto.Precio.ToString("N2")</h3>
-
-            <!-- Stock -->
-            @if (_producto.Stock > 0)
+            <!-- Categoría + nombre -->
+            @if (!string.IsNullOrEmpty(_producto.NombreCategoria))
             {
-                <span class="badge mb-3" style="background:#dcfce7;color:#166534;font-size:.9rem;padding:.4em .85em;">
-                    <i class="bi bi-check-circle me-1"></i>En stock (@_producto.Stock disponibles)
-                </span>
+                <span class="producto-categoria-badge mb-2">@_producto.NombreCategoria</span>
             }
-            else
-            {
-                <span class="badge badge-cancelado mb-3" style="font-size:.9rem;padding:.4em .85em;">
-                    <i class="bi bi-x-circle me-1"></i>Producto agotado
-                </span>
-            }
+            <h1 class="detalle-nombre">@_producto.Nombre</h1>
 
+            <!-- Rating demo -->
+            <div class="mb-3">
+                <RatingEstrellas Valor="@(3.5m + (_producto.Id % 3) * 0.5m)"
+                                 MostrarPuntuacion="true"
+                                 TotalResenas="@(12 + _producto.Id * 7 % 43)" />
+            </div>
+
+            <!-- Precio -->
+            <div class="detalle-precio" aria-label="Precio: $@_producto.Precio.ToString("N2")">
+                $@_producto.Precio.ToString("N2")
+            </div>
+
+            <!-- Descripción -->
+            <p class="text-muted mb-3">@_producto.Descripcion</p>
+
+            <!-- Especificaciones -->
+            <dl class="detalle-specs">
+                <div class="spec-row">
+                    <dt><i class="bi bi-upc-scan me-1" aria-hidden="true"></i>SKU</dt>
+                    <dd>#@_producto.Id.ToString("D5")</dd>
+                </div>
+                <div class="spec-row">
+                    <dt><i class="bi bi-tag me-1" aria-hidden="true"></i>Categoría</dt>
+                    <dd>@(_producto.NombreCategoria ?? "General")</dd>
+                </div>
+                <div class="spec-row">
+                    <dt><i class="bi bi-box-seam me-1" aria-hidden="true"></i>Disponibilidad</dt>
+                    <dd>
+                        @if (_producto.Stock > 0)
+                        {
+                            <span class="text-success fw-semibold">
+                                <i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i>En stock (@_producto.Stock unidades)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-danger fw-semibold">
+                                <i class="bi bi-x-circle-fill me-1" aria-hidden="true"></i>Agotado
+                            </span>
+                        }
+                    </dd>
+                </div>
+            </dl>
+
+            <!-- Alerta / feedback -->
             <MensajeAlerta Mensaje="@_mensaje" Tipo="@_tipoMensaje"
                            OnCerrar="() => _mensaje = string.Empty" />
 
             @if (_producto.Stock > 0)
             {
-                <!-- Selector de cantidad -->
+                <!-- Selección de cantidad -->
                 <div class="d-flex align-items-center gap-3 mb-4">
-                    <label class="fw-semibold">Cantidad:</label>
-                    <div class="input-group" style="width:130px;">
-                        <button class="btn btn-outline-secondary" @onclick="() => AjustarCantidad(-1)">–</button>
-                        <input type="number" class="form-control text-center" @bind="_cantidad" min="1" max="@_producto.Stock" />
-                        <button class="btn btn-outline-secondary" @onclick="() => AjustarCantidad(1)">+</button>
+                    <label class="fw-semibold" for="qty-detalle">Cantidad:</label>
+                    <div class="qty-control" role="group" aria-label="Seleccionar cantidad">
+                        <button class="qty-btn" @onclick="() => AjustarCantidad(-1)"
+                                aria-label="Disminuir cantidad" disabled="@(_cantidad <= 1)">
+                            <i class="bi bi-dash" aria-hidden="true"></i>
+                        </button>
+                        <span class="qty-value" id="qty-detalle" aria-live="polite">@_cantidad</span>
+                        <button class="qty-btn" @onclick="() => AjustarCantidad(1)"
+                                aria-label="Aumentar cantidad" disabled="@(_cantidad >= _producto.Stock)">
+                            <i class="bi bi-plus" aria-hidden="true"></i>
+                        </button>
                     </div>
+                    <span class="text-muted small">Máx. @_producto.Stock</span>
                 </div>
 
-                <button class="btn btn-primary btn-lg px-5" @onclick="AgregarAlCarrito" disabled="@_agregando">
+                <!-- Botón agregar carrito -->
+                <button class="btn-agregar-carrito"
+                        @onclick="AgregarAlCarrito"
+                        disabled="@_agregando"
+                        aria-busy="@_agregando"
+                        aria-label="Agregar @_cantidad unidades de @_producto.Nombre al carrito">
                     @if (_agregando)
                     {
-                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        <span class="spinner-border spinner-border-sm me-2"
+                              role="status" aria-hidden="true"></span>
+                        <span>Agregando…</span>
                     }
                     else
                     {
-                        <i class="bi bi-cart-plus me-2"></i>
+                        <i class="bi bi-cart-plus me-2" aria-hidden="true"></i>
+                        <span>Agregar al carrito</span>
                     }
-                    Agregar al carrito
+                </button>
+            }
+            else
+            {
+                <button class="btn-agregar-carrito" disabled aria-disabled="true">
+                    <i class="bi bi-x-circle me-2" aria-hidden="true"></i>Producto agotado
                 </button>
             }
 
-            <button class="btn btn-outline-secondary ms-2" @onclick="VolverAlCatalogo">
-                <i class="bi bi-arrow-left me-1"></i>Volver al catálogo
+            <!-- Volver al catálogo -->
+            <button class="btn btn-link text-muted mt-3 d-block"
+                    @onclick="VolverAlCatalogo"
+                    aria-label="Volver al catálogo principal">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Volver al catálogo
             </button>
+
+            <!-- Strip de confianza -->
+            <div class="detalle-trust" aria-label="Beneficios de compra">
+                <span><i class="bi bi-truck text-primary" aria-hidden="true"></i> Envío gratis +$500</span>
+                <span><i class="bi bi-shield-check text-success" aria-hidden="true"></i> Garantía 1 año</span>
+                <span><i class="bi bi-arrow-repeat text-warning" aria-hidden="true"></i> 30 días devolución</span>
+            </div>
+
         </div>
     </div>
 }
-else if (!_cargando)
+else
 {
-    <div class="text-center py-5 text-muted">
-        <i class="bi bi-exclamation-circle display-4"></i>
-        <p class="mt-3">Producto no encontrado.</p>
-        <a href="/" class="btn btn-primary">Ir al catálogo</a>
+    <div class="carrito-vacio">
+        <div class="carrito-vacio-icon">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+        </div>
+        <h4>Producto no encontrado</h4>
+        <p class="text-muted">El producto que buscas no existe o fue retirado del catálogo.</p>
+        <a href="/" class="btn btn-primary btn-lg px-4">
+            <i class="bi bi-grid me-2" aria-hidden="true"></i>Ir al catálogo
+        </a>
     </div>
 }
 
@@ -104,8 +196,8 @@ else if (!_cargando)
     [Parameter] public int Id { get; set; }
 
     private ProductoDto? _producto;
-    private int          _cantidad  = 1;
-    private bool         _cargando  = true;
+    private int          _cantidad    = 1;
+    private bool         _cargando    = true;
     private bool         _agregando;
     private string       _mensaje     = string.Empty;
     private string       _tipoMensaje = "success";
@@ -114,6 +206,8 @@ else if (!_cargando)
     protected override async Task OnParametersSetAsync()
     {
         _cargando = true;
+        _cantidad = 1;
+        _mensaje  = string.Empty;
         _producto = await ProductoServicio.ObtenerPorIdAsync(Id);
         _cargando = false;
     }
@@ -133,18 +227,19 @@ else if (!_cargando)
         if (!Sesion.EstaAutenticado)
         {
             _tipoMensaje = "warning";
-            _mensaje = "Debes iniciar sesión para agregar productos al carrito.";
+            _mensaje     = "Debes iniciar sesión para agregar productos al carrito.";
             return;
         }
 
         _agregando = true;
-        var dto      = new AgregarItemCarritoDto { ProductoId = Id, Cantidad = _cantidad };
-        var carrito  = await CarritoServicio.AgregarItemAsync(dto);
-        _agregando   = false;
+        var dto     = new AgregarItemCarritoDto { ProductoId = Id, Cantidad = _cantidad };
+        var carrito = await CarritoServicio.AgregarItemAsync(dto);
+        _agregando  = false;
 
         _tipoMensaje = carrito is not null ? "success" : "danger";
         _mensaje     = carrito is not null
-            ? $"{_cantidad} × {_producto!.Nombre} agregado(s) al carrito."
-            : "No se pudo agregar el producto. Inténtalo de nuevo.";
+            ? $"{_cantidad} × {_producto!.Nombre} agregado(s) al carrito. ¡Sigue comprando!"
+            : "No se pudo agregar el producto. Verifica el stock e inténtalo de nuevo.";
     }
 }
+

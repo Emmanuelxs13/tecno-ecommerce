@@ -15,11 +15,14 @@
 
 <div class="auth-wrapper">
     <div class="auth-card shadow-lg">
+
         <!-- Header con gradiente -->
         <div class="auth-card-header">
-            <div style="font-size:2.5rem; margin-bottom:.5rem;"><i class="bi bi-cpu-fill"></i></div>
-            <h4>Bienvenido de nuevo</h4>
-            <p>Inicia sesión para continuar</p>
+            <div style="font-size:2.5rem;margin-bottom:.5rem;" aria-hidden="true">
+                <i class="bi bi-cpu-fill"></i>
+            </div>
+            <h1 style="font-size:1.5rem;font-weight:700;margin:0;">Bienvenido de nuevo</h1>
+            <p style="margin:.25rem 0 0;opacity:.85;">Inicia sesión para continuar</p>
         </div>
 
         <div class="auth-card-body">
@@ -28,39 +31,74 @@
             <EditForm Model="@_modelo" OnValidSubmit="IniciarSesion">
                 <DataAnnotationsValidator />
 
+                <!-- Email -->
                 <div class="mb-3">
-                    <label class="form-label">Correo electrónico</label>
+                    <label class="form-label fw-semibold" for="login-email">
+                        Correo electrónico
+                    </label>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                        <InputText @bind-Value="_modelo.Email" class="form-control"
-                                   placeholder="correo@ejemplo.com" type="email" />
+                        <span class="input-group-text" aria-hidden="true">
+                            <i class="bi bi-envelope"></i>
+                        </span>
+                        <InputText id="login-email"
+                                   @bind-Value="_modelo.Email"
+                                   class="form-control"
+                                   placeholder="correo@ejemplo.com"
+                                   type="email"
+                                   autocomplete="email"
+                                   aria-required="true" />
                     </div>
                     <ValidationMessage For="() => _modelo.Email" class="validation-message" />
                 </div>
 
+                <!-- Contraseña con toggle -->
                 <div class="mb-4">
-                    <label class="form-label">Contraseña</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                        <InputText @bind-Value="_modelo.Contrasena" class="form-control"
-                                   placeholder="••••••••" type="password" />
+                    <label class="form-label fw-semibold" for="login-password">
+                        Contraseña
+                    </label>
+                    <div class="password-wrapper">
+                        <InputText id="login-password"
+                                   @bind-Value="_modelo.Contrasena"
+                                   class="form-control"
+                                   placeholder="••••••••"
+                                   type="@(_mostrarContrasena ? "text" : "password")"
+                                   autocomplete="current-password"
+                                   aria-required="true" />
+                        <button type="button"
+                                class="btn-toggle-pass"
+                                @onclick="() => _mostrarContrasena = !_mostrarContrasena"
+                                aria-label="@(_mostrarContrasena ? "Ocultar contraseña" : "Mostrar contraseña")"
+                                title="@(_mostrarContrasena ? "Ocultar" : "Mostrar")">
+                            <i class="bi @(_mostrarContrasena ? "bi-eye-slash" : "bi-eye")"
+                               aria-hidden="true"></i>
+                        </button>
                     </div>
                     <ValidationMessage For="() => _modelo.Contrasena" class="validation-message" />
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-2" disabled="@_cargando">
+                <button type="submit"
+                        class="btn btn-primary w-100 py-2 fw-semibold"
+                        disabled="@_cargando"
+                        aria-busy="@_cargando">
                     @if (_cargando)
                     {
-                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        <span class="spinner-border spinner-border-sm me-2"
+                              role="status" aria-hidden="true"></span>
+                        <span>Verificando…</span>
                     }
-                    Entrar
+                    else
+                    {
+                        <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>
+                        <span>Entrar</span>
+                    }
                 </button>
             </EditForm>
 
-            <hr class="my-3" />
-            <p class="text-center text-muted small mb-0">
-                ¿No tienes cuenta?
-                <a href="/registro" class="fw-semibold">Regístrate aquí</a>
+            <div class="auth-social-divider">¿No tienes cuenta?</div>
+            <p class="text-center mb-0">
+                <a href="/registro" class="fw-semibold text-primary">
+                    <i class="bi bi-person-plus me-1" aria-hidden="true"></i>Regístrate gratis
+                </a>
             </p>
         </div>
     </div>
@@ -70,11 +108,9 @@
     /// <summary>Modelo de formulario enlazado con EditForm.</summary>
     private readonly LoginUsuarioDto _modelo = new();
 
-    /// <summary>Mensaje de error visible al usuario.</summary>
-    private string _error = string.Empty;
-
-    /// <summary>Indica si hay una petición en curso.</summary>
-    private bool _cargando;
+    private string _error              = string.Empty;
+    private bool   _cargando;
+    private bool   _mostrarContrasena;
 
     /// <summary>Redirige si ya está autenticado.</summary>
     protected override void OnInitialized()
@@ -93,10 +129,11 @@
 
         if (resultado is null)
         {
-            _error = "Correo o contraseña incorrectos.";
+            _error = "Correo o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo.";
             return;
         }
 
         Navegacion.NavigateTo("/");
     }
 }
+

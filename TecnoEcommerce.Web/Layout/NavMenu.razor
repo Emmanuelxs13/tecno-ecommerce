@@ -2,8 +2,9 @@
 @using TecnoEcommerce.Web.Servicios
 @implements IDisposable
 
-@inject SesionServicio    Sesion
-@inject NavigationManager Navegacion
+@inject SesionServicio     Sesion
+@inject NavigationManager  Navegacion
+@inject CarritoApiServicio CarritoServicio
 
 @*
     Menú de navegación principal.
@@ -41,10 +42,20 @@
 
                 @if (_autenticado)
                 {
-                    <!-- Carrito -->
+                    <!-- Carrito con badge -->
                     <li class="nav-item">
-                        <NavLink class="nav-link position-relative" href="/carrito" title="Mi carrito">
-                            <i class="bi bi-cart3 fs-5"></i>
+                        <NavLink class="nav-link" href="/carrito"
+                                 title="Mi carrito"
+                                 aria-label="@(_totalItems > 0 ? $"Mi carrito, {_totalItems} artículo(s)" : "Mi carrito")">
+                            <span class="nav-cart-wrap">
+                                <i class="bi bi-cart3 fs-5" aria-hidden="true"></i>
+                                @if (_totalItems > 0)
+                                {
+                                    <span class="cart-badge" aria-label="@_totalItems artículo(s)">
+                                        @(_totalItems > 9 ? "9+" : _totalItems.ToString())
+                                    </span>
+                                }
+                            </span>
                             <span class="visually-hidden">Carrito</span>
                         </NavLink>
                     </li>
@@ -114,17 +125,27 @@
 @code {
     private bool   _autenticado;
     private string _terminoBusqueda = string.Empty;
+    private int    _totalItems;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _autenticado = Sesion.EstaAutenticado;
         Sesion.OnCambio += ActualizarEstado;
+        await CargarTotalCarrito();
     }
 
-    private void ActualizarEstado()
+    private async void ActualizarEstado()
     {
         _autenticado = Sesion.EstaAutenticado;
-        InvokeAsync(StateHasChanged);
+        await CargarTotalCarrito();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CargarTotalCarrito()
+    {
+        if (!Sesion.EstaAutenticado) { _totalItems = 0; return; }
+        var carrito = await CarritoServicio.ObtenerCarritoAsync();
+        _totalItems = carrito?.Items.Sum(i => i.Cantidad) ?? 0;
     }
 
     private void BuscarYNavegar()
