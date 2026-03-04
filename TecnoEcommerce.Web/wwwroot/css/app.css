@@ -68,30 +68,43 @@ img {
   box-shadow: none !important;
   padding: 0 !important;
 }
-/* Overrride Bootstrap container to keep Apple 980px centered track */
-.navbar-tecno > .container {
-  max-width: 1200px !important;
+
+/* ── nav-inner: layout móvil (brand | toggler) + desktop (brand | cats | right) ── */
+.nav-inner {
+  max-width: 1280px;
   width: 100%;
-  height: var(--nav-h);
-  display: flex !important;
-  flex-direction: row;
-  align-items: center !important;
-  flex-wrap: nowrap !important;
-  padding: 0 24px !important;
-  gap: 0 !important;
+  margin: 0 auto;
+  padding: 0 28px;
+  /* Móvil: brand + toggler en una fila, collapse abajo */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
 }
+
+/* Desktop (lg): grid de 3 columnas en una sola fila */
+@media (min-width: 992px) {
+  .nav-inner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    flex-wrap: nowrap;
+    height: var(--nav-h);
+  }
+}
+
+/* ── Marca (columna izquierda) ── */
 .navbar-brand {
-  font-size: 1rem !important;
+  font-size: 0.95rem !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em;
   color: var(--apple-dark) !important;
   display: flex;
   align-items: center;
   gap: 6px;
-  flex: 0 0 auto;
   white-space: nowrap;
-  margin-right: 20px !important;
+  padding-right: 32px;
   text-decoration: none !important;
+  grid-column: 1;
 }
 .navbar-brand .brand-icon {
   background: var(--apple-dark) !important;
@@ -100,51 +113,135 @@ img {
   padding: 3px 6px;
   font-size: 0.85rem;
 }
-/* Categories nav — centered, takes remaining middle space */
-.navbar-tecno #navPrincipal {
+
+/* ── Toggler (solo móvil) ── */
+.navbar-toggler {
+  margin-left: auto;
+}
+@media (min-width: 992px) {
+  .navbar-toggler {
+    display: none;
+  }
+}
+
+/* ── Collapse ── */
+/* Móvil: Bootstrap lo muestra/oculta con display:block — respetamos su lógica */
+.navbar-tecno .navbar-collapse {
+  width: 100%;
+}
+
+/* Desktop: fila dentro del grid, flex horizontal */
+@media (min-width: 992px) {
+  .navbar-tecno .navbar-collapse {
+    grid-column: 2 / 4;
+    display: flex !important;
+    align-items: center;
+    height: var(--nav-h);
+    width: auto;
+  }
+}
+
+/* ── Categorías ── */
+.nav-cats {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+  /* Móvil: columna */
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   flex: 1;
-  display: flex !important;
-  align-items: center;
-  justify-content: space-between;
 }
-.navbar-tecno #navPrincipal .navbar-nav.mx-auto {
-  /* center categories between search and brand using flex margins */
-  margin: 0 auto !important;
-  gap: 0 !important;
-  align-items: center;
-  height: var(--nav-h);
+@media (min-width: 992px) {
+  .nav-cats {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: var(--nav-h);
+    padding: 0;
+    gap: 2px;
+  }
+  .nav-cats li {
+    display: flex;
+    align-items: center;
+    height: var(--nav-h);
+  }
 }
-.navbar-tecno .navbar-nav .nav-link {
+
+/* ── Zona derecha (búsqueda + acciones) ── */
+.nav-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-bottom: 12px;
+}
+@media (min-width: 992px) {
+  .nav-right {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    height: var(--nav-h);
+    padding-bottom: 0;
+  }
+}
+.nav-actions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+@media (min-width: 992px) {
+  .nav-actions {
+    height: var(--nav-h);
+  }
+  .nav-actions li {
+    display: flex;
+    align-items: center;
+    height: var(--nav-h);
+  }
+}
+
+/* ── nav-link base ── */
+.navbar-tecno .nav-link {
   color: var(--apple-dark) !important;
-  font-size: 0.78rem !important;
+  font-size: 0.8rem !important;
   font-weight: 400;
-  padding: 0 0.65rem !important;
-  line-height: var(--nav-h);
-  height: var(--nav-h);
-  display: inline-flex;
-  align-items: center;
+  /* Móvil: padding vertical normal */
+  padding: 0.55rem 0.65rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
   opacity: 0.82;
   border-radius: 0;
   background: none !important;
   transition: opacity 0.15s;
   text-decoration: none !important;
   white-space: nowrap;
-}
-.navbar-tecno .navbar-nav .nav-link:hover,
-.navbar-tecno .navbar-nav .nav-link.active {
-  opacity: 1;
-  background: none !important;
-  text-decoration: none !important;
-}
-/* Subrayado activo en categorías */
-.navbar-tecno .navbar-nav .nav-link.active {
-  font-weight: 600 !important;
   position: relative;
 }
-.navbar-tecno .navbar-nav .nav-link.active::after {
+/* Desktop: altura completa = nav-h para subrayado y alineación */
+@media (min-width: 992px) {
+  .navbar-tecno .nav-link {
+    padding: 0 0.65rem !important;
+    height: var(--nav-h);
+  }
+}
+.navbar-tecno .nav-link:hover {
+  opacity: 1;
+  text-decoration: none !important;
+}
+.navbar-tecno .nav-link.active {
+  opacity: 1;
+  font-weight: 600 !important;
+}
+/* Subrayado activo */
+.navbar-tecno .nav-link.active::after {
   content: "";
   position: absolute;
-  bottom: 2px;
+  bottom: 6px;
   left: 50%;
   transform: translateX(-50%);
   width: 18px;
@@ -152,7 +249,23 @@ img {
   background: var(--apple-blue);
   border-radius: 2px;
 }
-/* Botones de búsqueda integrados */
+
+/* ── Iconos de acción (carrito / perfil) ── */
+.nav-icon-link {
+  padding: 0 0.5rem !important;
+  font-size: 1rem !important;
+}
+.nav-icon-link i {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.nav-username {
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+/* ── Botones de búsqueda integrados ── */
 .nav-search-btn,
 .nav-search-clear {
   color: var(--apple-gray) !important;
@@ -166,24 +279,19 @@ img {
 .nav-search-clear:hover {
   color: var(--apple-dark) !important;
 }
-/* Badge bump animation al agregar al carrito */
+
+/* ── Badge bump animation ── */
 @keyframes badgeBump {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(1.45);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.45); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
 }
 .cart-badge-bump {
   animation: badgeBump 0.35s ease-out;
 }
+
+/* ── Boton Registrarse ── */
 .btn-nav-registro {
   background: var(--apple-blue) !important;
   color: var(--apple-white) !important;
@@ -198,18 +306,24 @@ img {
   background: var(--apple-blue-hv) !important;
   opacity: 1 !important;
 }
-/* Search pill */
+
+/* ── Enlace de texto derecho (Iniciar sesion) ── */
+.nav-text-link {
+  font-size: 0.8rem !important;
+  opacity: 0.82;
+}
+
+/* ── Search pill ── */
 .navbar-search {
   background: rgba(0, 0, 0, 0.06) !important;
   border: none !important;
   border-radius: 8px !important;
   padding: 0 0.5rem 0 0.75rem !important;
-  width: 180px;
+  width: 188px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   height: 32px;
-  margin-right: 12px !important;
 }
 .navbar-search .form-control {
   background: transparent !important;
@@ -226,14 +340,8 @@ img {
 .navbar-search .form-control::placeholder {
   color: var(--apple-gray);
 }
-/* Right-side actions: cart + user */
-.navbar-tecno .navbar-nav.mb-2 {
-  flex: 0 0 auto;
-  gap: 4px !important;
-  display: flex;
-  align-items: center;
-  height: var(--nav-h);
-}
+
+/* ── Carrito badge ── */
 .nav-cart-wrap {
   position: relative;
   display: inline-flex;
