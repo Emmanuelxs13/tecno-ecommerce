@@ -5,6 +5,7 @@
 @inject SesionServicio     Sesion
 @inject NavigationManager  Navegacion
 @inject CarritoApiServicio CarritoServicio
+@inject IJSRuntime         JS
 
 <nav class="navbar navbar-expand-lg navbar-tecno">
     <div class="container">
@@ -16,25 +17,51 @@
 
         <button class="navbar-toggler border-0" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navPrincipal"
-                aria-controls="navPrincipal" aria-expanded="false">
+                aria-controls="navPrincipal" aria-expanded="false"
+                aria-label="Abrir menu">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navPrincipal">
 
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
-                <li class="nav-item"><NavLink class="nav-link" href="/?cat=laptops">Laptops</NavLink></li>
-                <li class="nav-item"><NavLink class="nav-link" href="/?cat=smartphones">Smartphones</NavLink></li>
-                <li class="nav-item"><NavLink class="nav-link" href="/?cat=gaming">Gaming</NavLink></li>
-                <li class="nav-item"><NavLink class="nav-link" href="/?cat=accesorios">Accesorios</NavLink></li>
-                <li class="nav-item"><NavLink class="nav-link" href="/?cat=monitores">Monitores</NavLink></li>
+                <li class="nav-item">
+                    <a class="nav-link @CategoriaActiva(string.Empty)" href="/" @onclick="CerrarMenuMovil">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @CategoriaActiva("laptops")" href="/?cat=laptops" @onclick="CerrarMenuMovil">Laptops</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @CategoriaActiva("smartphones")" href="/?cat=smartphones" @onclick="CerrarMenuMovil">Smartphones</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @CategoriaActiva("gaming")" href="/?cat=gaming" @onclick="CerrarMenuMovil">Gaming</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @CategoriaActiva("accesorios")" href="/?cat=accesorios" @onclick="CerrarMenuMovil">Accesorios</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @CategoriaActiva("monitores")" href="/?cat=monitores" @onclick="CerrarMenuMovil">Monitores</a>
+                </li>
             </ul>
 
             <form class="d-flex my-2 my-lg-0 navbar-search me-2" role="search"
                   @onsubmit="BuscarYNavegar" @onsubmit:preventDefault>
                 <input class="form-control border-0" type="search"
-                       placeholder="&#xF52A; Buscar productos…"
-                       @bind="_terminoBusqueda" />
+                       placeholder="Buscar productos"
+                       @bind="_terminoBusqueda"
+                       @bind:event="oninput"
+                       @onkeydown="TeclaSearch" />
+                @if (!string.IsNullOrWhiteSpace(_terminoBusqueda))
+                {
+                    <button type="button" class="nav-search-clear btn btn-link px-1"
+                            @onclick="LimpiarBusqueda" title="Limpiar">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                }
+                <button class="nav-search-btn btn btn-link px-2" type="submit" title="Buscar">
+                    <i class="bi bi-search"></i>
+                </button>
             </form>
 
             <ul class="navbar-nav mb-2 mb-lg-0 align-items-lg-center gap-1">
@@ -42,37 +69,54 @@
                 @if (_autenticado)
                 {
                     <li class="nav-item">
-                        <NavLink class="nav-link px-2" href="/carrito"
-                                 title="@(_totalItems > 0 ? $"Carrito ({_totalItems})" : "Carrito")">
+                        <a class="nav-link px-2 @(_enCarrito ? "active" : "")"
+                           href="/carrito"
+                           title="@(_totalItems > 0 ? "Carrito — " + _totalItems + " items" : "Carrito vacio")"
+                           @onclick="CerrarMenuMovil">
                             <span class="nav-cart-wrap">
                                 <i class="bi bi-bag3 fs-6"></i>
                                 @if (_totalItems > 0)
                                 {
-                                    <span class="cart-badge">@(_totalItems > 9 ? "9+" : _totalItems.ToString())</span>
+                                    <span class="cart-badge @(_animarBadge ? "cart-badge-bump" : "")">
+                                        @(_totalItems > 9 ? "9+" : _totalItems.ToString())
+                                    </span>
                                 }
                             </span>
-                        </NavLink>
+                        </a>
                     </li>
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center gap-1 px-2"
                            href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle fs-6"></i>
-                            <span class="d-none d-lg-inline small">@Sesion.UsuarioActual?.Nombre</span>
+                            <span class="d-none d-lg-inline small fw-medium">@_nombreCorto</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                             <li>
-                                <span class="dropdown-item-text small text-muted">
-                                    @Sesion.UsuarioActual?.Email
-                                </span>
+                                <div class="dropdown-item-text py-2">
+                                    <div class="fw-semibold small">@Sesion.UsuarioActual?.Nombre</div>
+                                    <div class="text-muted" style="font-size:.75rem">@Sesion.UsuarioActual?.Email</div>
+                                </div>
                             </li>
-                            <li><hr class="dropdown-divider" /></li>
-                            <li><NavLink class="dropdown-item" href="/mis-pedidos"><i class="bi bi-bag-check me-2"></i>Mis pedidos</NavLink></li>
-                            <li><NavLink class="dropdown-item" href="/carrito"><i class="bi bi-bag3 me-2"></i>Mi carrito</NavLink></li>
-                            <li><hr class="dropdown-divider" /></li>
+                            <li><hr class="dropdown-divider my-1" /></li>
+                            <li>
+                                <a class="dropdown-item" href="/mis-pedidos" @onclick="CerrarMenuMovil">
+                                    <i class="bi bi-bag-check me-2 text-primary"></i>Mis pedidos
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/carrito" @onclick="CerrarMenuMovil">
+                                    <i class="bi bi-bag3 me-2 text-primary"></i>Mi carrito
+                                    @if (_totalItems > 0)
+                                    {
+                                        <span class="badge bg-primary rounded-pill ms-1">@_totalItems</span>
+                                    }
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider my-1" /></li>
                             <li>
                                 <button class="dropdown-item text-danger" @onclick="CerrarSesion">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesion
                                 </button>
                             </li>
                         </ul>
@@ -81,37 +125,60 @@
                 else
                 {
                     <li class="nav-item">
-                        <NavLink class="nav-link small" href="/login">
-                            Iniciar sesión
-                        </NavLink>
+                        <a class="nav-link small" href="/login" @onclick="CerrarMenuMovil">
+                            Iniciar sesion
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link btn-nav-registro" href="/registro">
+                        <a class="nav-link btn-nav-registro" href="/registro" @onclick="CerrarMenuMovil">
                             Registrarse
-                        </NavLink>
+                        </a>
                     </li>
                 }
             </ul>
+
         </div>
     </div>
 </nav>
 
 @code {
     private bool   _autenticado;
-    private string _terminoBusqueda = string.Empty;
+    private string _terminoBusqueda   = string.Empty;
     private int    _totalItems;
+    private bool   _animarBadge;
+
+    private bool   _enCarrito    => Navegacion.Uri.Contains("/carrito");
+    private string _nombreCorto  => Sesion.UsuarioActual?.Nombre?.Split(' ')[0] ?? "";
 
     protected override async Task OnInitializedAsync()
     {
         _autenticado = Sesion.EstaAutenticado;
-        Sesion.OnCambio += ActualizarEstado;
+        Sesion.OnCambio                 += OnSesionCambio;
+        CarritoServicio.OnCambioCarrito += OnCarritoCambio;
+        Navegacion.LocationChanged      += OnLocationChanged;
         await CargarTotalCarrito();
     }
 
-    private async void ActualizarEstado()
+    private async void OnSesionCambio()
     {
         _autenticado = Sesion.EstaAutenticado;
         await CargarTotalCarrito();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async void OnCarritoCambio()
+    {
+        _animarBadge = true;
+        await CargarTotalCarrito();
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(400);
+        _animarBadge = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        _autenticado = Sesion.EstaAutenticado;
         await InvokeAsync(StateHasChanged);
     }
 
@@ -121,25 +188,54 @@
         try
         {
             var carrito = await CarritoServicio.ObtenerCarritoAsync();
-            _totalItems = carrito?.Items.Sum(i => i.Cantidad) ?? 0;
+            _totalItems = carrito?.Items?.Sum(i => i.Cantidad) ?? 0;
         }
-        catch { _totalItems = 3; /* mock */ }
+        catch { _totalItems = 0; }
+    }
+
+    private string CategoriaActiva(string cat)
+    {
+        var uri = Navegacion.Uri;
+        if (string.IsNullOrEmpty(cat))
+            return uri.Contains("cat=") ? "" : (uri.EndsWith("/") || uri.Contains("/#") ? "active" : "");
+        return uri.Contains("cat=" + cat, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    }
+
+    private void TeclaSearch(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") BuscarYNavegar();
+        if (e.Key == "Escape") LimpiarBusqueda();
     }
 
     private void BuscarYNavegar()
     {
-        if (!string.IsNullOrWhiteSpace(_terminoBusqueda))
+        var termino = _terminoBusqueda.Trim();
+        if (!string.IsNullOrWhiteSpace(termino))
         {
-            Navegacion.NavigateTo($"/?q={Uri.EscapeDataString(_terminoBusqueda.Trim())}");
             _terminoBusqueda = string.Empty;
+            CerrarMenuMovil();
+            Navegacion.NavigateTo("/?q=" + Uri.EscapeDataString(termino));
         }
     }
+
+    private void LimpiarBusqueda() => _terminoBusqueda = string.Empty;
 
     private void CerrarSesion()
     {
         Sesion.CerrarSesion();
+        CerrarMenuMovil();
         Navegacion.NavigateTo("/");
     }
 
-    public void Dispose() => Sesion.OnCambio -= ActualizarEstado;
+    private void CerrarMenuMovil()
+    {
+        _ = JS.InvokeVoidAsync("cerrarNavbarMovil");
+    }
+
+    public void Dispose()
+    {
+        Sesion.OnCambio                 -= OnSesionCambio;
+        CarritoServicio.OnCambioCarrito -= OnCarritoCambio;
+        Navegacion.LocationChanged      -= OnLocationChanged;
+    }
 }

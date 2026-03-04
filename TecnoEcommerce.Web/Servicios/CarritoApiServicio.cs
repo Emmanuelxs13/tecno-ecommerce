@@ -13,6 +13,12 @@ public class CarritoApiServicio
     private readonly HttpClient     _http;
     private readonly SesionServicio _sesion;
 
+    /// <summary>
+    /// Evento que se dispara cuando el carrito cambia (ítem agregado, eliminado o actualizado).
+    /// Los componentes como NavMenu se suscriben para refrescar el badge.
+    /// </summary>
+    public event Action? OnCambioCarrito;
+
     /// <summary>Inicializa el servicio con las dependencias requeridas.</summary>
     public CarritoApiServicio(HttpClient http, SesionServicio sesion)
     {
@@ -46,7 +52,9 @@ public class CarritoApiServicio
         var respuesta = await _http.PostAsJsonAsync(
             $"api/carrito/{_sesion.UsuarioActual!.Id}/items", dto);
         if (!respuesta.IsSuccessStatusCode) return null;
-        return await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        var resultado = await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        OnCambioCarrito?.Invoke();
+        return resultado;
     }
 
     /// <summary>
@@ -61,7 +69,9 @@ public class CarritoApiServicio
         var respuesta = await _http.DeleteAsync(
             $"api/carrito/{_sesion.UsuarioActual!.Id}/items/{itemId}");
         if (!respuesta.IsSuccessStatusCode) return null;
-        return await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        var resultado = await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        OnCambioCarrito?.Invoke();
+        return resultado;
     }
 
     /// <summary>
@@ -72,6 +82,7 @@ public class CarritoApiServicio
         if (!_sesion.EstaAutenticado) return;
         AgregarTokenAlCliente();
         await _http.DeleteAsync($"api/carrito/{_sesion.UsuarioActual!.Id}");
+        OnCambioCarrito?.Invoke();
     }
 
     /// <summary>
@@ -88,7 +99,9 @@ public class CarritoApiServicio
             $"api/carrito/{_sesion.UsuarioActual!.Id}/items/{itemId}",
             new { Cantidad = nuevaCantidad });
         if (!respuesta.IsSuccessStatusCode) return null;
-        return await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        var resultado = await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        OnCambioCarrito?.Invoke();
+        return resultado;
     }
 
     /// <summary>

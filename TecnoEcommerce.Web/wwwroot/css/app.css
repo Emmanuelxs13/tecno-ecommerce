@@ -89,6 +89,38 @@ img { max-width: 100%; height: auto; }
 }
 .navbar-tecno .navbar-nav .nav-link:hover,
 .navbar-tecno .navbar-nav .nav-link.active { opacity: 1; background: none !important; }
+
+/* Subrayado activo en categorías */
+.navbar-tecno .navbar-nav .nav-link.active {
+  font-weight: 600 !important;
+  position: relative;
+}
+.navbar-tecno .navbar-nav .nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: -4px; left: 50%; transform: translateX(-50%);
+  width: 20px; height: 2px;
+  background: var(--apple-blue);
+  border-radius: 2px;
+}
+/* Botones de búsqueda integrados */
+.nav-search-btn, .nav-search-clear {
+  color: var(--apple-gray) !important;
+  text-decoration: none;
+  padding: 0 .35rem !important;
+  font-size: .8rem;
+  background: none !important;
+  border: none !important;
+}
+.nav-search-btn:hover, .nav-search-clear:hover { color: var(--apple-dark) !important; }
+/* Badge bump animation al agregar al carrito */
+@keyframes badgeBump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.45); }
+  70%  { transform: scale(.9); }
+  100% { transform: scale(1); }
+}
+.cart-badge-bump { animation: badgeBump .35s ease-out; }
 .btn-nav-registro {
   background: var(--apple-blue) !important;
   color: var(--apple-white) !important;
