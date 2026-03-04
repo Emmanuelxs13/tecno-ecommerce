@@ -1,7 +1,7 @@
 # Plan de Sprints — TecnoEcommerce
 
 Arquitectura: **Modelo - Vista - Controlador (MVC)**  
-Framework: **.NET 8 Web API**
+Framework: **.NET 9 Web API + Blazor WebAssembly**
 
 ---
 
@@ -70,41 +70,62 @@ Framework: **.NET 8 Web API**
 
 ---
 
-## Sprint 3 — Interfaz Web (Blazor WebAssembly)
+## Sprint 3 — Interfaz Web (Blazor WebAssembly) ✅
 
 **Proyecto**: `TecnoEcommerce.Web` (blazorwasm)  
 **Objetivo**: Proveer una interfaz gráfica para que el usuario pueda interactuar con la plataforma sin usar Swagger.
 
 ### Configuración (`/`)
 
-- [ ] Crear proyecto Blazor WebAssembly `TecnoEcommerce.Web`
-- [ ] Agregar a la solución y configurar Bootstrap 5
-- [ ] Configurar CORS en `TecnoEcommerce.API/Program.cs`
-- [ ] Configurar `HttpClient` base apuntando a la URL de la API
+- [x] Crear proyecto Blazor WebAssembly `TecnoEcommerce.Web`
+- [x] Agregar a la solución y configurar Bootstrap 5 + Bootstrap Icons
+- [x] Configurar CORS en `TecnoEcommerce.API/Program.cs`
+- [x] Configurar `HttpClient` base apuntando a la URL de la API
 
 ### Servicios HTTP (`Servicios/`)
 
-- [ ] `ProductoApiServicio.cs` — GET productos, filtrar por categoría, buscar por nombre
-- [ ] `CategoriaApiServicio.cs` — GET categorías
-- [ ] `UsuarioApiServicio.cs` — Registro, login, gestionar sesión en memoria
-- [ ] `CarritoApiServicio.cs` — Ver carrito, agregar/eliminar ítems
-- [ ] `PedidoApiServicio.cs` — Crear pedido, ver historial
+- [x] `ProductoApiServicio.cs` — GET productos, filtrar por categoría, buscar por nombre
+- [x] `CategoriaApiServicio.cs` — GET categorías
+- [x] `UsuarioApiServicio.cs` — Registro, login, gestionar sesión en memoria
+- [x] `SesionServicio.cs` — Estado de autenticación con evento `OnCambio`
+- [x] `CarritoApiServicio.cs` — Ver carrito, agregar/eliminar ítems, evento `OnCambioCarrito`
+- [x] `PedidoApiServicio.cs` — Crear pedido, ver historial
 
 ### Páginas (`Pages/`)
 
-- [ ] `Inicio.razor` — Catálogo de productos con buscador y filtro por categoría
-- [ ] `ProductoDetalle.razor` — Ficha del producto con botón de agregar al carrito
-- [ ] `Carrito.razor` — Lista de ítems, subtotales, total y botón de confirmar pedido
-- [ ] `Login.razor` — Formulario de inicio de sesión
-- [ ] `Registro.razor` — Formulario de registro de usuario
-- [ ] `MisPedidos.razor` — Historial de pedidos con estado de pago y envío
+- [x] `Inicio.razor` — Catálogo de productos con buscador y filtro por categoría
+- [x] `ProductoDetalle.razor` — Ficha del producto con botón de agregar al carrito
+- [x] `Carrito.razor` — Lista de ítems, subtotales, total y botón de confirmar pedido
+- [x] `Login.razor` — Formulario de inicio de sesión
+- [x] `Registro.razor` — Formulario de registro de usuario
+- [x] `MisPedidos.razor` — Historial de pedidos con estado de pago y envío
 
-### Componentes compartidos (`Shared/`)
+### Componentes compartidos (`Shared/` / `Layout/`)
 
-- [ ] `NavMenu.razor` — Barra de navegación con contador de ítems en carrito
-- [ ] `ProductoCard.razor` — Tarjeta reutilizable de producto (imagen, nombre, precio, botón)
-- [ ] `CargandoSpinner.razor` — Indicador visual de carga durante peticiones HTTP
-- [ ] `MensajeAlerta.razor` — Componente de alertas de éxito/error reutilizable
+- [x] `NavMenu.razor` — Barra de navegación con contador de ítems en carrito
+- [x] `MainLayout.razor` — Layout principal con footer Apple-style
+- [x] `ProductoCard.razor` — Tarjeta reutilizable de producto (imagen, nombre, precio, botón)
+- [x] `CargandoSpinner.razor` — Indicador visual de carga durante peticiones HTTP
+- [x] `MensajeAlerta.razor` — Componente de alertas de éxito/error reutilizable
+
+### Rama `feature_frontend` — Diseño Apple-inspired ✅
+
+> Rediseño visual completo inspirado en apple.com/co con datos mock para demostración de UI/UX.
+
+- [x] Sistema de diseño en `app.css` (~1 900 líneas): paleta `#0071e3` / `#1d1d1f` / `#f5f5f7`, tipografía SF Pro, border-radius y sombras consistentes
+- [x] `Inicio.razor` — Hero oscuro, tiles de producto, sección de categorías, reseñas, banner promo
+- [x] `ProductoDetalle.razor` — Selector de color, specs técnicas, cantidad, productos relacionados
+- [x] `Carrito.razor` — Bolsa de compra estilizada, resumen de orden Apple-style
+- [x] `Login.razor` + `Registro.razor` — Formularios estilo Apple ID con validaciones visuales
+- [x] `MisPedidos.razor` — Historial con línea de tiempo de 5 pasos
+- [x] `NavMenu.razor` — Navbar sticky con layout 3 zonas (marca | categorías centradas | búsqueda+acciones):
+  - Estados activos por URL con subrayado azul animado
+  - Badge de carrito en tiempo real con animación *bump*
+  - Búsqueda con `oninput`, tecla Enter/Escape y botón limpiar
+  - Cierre automático del menú móvil via JS Interop (Bootstrap 5 Collapse)
+  - Hover con pill background, línea indicadora deslizante e íconos con fondo circular
+  - Suscripción a `SesionServicio.OnCambio`, `CarritoApiServicio.OnCambioCarrito` y `NavigationManager.LocationChanged`
+  - Patrón `IDisposable` con desuscripción de los 3 eventos
 
 ---
 
@@ -142,7 +163,7 @@ dotnet ef database update --project TecnoEcommerce.Datos --startup-project Tecno
 
 ---
 
-## Sprint 5 — Capa Controladores (Endpoints REST)
+## Sprint 5 — Capa Controladores (Endpoints REST) ✅
 
 **Proyecto**: `TecnoEcommerce.API`  
 **Carpeta**: `Controladores/`  
@@ -150,15 +171,16 @@ dotnet ef database update --project TecnoEcommerce.Datos --startup-project Tecno
 
 ### Controladores
 
-- [ ] `UsuariosControlador.cs` — POST /api/usuarios/registro, POST /api/usuarios/login
-- [ ] `ProductosControlador.cs` — GET /api/productos, GET /api/productos/{id}, POST, PUT, DELETE
-- [ ] `CategoriasControlador.cs` — CRUD de categorías
-- [ ] `CarritoControlador.cs` — GET, POST (agregar ítem), DELETE (eliminar ítem)
-- [ ] `PedidosControlador.cs` — POST (crear), GET /api/pedidos/mis-pedidos
+- [x] `UsuariosController.cs` — POST /api/usuarios/registro, POST /api/usuarios/login
+- [x] `ProductosController.cs` — GET /api/productos, GET /api/productos/{id}, GET por categoría, GET buscar
+- [x] `CategoriasController.cs` — GET /api/categorias, GET /api/categorias/{id}
+- [x] `CarritoController.cs` — GET, POST (agregar ítem), DELETE (eliminar ítem), DELETE (vaciar)
+- [x] `PedidosController.cs` — POST (crear), GET /api/pedidos/mis-pedidos/{usuarioId}
 
-### Swagger
+### Swagger / Scalar
 
-- [ ] Configurar Swagger con título y versión en Program.cs
+- [x] Configurar Swagger (`Swashbuckle.AspNetCore 6.9.0`) con título y versión en `Program.cs`
+- [x] Resolver conflicto de versión `Microsoft.OpenApi` (downgrade desde 10.1.4 → 6.9.0)
 
 ---
 
