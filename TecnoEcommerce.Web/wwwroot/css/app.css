@@ -282,10 +282,18 @@ img {
 
 /* ── Badge bump animation ── */
 @keyframes badgeBump {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.45); }
-  70%  { transform: scale(0.9); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.45);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 .cart-badge-bump {
   animation: badgeBump 0.35s ease-out;
