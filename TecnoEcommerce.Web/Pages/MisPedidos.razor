@@ -1,198 +1,191 @@
 @page "/mis-pedidos"
-@using TecnoEcommerce.Web.Servicios
-@using TecnoEcommerce.Modelos.DTOs
-@using TecnoEcommerce.Modelos.Enumeraciones
 
-@inject PedidoApiServicio PedidoServicio
-@inject SesionServicio    Sesion
-@inject NavigationManager Navegacion
+<PageTitle>Mis pedidos — TecnoEcommerce</PageTitle>
 
-@*
-    Página de historial de pedidos del usuario autenticado.
-    Principio SRP: única responsabilidad de listar y mostrar el estado de los pedidos.
-*@
-
-<PageTitle>Mis pedidos – TecnoEcommerce</PageTitle>
-
-<!-- ── Encabezado ────────────────────────────────────────────────────────── -->
+<!-- Header -->
 <div class="mis-pedidos-header">
     <div>
-        <h1 class="mis-pedidos-title">
-            <i class="bi bi-bag-check me-2" aria-hidden="true"></i>Mis pedidos
-        </h1>
-        <p class="mis-pedidos-sub">Revisa el estado y el detalle de cada pedido</p>
+        <h1 class="mis-pedidos-title"><i class="bi bi-bag-check me-2"></i>Mis pedidos</h1>
+        <p class="mis-pedidos-sub">@_pedidos.Count pedido(s) en tu historial</p>
     </div>
-    <i class="bi bi-box-seam hero-icon d-none d-md-block" aria-hidden="true"></i>
+    <span class="hero-icon"><i class="bi bi-bag-check"></i></span>
 </div>
 
-@if (_cargando)
+@if (_pedidos.Count == 0)
 {
-    <div class="d-flex justify-content-center py-5">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Cargando pedidos…</span>
-        </div>
-    </div>
-}
-else if (!Sesion.EstaAutenticado)
-{
-    <div class="carrito-vacio" role="alert">
-        <div class="carrito-vacio-icon">
-            <i class="bi bi-person-lock" aria-hidden="true"></i>
-        </div>
-        <h4>Inicia sesión para ver tus pedidos</h4>
-        <p class="text-muted">Necesitas una cuenta activa para acceder a tu historial.</p>
-        <a href="/login" class="btn btn-primary btn-lg px-4">
-            <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>Iniciar sesión
-        </a>
-    </div>
-}
-else if (_pedidos.Count == 0)
-{
-    <div class="carrito-vacio">
-        <div class="carrito-vacio-icon">
-            <i class="bi bi-inbox" aria-hidden="true"></i>
-        </div>
-        <h4>Aún no tienes pedidos</h4>
-        <p class="text-muted">Explora el catálogo y realiza tu primera compra.</p>
-        <a href="/" class="btn btn-primary btn-lg px-4">
-            <i class="bi bi-grid me-2" aria-hidden="true"></i>Explorar catálogo
+    <div class="empty-state">
+        <i class="bi bi-bag3"></i>
+        <h3 style="font-size:1.2rem;font-weight:700;margin:.4rem 0">No tienes pedidos aún</h3>
+        <p style="margin-bottom:1.5rem">Haz tu primera compra y aparecerá aquí</p>
+        <a href="/" class="btn-apple btn-apple-primary">
+            <i class="bi bi-grid-fill"></i> Explorar productos
         </a>
     </div>
 }
 else
 {
-    <div class="row g-4">
+    <div class="row g-3">
         @foreach (var pedido in _pedidos)
         {
             <div class="col-12">
-                <article class="pedido-card" aria-label="Pedido #@pedido.Id">
+                <div class="pedido-card fade-in-up">
 
                     <!-- Header del pedido -->
                     <div class="pedido-header">
-                        <div class="pedido-header-id">
-                            <span class="pedido-num">#@pedido.Id</span>
-                            <span class="pedido-fecha">@pedido.FechaCreacion.ToString("dd MMM yyyy, HH:mm")</span>
+                        <div>
+                            <span class="pedido-num">Pedido @pedido.Numero</span>
+                            <div class="pedido-fecha">Realizado el @pedido.Fecha</div>
                         </div>
-                        <div class="d-flex gap-2 flex-wrap justify-content-end">
-                            <span class="badge @ObtenerClasePedido(pedido.EstadoPedido)"
-                                  aria-label="Estado del pedido: @pedido.EstadoPedido">
-                                <i class="bi @ObtenerIconoPedido(pedido.EstadoPedido) me-1" aria-hidden="true"></i>
-                                @pedido.EstadoPedido
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge @ObtenerBadgeEstado(pedido.Estado)" style="padding:.4em .8em;border-radius:8px;font-size:.75rem">
+                                @pedido.Estado
                             </span>
-                            <span class="badge @ObtenerClasePago(pedido.EstadoPago)"
-                                  aria-label="Estado de pago: @pedido.EstadoPago">
-                                <i class="bi bi-credit-card me-1" aria-hidden="true"></i>@pedido.EstadoPago
+                            <span class="badge @ObtenerBadgePago(pedido.EstadoPago)" style="padding:.4em .8em;border-radius:8px;font-size:.75rem">
+                                @pedido.EstadoPago
                             </span>
                         </div>
                     </div>
 
-                    <!-- Timeline de progreso -->
-                    @if (pedido.EstadoPedido != EstadoPedido.Cancelado)
-                    {
-                        <nav class="pedido-timeline" aria-label="Progreso del pedido #@pedido.Id">
-                            @foreach (var paso in _pasosTiempo)
-                            {
-                                <div class="timeline-step @((int)paso.Estado <= (int)pedido.EstadoPedido ? "active" : "") @(paso.Estado == pedido.EstadoPedido ? "current" : "")"
-                                     aria-current="@(paso.Estado == pedido.EstadoPedido ? "step" : null)">
-                                    <div class="timeline-dot">
-                                        <i class="bi @paso.Icono" aria-hidden="true"></i>
-                                    </div>
-                                    <span class="timeline-label">@paso.Etiqueta</span>
-                                </div>
-                            }
-                        </nav>
-                    }
-                    else
-                    {
-                        <div class="alert alert-danger small py-2 mx-3 mb-0 mt-2" role="alert">
-                            <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Este pedido fue cancelado.
-                        </div>
-                    }
-
-                    <!-- Detalle de productos -->
-                    <div class="pedido-body">
-                        <ul class="list-unstyled mb-0" aria-label="Productos del pedido">
-                            @foreach (var detalle in pedido.Detalles)
-                            {
-                                <li class="pedido-detalle-row">
-                                    <span>@detalle.NombreProducto <span class="text-muted">×@detalle.Cantidad</span></span>
-                                    <span>$@detalle.Subtotal.ToString("N2")</span>
-                                </li>
-                            }
-                        </ul>
-                        <div class="pedido-total-row">
-                            <span>Total del pedido</span>
-                            <span>$@pedido.Total.ToString("N2")</span>
-                        </div>
-
-                        <!-- Caja de envío -->
-                        @if (!string.IsNullOrWhiteSpace(pedido.DireccionEntrega))
+                    <!-- Timeline -->
+                    <div class="pedido-timeline">
+                        @foreach (var (paso, i) in _pasosTiempos.Select((p,i) => (p,i)))
                         {
-                            <div class="pedido-envio-box">
-                                <i class="bi bi-geo-alt-fill me-2 text-primary" aria-hidden="true"></i>
-                                <span>@pedido.DireccionEntrega</span>
-                                @if (pedido.EstadoEnvio.HasValue)
-                                {
-                                    <span class="badge bg-info ms-2">@pedido.EstadoEnvio</span>
-                                }
+                            var orden = pedido.PasoActual;
+                            var clase = i < orden ? "active" : i == orden ? "current" : "";
+                            <div class="timeline-step @clase">
+                                <div class="timeline-dot">
+                                    @if (i < orden) { <i class="bi bi-check-lg"></i> }
+                                    else { <span style="font-size:.65rem;font-weight:700">@(i+1)</span> }
+                                </div>
+                                <span class="timeline-label">@paso</span>
                             </div>
                         }
                     </div>
 
-                </article>
+                    <!-- Items del pedido -->
+                    <div class="pedido-body">
+                        @foreach (var item in pedido.Items)
+                        {
+                            <div class="pedido-detalle-row">
+                                <span>@item.Nombre <span style="color:var(--apple-gray)">×@item.Cantidad</span></span>
+                                <span>$@((item.Precio * item.Cantidad).ToString("N2"))</span>
+                            </div>
+                        }
+
+                        <div class="resumen-row">
+                            <span>Subtotal</span><span>$@pedido.Items.Sum(i => i.Precio * i.Cantidad).ToString("N2")</span>
+                        </div>
+                        <div class="resumen-row">
+                            <span>Envío</span>
+                            <span class="@(pedido.EnvioGratis ? "text-success fw-semibold" : "")">
+                                @(pedido.EnvioGratis ? "Gratis" : "$15.00")
+                            </span>
+                        </div>
+                        <div class="pedido-total-row">
+                            <span>Total</span>
+                            <span>$@pedido.Total.ToString("N2") USD</span>
+                        </div>
+
+                        <div class="pedido-envio-box">
+                            <i class="bi bi-truck me-1" style="color:var(--apple-blue)"></i>
+                            <div>
+                                <strong>@pedido.DireccionEnvio</strong>
+                                @if (!string.IsNullOrEmpty(pedido.NumeroGuia))
+                                {
+                                    <span class="ms-2 text-muted" style="font-size:.78rem">
+                                        Guía: @pedido.NumeroGuia
+                                    </span>
+                                }
+                                <div style="font-size:.78rem;color:var(--apple-gray)">@pedido.TransportadoraMensaje</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3 flex-wrap">
+                            @if (pedido.Estado == "Enviado" || pedido.Estado == "Entregado")
+                            {
+                                <button class="btn-apple btn-apple-ghost" style="font-size:.82rem">
+                                    <i class="bi bi-geo-alt me-1"></i> Rastrear envío
+                                </button>
+                            }
+                            <button class="btn-apple btn-apple-white" style="font-size:.82rem">
+                                <i class="bi bi-file-earmark-text me-1"></i> Ver factura
+                            </button>
+                            @if (pedido.Estado == "Entregado")
+                            {
+                                <button class="btn-apple btn-apple-white" style="font-size:.82rem">
+                                    <i class="bi bi-star me-1"></i> Calificar
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                </div>
             </div>
         }
     </div>
 }
 
 @code {
-    private List<PedidoDto> _pedidos  = new();
-    private bool            _cargando = true;
-
-    private static readonly (EstadoPedido Estado, string Icono, string Etiqueta)[] _pasosTiempo =
-    [
-        (EstadoPedido.Pendiente,  "bi-clock",      "Pendiente"),
-        (EstadoPedido.Procesando, "bi-gear",        "Procesando"),
-        (EstadoPedido.Enviado,    "bi-truck",       "Enviado"),
-        (EstadoPedido.Entregado,  "bi-house-check", "Entregado")
-    ];
-
-    /// <inheritdoc/>
-    protected override async Task OnInitializedAsync()
+    private record ItemPedido(string Nombre, int Cantidad, decimal Precio);
+    private class MockPedido
     {
-        if (!Sesion.EstaAutenticado) { _cargando = false; return; }
-        _pedidos  = await PedidoServicio.ObtenerMisPedidosAsync();
-        _cargando = false;
+        public string Numero           { get; set; } = "";
+        public string Fecha            { get; set; } = "";
+        public string Estado           { get; set; } = "";
+        public string EstadoPago       { get; set; } = "";
+        public int    PasoActual       { get; set; }
+        public string DireccionEnvio   { get; set; } = "";
+        public string NumeroGuia       { get; set; } = "";
+        public string TransportadoraMensaje { get; set; } = "";
+        public bool   EnvioGratis      { get; set; }
+        public decimal Total           { get; set; }
+        public List<ItemPedido> Items  { get; set; } = new();
     }
 
-    /// <summary>Devuelve la clase CSS para el badge del estado de pedido.</summary>
-    private static string ObtenerClasePedido(EstadoPedido estado) => estado switch
+    private readonly string[] _pasosTiempos = { "Recibido", "Procesando", "Empacado", "Enviado", "Entregado" };
+
+    private readonly List<MockPedido> _pedidos = new()
     {
-        EstadoPedido.Pendiente   => "badge-pendiente",
-        EstadoPedido.Procesando  => "badge-procesando",
-        EstadoPedido.Enviado     => "badge-enviado",
-        EstadoPedido.Entregado   => "bg-success",
-        EstadoPedido.Cancelado   => "bg-danger",
-        _                        => "bg-secondary"
+        new() {
+            Numero = "#TE-84712", Fecha = "28 de febrero, 2026", Estado = "Enviado",
+            EstadoPago = "Aprobado", PasoActual = 3,
+            DireccionEnvio = "Calle 123 #45-67, Bogotá, Colombia",
+            NumeroGuia = "COL829341", TransportadoraMensaje = "Servientrega — Llegará el 5 de marzo",
+            EnvioGratis = true, Total = 1609.22m,
+            Items = new() { new("MacBook Air M3", 1, 1299m), new("Keychron K2 V2", 2, 89m) }
+        },
+        new() {
+            Numero = "#TE-71234", Fecha = "14 de enero, 2026", Estado = "Entregado",
+            EstadoPago = "Aprobado", PasoActual = 5,
+            DireccionEnvio = "Carrera 7 #80-10, Medellín, Colombia",
+            NumeroGuia = "", TransportadoraMensaje = "Entregado el 17 de enero — Conforme",
+            EnvioGratis = false, Total = 1242.19m,
+            Items = new() { new("iPhone 15 Pro", 1, 1199m) }
+        },
+        new() {
+            Numero = "#TE-65481", Fecha = "3 de diciembre, 2025", Estado = "Procesando",
+            EstadoPago = "Aprobado", PasoActual = 1,
+            DireccionEnvio = "Av. El Dorado #90-10, Bogotá, Colombia",
+            NumeroGuia = "", TransportadoraMensaje = "Tu pedido está siendo preparado",
+            EnvioGratis = true, Total = 474.51m,
+            Items = new() { new("RTX 4060 8GB", 1, 399m) }
+        },
     };
 
-    /// <summary>Devuelve un icono Bootstrap para el estado del pedido.</summary>
-    private static string ObtenerIconoPedido(EstadoPedido estado) => estado switch
+    private string ObtenerBadgeEstado(string estado) => estado switch
     {
-        EstadoPedido.Pendiente   => "bi-clock",
-        EstadoPedido.Procesando  => "bi-gear-fill",
-        EstadoPedido.Enviado     => "bi-truck",
-        EstadoPedido.Entregado   => "bi-check-circle-fill",
-        EstadoPedido.Cancelado   => "bi-x-circle-fill",
-        _                        => "bi-question-circle"
+        "Pendiente"   => "badge-pendiente",
+        "Procesando"  => "badge-procesando",
+        "Enviado"     => "badge-enviado",
+        "Entregado"   => "badge-entregado",
+        "Cancelado"   => "badge-cancelado",
+        _             => "badge-pendiente",
     };
 
-    /// <summary>Devuelve la clase CSS para el badge del estado de pago.</summary>
-    private static string ObtenerClasePago(EstadoPago estado) => estado switch
+    private string ObtenerBadgePago(string estado) => estado switch
     {
-        EstadoPago.Aprobado  => "bg-success",
-        EstadoPago.Rechazado => "bg-danger",
-        _                    => "bg-warning text-dark"
+        "Aprobado"  => "badge-aprobado",
+        "Rechazado" => "badge-rechazado",
+        _           => "badge-pendiente",
     };
 }
-

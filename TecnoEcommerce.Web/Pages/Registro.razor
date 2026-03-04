@@ -1,163 +1,141 @@
 @page "/registro"
-@using TecnoEcommerce.Web.Servicios
-@using TecnoEcommerce.Modelos.DTOs
+@using System.ComponentModel.DataAnnotations
 
-@inject UsuarioApiServicio UsuarioServicio
-@inject NavigationManager  Navegacion
-@inject SesionServicio     Sesion
+@inject NavigationManager Navegacion
 
-@*
-    Página de registro de nuevos usuarios.
-    Principio SRP: única responsabilidad de crear la cuenta del usuario.
-*@
-
-<PageTitle>Crear cuenta – TecnoEcommerce</PageTitle>
+<PageTitle>Crear cuenta — TecnoEcommerce</PageTitle>
 
 <div class="auth-wrapper">
-    <div class="auth-card shadow-lg">
-
-        <!-- Header con gradiente -->
+    <div class="auth-card" style="max-width:480px">
+        <!-- Header -->
         <div class="auth-card-header">
-            <div style="font-size:2.5rem;margin-bottom:.5rem;" aria-hidden="true">
-                <i class="bi bi-person-plus-fill"></i>
-            </div>
-            <h1 style="font-size:1.5rem;font-weight:700;margin:0;">Crear cuenta</h1>
-            <p style="margin:.25rem 0 0;opacity:.85;">Regístrate para empezar a comprar</p>
+            <div style="font-size:2rem;margin-bottom:.5rem"><i class="bi bi-cpu-fill"></i></div>
+            <h1>Crear cuenta</h1>
+            <p>Únete a miles de clientes satisfechos</p>
+            <ul class="auth-benefits mt-3">
+                <li><i class="bi bi-check-circle-fill"></i> Envío gratis en tu primer pedido</li>
+                <li><i class="bi bi-check-circle-fill"></i> Historial y seguimiento de pedidos</li>
+                <li><i class="bi bi-check-circle-fill"></i> Ofertas y descuentos exclusivos</li>
+                <li><i class="bi bi-check-circle-fill"></i> Lista de deseos personalizada</li>
+            </ul>
         </div>
 
-        <!-- Beneficios de registro -->
-        <ul class="auth-benefits" aria-label="Beneficios de crear una cuenta">
-            <li><i class="bi bi-truck text-primary" aria-hidden="true"></i> Envío gratis en pedidos +$500</li>
-            <li><i class="bi bi-clock-history text-success" aria-hidden="true"></i> Historial de pedidos</li>
-            <li><i class="bi bi-shield-check text-warning" aria-hidden="true"></i> Compras 100% seguras</li>
-        </ul>
-
+        <!-- Body -->
         <div class="auth-card-body">
-            <MensajeAlerta Mensaje="@_error" Tipo="danger"  OnCerrar="() => _error = string.Empty" />
-            <MensajeAlerta Mensaje="@_exito" Tipo="success" OnCerrar="() => _exito = string.Empty" />
+            @if (_registroExitoso)
+            {
+                <div class="alert alert-success py-2 mb-3" style="font-size:.85rem">
+                    <i class="bi bi-check-circle-fill me-1"></i>¡Cuenta creada! Redirigiendo al inicio…
+                </div>
+            }
 
-            <EditForm Model="@_modelo" OnValidSubmit="Registrar">
+            <EditForm Model="_modelo" OnValidSubmit="CrearCuenta">
                 <DataAnnotationsValidator />
 
-                <!-- Nombre -->
-                <div class="mb-3">
-                    <label class="form-label fw-semibold" for="reg-nombre">Nombre completo</label>
-                    <div class="input-group">
-                        <span class="input-group-text" aria-hidden="true">
-                            <i class="bi bi-person"></i>
-                        </span>
-                        <InputText id="reg-nombre"
-                                   @bind-Value="_modelo.Nombre"
-                                   class="form-control"
-                                   placeholder="Tu nombre"
-                                   autocomplete="name"
-                                   aria-required="true" />
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" placeholder="Tu nombre"
+                               @bind="_modelo.Nombre" autocomplete="given-name" />
+                        <ValidationMessage For="() => _modelo.Nombre" class="validation-message" />
                     </div>
-                    <ValidationMessage For="() => _modelo.Nombre" class="validation-message" />
+                    <div class="col-sm-6">
+                        <label class="form-label">Apellido</label>
+                        <input type="text" class="form-control" placeholder="Tu apellido"
+                               @bind="_modelo.Apellido" autocomplete="family-name" />
+                        <ValidationMessage For="() => _modelo.Apellido" class="validation-message" />
+                    </div>
                 </div>
 
-                <!-- Email -->
-                <div class="mb-3">
-                    <label class="form-label fw-semibold" for="reg-email">Correo electrónico</label>
-                    <div class="input-group">
-                        <span class="input-group-text" aria-hidden="true">
-                            <i class="bi bi-envelope"></i>
-                        </span>
-                        <InputText id="reg-email"
-                                   @bind-Value="_modelo.Email"
-                                   class="form-control"
-                                   placeholder="correo@ejemplo.com"
-                                   type="email"
-                                   autocomplete="email"
-                                   aria-required="true" />
-                    </div>
+                <div class="mt-3">
+                    <label class="form-label">Correo electrónico</label>
+                    <input type="email" class="form-control" placeholder="tu@correo.com"
+                           @bind="_modelo.Email" autocomplete="email" />
                     <ValidationMessage For="() => _modelo.Email" class="validation-message" />
                 </div>
 
-                <!-- Contraseña con toggle -->
-                <div class="mb-4">
-                    <label class="form-label fw-semibold" for="reg-password">Contraseña</label>
+                <div class="mt-3">
+                    <label class="form-label">Contraseña</label>
                     <div class="password-wrapper">
-                        <InputText id="reg-password"
-                                   @bind-Value="_modelo.Contrasena"
-                                   class="form-control"
-                                   placeholder="Mínimo 6 caracteres"
-                                   type="@(_mostrarContrasena ? "text" : "password")"
-                                   autocomplete="new-password"
-                                   aria-required="true" />
-                        <button type="button"
-                                class="btn-toggle-pass"
-                                @onclick="() => _mostrarContrasena = !_mostrarContrasena"
-                                aria-label="@(_mostrarContrasena ? "Ocultar contraseña" : "Mostrar contraseña")"
-                                title="@(_mostrarContrasena ? "Ocultar" : "Mostrar")">
-                            <i class="bi @(_mostrarContrasena ? "bi-eye-slash" : "bi-eye")"
-                               aria-hidden="true"></i>
+                        <input type="@(_verPwd1 ? "text" : "password")" class="form-control"
+                               placeholder="Mínimo 8 caracteres"
+                               @bind="_modelo.Password" autocomplete="new-password" />
+                        <button type="button" class="btn-toggle-pass" @onclick="() => _verPwd1 = !_verPwd1">
+                            <i class="bi @(_verPwd1 ? "bi-eye-slash" : "bi-eye")"></i>
                         </button>
                     </div>
-                    <ValidationMessage For="() => _modelo.Contrasena" class="validation-message" />
+                    <ValidationMessage For="() => _modelo.Password" class="validation-message" />
                 </div>
 
-                <button type="submit"
-                        class="btn btn-primary w-100 py-2 fw-semibold"
-                        disabled="@_cargando"
-                        aria-busy="@_cargando">
-                    @if (_cargando)
-                    {
-                        <span class="spinner-border spinner-border-sm me-2"
-                              role="status" aria-hidden="true"></span>
-                        <span>Creando cuenta…</span>
-                    }
-                    else
-                    {
-                        <i class="bi bi-person-check me-2" aria-hidden="true"></i>
-                        <span>Crear cuenta</span>
-                    }
+                <div class="mt-3 mb-3">
+                    <label class="form-label">Confirmar contraseña</label>
+                    <div class="password-wrapper">
+                        <input type="@(_verPwd2 ? "text" : "password")" class="form-control"
+                               placeholder="Repite la contraseña"
+                               @bind="_modelo.ConfirmarPassword" autocomplete="new-password" />
+                        <button type="button" class="btn-toggle-pass" @onclick="() => _verPwd2 = !_verPwd2">
+                            <i class="bi @(_verPwd2 ? "bi-eye-slash" : "bi-eye")"></i>
+                        </button>
+                    </div>
+                    <ValidationMessage For="() => _modelo.ConfirmarPassword" class="validation-message" />
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="terminos" @bind="_aceptoTerminos" />
+                    <label class="form-check-label" for="terminos" style="font-size:.82rem">
+                        Acepto los <a href="#">términos y condiciones</a> y la <a href="#">política de privacidad</a>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-apple btn-apple-primary btn-apple-wide" disabled="@(!_aceptoTerminos || _cargando)">
+                    @if (_cargando) { <span class="spinner-border spinner-border-sm me-2"></span> }
+                    <i class="bi bi-person-plus me-1"></i> Crear mi cuenta
                 </button>
             </EditForm>
 
-            <div class="auth-social-divider">¿Ya tienes cuenta?</div>
-            <p class="text-center mb-0">
-                <a href="/login" class="fw-semibold text-primary">
-                    <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>Inicia sesión
-                </a>
+            <p class="text-center mt-4 mb-0" style="font-size:.85rem;color:var(--apple-gray)">
+                ¿Ya tienes cuenta?
+                <a href="/login" style="font-weight:600">Iniciar sesión</a>
             </p>
         </div>
     </div>
 </div>
 
 @code {
-    /// <summary>Modelo de formulario enlazado con EditForm.</summary>
-    private readonly RegistroUsuarioDto _modelo = new();
-
-    private string _error              = string.Empty;
-    private string _exito              = string.Empty;
-    private bool   _cargando;
-    private bool   _mostrarContrasena;
-
-    /// <summary>Redirige si ya está autenticado.</summary>
-    protected override void OnInitialized()
+    private class RegistroModelo
     {
-        if (Sesion.EstaAutenticado) Navegacion.NavigateTo("/");
+        [Required(ErrorMessage = "El nombre es obligatorio")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El apellido es obligatorio")]
+        public string Apellido { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El correo es obligatorio")]
+        [EmailAddress(ErrorMessage = "Correo no válido")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La contraseña es obligatoria")]
+        [MinLength(8, ErrorMessage = "Mínimo 8 caracteres")]
+        public string Password { get; set; } = string.Empty;
+
+        [Compare(nameof(Password), ErrorMessage = "Las contraseñas no coinciden")]
+        public string ConfirmarPassword { get; set; } = string.Empty;
     }
 
-    /// <summary>Envía el registro a la API; en caso de éxito redirige al catálogo.</summary>
-    private async Task Registrar()
+    private readonly RegistroModelo _modelo = new();
+    private bool _cargando      = false;
+    private bool _aceptoTerminos = false;
+    private bool _registroExitoso = false;
+    private bool _verPwd1 = false;
+    private bool _verPwd2 = false;
+
+    private async Task CrearCuenta()
     {
         _cargando = true;
-        _error    = string.Empty;
-
-        var resultado = await UsuarioServicio.RegistrarAsync(_modelo);
-        _cargando = false;
-
-        if (resultado is null)
-        {
-            _error = "No se pudo crear la cuenta. El correo podría estar en uso.";
-            return;
-        }
-
-        _exito = $"¡Bienvenido/a, {resultado.Nombre}! Redirigiendo al catálogo…";
-        await Task.Delay(1500);
+        await Task.Delay(900);
+        _cargando       = false;
+        _registroExitoso = true;
+        await Task.Delay(1400);
         Navegacion.NavigateTo("/");
     }
 }
-

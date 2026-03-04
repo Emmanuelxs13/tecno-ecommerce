@@ -1,139 +1,128 @@
 @page "/login"
-@using TecnoEcommerce.Web.Servicios
-@using TecnoEcommerce.Modelos.DTOs
+@using System.ComponentModel.DataAnnotations
 
-@inject UsuarioApiServicio UsuarioServicio
 @inject NavigationManager Navegacion
-@inject SesionServicio    Sesion
 
-@*
-    Página de inicio de sesión.
-    Principio SRP: única responsabilidad de autenticar al usuario.
-*@
-
-<PageTitle>Iniciar sesión – TecnoEcommerce</PageTitle>
+<PageTitle>Iniciar sesión — TecnoEcommerce</PageTitle>
 
 <div class="auth-wrapper">
-    <div class="auth-card shadow-lg">
-
-        <!-- Header con gradiente -->
+    <div class="auth-card">
+        <!-- Header -->
         <div class="auth-card-header">
-            <div style="font-size:2.5rem;margin-bottom:.5rem;" aria-hidden="true">
-                <i class="bi bi-cpu-fill"></i>
-            </div>
-            <h1 style="font-size:1.5rem;font-weight:700;margin:0;">Bienvenido de nuevo</h1>
-            <p style="margin:.25rem 0 0;opacity:.85;">Inicia sesión para continuar</p>
+            <div style="font-size:2rem;margin-bottom:.5rem"><i class="bi bi-cpu-fill"></i></div>
+            <h1>Inicia sesión</h1>
+            <p>Accede a tu cuenta TecnoEcommerce</p>
+            <ul class="auth-benefits mt-3">
+                <li><i class="bi bi-check-circle-fill"></i> Revisa el estado de tus pedidos</li>
+                <li><i class="bi bi-check-circle-fill"></i> Accede a ofertas exclusivas</li>
+                <li><i class="bi bi-check-circle-fill"></i> Guarda tu lista de deseos</li>
+            </ul>
         </div>
 
+        <!-- Body -->
         <div class="auth-card-body">
-            <MensajeAlerta Mensaje="@_error" Tipo="danger" OnCerrar="() => _error = string.Empty" />
+            @if (!string.IsNullOrEmpty(_errorGlobal))
+            {
+                <div class="alert alert-danger py-2 mb-3" style="font-size:.85rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>@_errorGlobal
+                </div>
+            }
+            @if (_loginExitoso)
+            {
+                <div class="alert alert-success py-2 mb-3" style="font-size:.85rem">
+                    <i class="bi bi-check-circle-fill me-1"></i>¡Bienvenido de vuelta! Redirigiendo…
+                </div>
+            }
 
-            <EditForm Model="@_modelo" OnValidSubmit="IniciarSesion">
+            <EditForm Model="_modelo" OnValidSubmit="IniciarSesion">
                 <DataAnnotationsValidator />
 
-                <!-- Email -->
                 <div class="mb-3">
-                    <label class="form-label fw-semibold" for="login-email">
-                        Correo electrónico
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text" aria-hidden="true">
-                            <i class="bi bi-envelope"></i>
-                        </span>
-                        <InputText id="login-email"
-                                   @bind-Value="_modelo.Email"
-                                   class="form-control"
-                                   placeholder="correo@ejemplo.com"
-                                   type="email"
-                                   autocomplete="email"
-                                   aria-required="true" />
-                    </div>
+                    <label for="email" class="form-label">Correo electrónico</label>
+                    <input id="email" type="email" class="form-control" placeholder="tu@correo.com"
+                           @bind="_modelo.Email" autocomplete="email" />
                     <ValidationMessage For="() => _modelo.Email" class="validation-message" />
                 </div>
 
-                <!-- Contraseña con toggle -->
-                <div class="mb-4">
-                    <label class="form-label fw-semibold" for="login-password">
-                        Contraseña
-                    </label>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
                     <div class="password-wrapper">
-                        <InputText id="login-password"
-                                   @bind-Value="_modelo.Contrasena"
-                                   class="form-control"
-                                   placeholder="••••••••"
-                                   type="@(_mostrarContrasena ? "text" : "password")"
-                                   autocomplete="current-password"
-                                   aria-required="true" />
-                        <button type="button"
-                                class="btn-toggle-pass"
-                                @onclick="() => _mostrarContrasena = !_mostrarContrasena"
-                                aria-label="@(_mostrarContrasena ? "Ocultar contraseña" : "Mostrar contraseña")"
-                                title="@(_mostrarContrasena ? "Ocultar" : "Mostrar")">
-                            <i class="bi @(_mostrarContrasena ? "bi-eye-slash" : "bi-eye")"
-                               aria-hidden="true"></i>
+                        <input id="password"
+                               type="@(_mostrarPassword ? "text" : "password")"
+                               class="form-control"
+                               placeholder="••••••••"
+                               @bind="_modelo.Password"
+                               autocomplete="current-password" />
+                        <button type="button" class="btn-toggle-pass"
+                                @onclick="() => _mostrarPassword = !_mostrarPassword"
+                                title="@(_mostrarPassword ? "Ocultar" : "Ver") contraseña">
+                            <i class="bi @(_mostrarPassword ? "bi-eye-slash" : "bi-eye")"></i>
                         </button>
                     </div>
-                    <ValidationMessage For="() => _modelo.Contrasena" class="validation-message" />
+                    <ValidationMessage For="() => _modelo.Password" class="validation-message" />
                 </div>
 
-                <button type="submit"
-                        class="btn btn-primary w-100 py-2 fw-semibold"
-                        disabled="@_cargando"
-                        aria-busy="@_cargando">
-                    @if (_cargando)
-                    {
-                        <span class="spinner-border spinner-border-sm me-2"
-                              role="status" aria-hidden="true"></span>
-                        <span>Verificando…</span>
-                    }
-                    else
-                    {
-                        <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>
-                        <span>Entrar</span>
-                    }
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="recordar" @bind="_recordarme" />
+                        <label class="form-check-label" for="recordar" style="font-size:.85rem">Recuérdame</label>
+                    </div>
+                    <a href="#" style="font-size:.82rem">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <button type="submit" class="btn-apple btn-apple-primary btn-apple-wide" disabled="@_cargando">
+                    @if (_cargando) { <span class="spinner-border spinner-border-sm me-2"></span> }
+                    Iniciar sesión
                 </button>
             </EditForm>
 
-            <div class="auth-social-divider">¿No tienes cuenta?</div>
-            <p class="text-center mb-0">
-                <a href="/registro" class="fw-semibold text-primary">
-                    <i class="bi bi-person-plus me-1" aria-hidden="true"></i>Regístrate gratis
-                </a>
+            <div class="auth-social-divider">o continúa con</div>
+
+            <div class="d-flex gap-2">
+                <button class="btn-apple btn-apple-white flex-fill" style="font-size:.82rem">
+                    <i class="bi bi-google me-1"></i> Google
+                </button>
+                <button class="btn-apple btn-apple-white flex-fill" style="font-size:.82rem">
+                    <i class="bi bi-apple me-1"></i> Apple
+                </button>
+            </div>
+
+            <p class="text-center mt-4 mb-0" style="font-size:.85rem;color:var(--apple-gray)">
+                ¿No tienes cuenta?
+                <a href="/registro" style="font-weight:600">Regístrate gratis</a>
             </p>
         </div>
     </div>
 </div>
 
 @code {
-    /// <summary>Modelo de formulario enlazado con EditForm.</summary>
-    private readonly LoginUsuarioDto _modelo = new();
-
-    private string _error              = string.Empty;
-    private bool   _cargando;
-    private bool   _mostrarContrasena;
-
-    /// <summary>Redirige si ya está autenticado.</summary>
-    protected override void OnInitialized()
+    private class LoginModelo
     {
-        if (Sesion.EstaAutenticado) Navegacion.NavigateTo("/");
+        [Required(ErrorMessage = "El correo es obligatorio")]
+        [EmailAddress(ErrorMessage = "Correo no válido")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La contraseña es obligatoria")]
+        [MinLength(6, ErrorMessage = "Mínimo 6 caracteres")]
+        public string Password { get; set; } = string.Empty;
     }
 
-    /// <summary>Envía las credenciales a la API y gestiona el resultado.</summary>
+    private readonly LoginModelo _modelo = new();
+    private bool   _cargando       = false;
+    private bool   _mostrarPassword = false;
+    private bool   _recordarme      = false;
+    private bool   _loginExitoso    = false;
+    private string _errorGlobal     = string.Empty;
+
     private async Task IniciarSesion()
     {
         _cargando = true;
-        _error    = string.Empty;
-
-        var resultado = await UsuarioServicio.LoginAsync(_modelo);
+        _errorGlobal = string.Empty;
+        await Task.Delay(900);
+        // Mock: cualquier email/password válidos entran
         _cargando = false;
-
-        if (resultado is null)
-        {
-            _error = "Correo o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo.";
-            return;
-        }
-
+        _loginExitoso = true;
+        await Task.Delay(1200);
         Navegacion.NavigateTo("/");
     }
 }
-

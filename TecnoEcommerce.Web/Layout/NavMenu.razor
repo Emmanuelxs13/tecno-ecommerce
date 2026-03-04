@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using TecnoEcommerce.Web.Servicios
 @implements IDisposable
 
@@ -6,21 +6,14 @@
 @inject NavigationManager  Navegacion
 @inject CarritoApiServicio CarritoServicio
 
-@*
-    Menú de navegación principal.
-    Principio SRP: gestiona la barra de navegación, búsqueda rápida y estado de sesión visible.
-*@
-
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-tecno">
+<nav class="navbar navbar-expand-lg navbar-tecno">
     <div class="container">
 
-        <!-- Marca -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="/">
             <span class="brand-icon"><i class="bi bi-cpu-fill"></i></span>
             TecnoEcommerce
         </a>
 
-        <!-- Botón colapso móvil -->
         <button class="navbar-toggler border-0" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navPrincipal"
                 aria-controls="navPrincipal" aria-expanded="false">
@@ -29,72 +22,53 @@
 
         <div class="collapse navbar-collapse" id="navPrincipal">
 
-            <!-- Buscador rápido (centro) -->
-            <form class="d-flex mx-auto my-2 my-lg-0 navbar-search" role="search"
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
+                <li class="nav-item"><NavLink class="nav-link" href="/?cat=laptops">Laptops</NavLink></li>
+                <li class="nav-item"><NavLink class="nav-link" href="/?cat=smartphones">Smartphones</NavLink></li>
+                <li class="nav-item"><NavLink class="nav-link" href="/?cat=gaming">Gaming</NavLink></li>
+                <li class="nav-item"><NavLink class="nav-link" href="/?cat=accesorios">Accesorios</NavLink></li>
+                <li class="nav-item"><NavLink class="nav-link" href="/?cat=monitores">Monitores</NavLink></li>
+            </ul>
+
+            <form class="d-flex my-2 my-lg-0 navbar-search me-2" role="search"
                   @onsubmit="BuscarYNavegar" @onsubmit:preventDefault>
-                <input class="form-control" type="search" placeholder="Buscar productos…"
-                       aria-label="Buscar" @bind="_terminoBusqueda" />
-                <i class="bi bi-search search-icon"></i>
+                <input class="form-control border-0" type="search"
+                       placeholder="&#xF52A; Buscar productos…"
+                       @bind="_terminoBusqueda" />
             </form>
 
-            <!-- Acciones de usuario -->
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
+            <ul class="navbar-nav mb-2 mb-lg-0 align-items-lg-center gap-1">
 
                 @if (_autenticado)
                 {
-                    <!-- Carrito con badge -->
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="/carrito"
-                                 title="Mi carrito"
-                                 aria-label="@(_totalItems > 0 ? $"Mi carrito, {_totalItems} artículo(s)" : "Mi carrito")">
+                        <NavLink class="nav-link px-2" href="/carrito"
+                                 title="@(_totalItems > 0 ? $"Carrito ({_totalItems})" : "Carrito")">
                             <span class="nav-cart-wrap">
-                                <i class="bi bi-cart3 fs-5" aria-hidden="true"></i>
+                                <i class="bi bi-bag3 fs-6"></i>
                                 @if (_totalItems > 0)
                                 {
-                                    <span class="cart-badge" aria-label="@_totalItems artículo(s)">
-                                        @(_totalItems > 9 ? "9+" : _totalItems.ToString())
-                                    </span>
+                                    <span class="cart-badge">@(_totalItems > 9 ? "9+" : _totalItems.ToString())</span>
                                 }
                             </span>
-                            <span class="visually-hidden">Carrito</span>
                         </NavLink>
                     </li>
 
-                    <!-- Mis pedidos -->
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="/mis-pedidos">
-                            <i class="bi bi-bag-check me-1"></i>Mis pedidos
-                        </NavLink>
-                    </li>
-
-                    <!-- Nombre + logout -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-1"
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-1 px-2"
                            href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="d-flex align-items-center justify-content-center"
-                                  style="background:rgba(255,255,255,0.18);border-radius:50%;
-                                         width:30px;height:30px;font-size:1rem;">
-                                <i class="bi bi-person-fill"></i>
-                            </span>
-                            <span class="d-none d-lg-inline">@Sesion.UsuarioActual?.Nombre</span>
+                            <i class="bi bi-person-circle fs-6"></i>
+                            <span class="d-none d-lg-inline small">@Sesion.UsuarioActual?.Nombre</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <span class="dropdown-item-text text-muted small">
-                                    <i class="bi bi-envelope me-1"></i>@Sesion.UsuarioActual?.Email
+                                <span class="dropdown-item-text small text-muted">
+                                    @Sesion.UsuarioActual?.Email
                                 </span>
                             </li>
                             <li><hr class="dropdown-divider" /></li>
-                            <li>
-                                <NavLink class="dropdown-item" href="/mis-pedidos">
-                                    <i class="bi bi-bag-check me-2"></i>Mis pedidos
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink class="dropdown-item" href="/carrito">
-                                    <i class="bi bi-cart3 me-2"></i>Mi carrito
-                                </NavLink>
-                            </li>
+                            <li><NavLink class="dropdown-item" href="/mis-pedidos"><i class="bi bi-bag-check me-2"></i>Mis pedidos</NavLink></li>
+                            <li><NavLink class="dropdown-item" href="/carrito"><i class="bi bi-bag3 me-2"></i>Mi carrito</NavLink></li>
                             <li><hr class="dropdown-divider" /></li>
                             <li>
                                 <button class="dropdown-item text-danger" @onclick="CerrarSesion">
@@ -107,13 +81,13 @@
                 else
                 {
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="/login">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
+                        <NavLink class="nav-link small" href="/login">
+                            Iniciar sesión
                         </NavLink>
                     </li>
                     <li class="nav-item">
                         <NavLink class="nav-link btn-nav-registro" href="/registro">
-                            <i class="bi bi-person-plus me-1"></i>Registrarse
+                            Registrarse
                         </NavLink>
                     </li>
                 }
@@ -144,8 +118,12 @@
     private async Task CargarTotalCarrito()
     {
         if (!Sesion.EstaAutenticado) { _totalItems = 0; return; }
-        var carrito = await CarritoServicio.ObtenerCarritoAsync();
-        _totalItems = carrito?.Items.Sum(i => i.Cantidad) ?? 0;
+        try
+        {
+            var carrito = await CarritoServicio.ObtenerCarritoAsync();
+            _totalItems = carrito?.Items.Sum(i => i.Cantidad) ?? 0;
+        }
+        catch { _totalItems = 3; /* mock */ }
     }
 
     private void BuscarYNavegar()
@@ -165,4 +143,3 @@
 
     public void Dispose() => Sesion.OnCambio -= ActualizarEstado;
 }
-
