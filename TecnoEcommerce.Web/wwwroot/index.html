@@ -87,8 +87,8 @@
     <script>
       // Cierra el collapse del navbar en pantallas móviles (Bootstrap 5)
       window.cerrarNavbarMovil = function () {
-        const nav = document.getElementById('navPrincipal');
-        if (nav && nav.classList.contains('show')) {
+        const nav = document.getElementById("navPrincipal");
+        if (nav && nav.classList.contains("show")) {
           const bsCollapse = bootstrap.Collapse.getInstance(nav);
           if (bsCollapse) bsCollapse.hide();
         }
