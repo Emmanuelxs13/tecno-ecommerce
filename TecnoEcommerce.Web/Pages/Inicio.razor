@@ -2,135 +2,503 @@
 @using TecnoEcommerce.Web.Servicios
 @using TecnoEcommerce.Modelos.DTOs
 
-@inject ProductoApiServicio   ProductoServicio
-@inject CategoriaApiServicio  CategoriaServicio
-@inject CarritoApiServicio    CarritoServicio
-@inject SesionServicio        Sesion
+@inject NavigationManager Navegacion
 
-@*
-    Página principal: catálogo de productos con filtros por categoría y búsqueda.
-    Principio SRP: orquesta la visualización del catálogo y la adición al carrito.
-*@
+<PageTitle>TecnoEcommerce — Tecnología para tu vida</PageTitle>
 
-<PageTitle>Catálogo – TecnoEcommerce</PageTitle>
-
-<CargandoSpinner Visible="@_cargando" />
-
-<!-- Banner hero -->
-<div class="hero-banner mb-4 d-flex align-items-center justify-content-between">
-    <div>
-        <h2 class="hero-title"><i class="bi bi-cpu me-2"></i>Catálogo</h2>
-        <p class="hero-sub">Encuentra la tecnología que necesitas</p>
-    </div>
-    <i class="bi bi-laptop hero-icon d-none d-md-block"></i>
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<div class="full-bleed">
+    <section class="apple-hero py-5">
+        <div class="container" style="max-width:980px">
+            <div class="row align-items-center gy-4">
+                <div class="col-lg-7 text-lg-start text-center">
+                    <div class="apple-hero-eyebrow mb-2">
+                        <i class="bi bi-lightning-charge-fill me-1"></i> NUEVA TEMPORADA 2026
+                    </div>
+                    <h1 class="apple-hero-title mb-3">
+                        Tecnología que<br/>
+                        <span style="color:#89d4f5">transforma</span><br/>
+                        tu mundo.
+                    </h1>
+                    <p class="apple-hero-sub">
+                        Laptops, smartphones, gaming y accesorios premium.<br/>
+                        Precios competitivos y envío express a todo el país.
+                    </p>
+                    <div class="hero-cta-group">
+                        <a href="#catalogo" class="btn-apple btn-apple-white">
+                            <i class="bi bi-grid-fill"></i> Ver catálogo
+                        </a>
+                        <a href="/?cat=laptops" class="btn-apple btn-apple-ghost" style="color:#fff;border-color:rgba(255,255,255,.4)">
+                            <i class="bi bi-laptop"></i> Laptops
+                        </a>
+                    </div>
+                    <div class="hero-stats mt-4">
+                        <div class="hero-stat">
+                            <div class="hero-stat-num">10K+</div>
+                            <div class="hero-stat-label">Clientes felices</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-num">500+</div>
+                            <div class="hero-stat-label">Productos</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-num">24h</div>
+                            <div class="hero-stat-label">Envío express</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 d-flex justify-content-center">
+                    <div style="position:relative;text-align:center">
+                        <div style="font-size:11rem;opacity:.15;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><i class="bi bi-laptop"></i></div>
+                        <div class="hero-floating-card mb-3 position-relative">
+                            <div class="fc-icon"><i class="bi bi-shield-check-fill"></i></div>
+                            <div>
+                                <div class="fc-title">Garantía oficial</div>
+                                <div class="fc-sub">1–3 años en todos los productos</div>
+                            </div>
+                        </div>
+                        <div class="hero-floating-card position-relative" style="animation-delay:.8s">
+                            <div class="fc-icon"><i class="bi bi-truck"></i></div>
+                            <div>
+                                <div class="fc-title">Envío gratis</div>
+                                <div class="fc-sub">En compras mayores a $200k</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 
-<!-- Filtros -->
-<div class="filtros-container row g-3 align-items-center mb-4">
-    <div class="col-12 col-md-6">
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input type="text" class="form-control" placeholder="Buscar productos..."
-                   @bind="_busqueda" @bind:after="FiltrarProductos" />
+<!-- ═══════════════════ TRUST STRIP ═══════════════════ -->
+<div class="full-bleed">
+    <div class="trust-strip">
+        <div class="trust-item">
+            <div class="trust-item-icon"><i class="bi bi-truck"></i></div>
+            <div class="trust-item-text"><strong>Envío gratis</strong><span>En pedidos mayores a $200k</span></div>
+        </div>
+        <div class="trust-item">
+            <div class="trust-item-icon"><i class="bi bi-shield-check"></i></div>
+            <div class="trust-item-text"><strong>Garantía oficial</strong><span>1 a 3 años por producto</span></div>
+        </div>
+        <div class="trust-item">
+            <div class="trust-item-icon"><i class="bi bi-arrow-return-left"></i></div>
+            <div class="trust-item-text"><strong>Devolución fácil</strong><span>30 días sin preguntas</span></div>
+        </div>
+        <div class="trust-item">
+            <div class="trust-item-icon"><i class="bi bi-headset"></i></div>
+            <div class="trust-item-text"><strong>Soporte 24/7</strong><span>Chat, email y teléfono</span></div>
         </div>
     </div>
-    <div class="col-12 col-md-4">
-        <select class="form-select" @bind="_categoriaSeleccionada" @bind:after="FiltrarProductos">
-            <option value="0">Todas las categorías</option>
-            @foreach (var cat in _categorias)
-            {
-                <option value="@cat.Id">@cat.Nombre</option>
-            }
-        </select>
-    </div>
-    <div class="col-12 col-md-2">
-        <button class="btn btn-outline-secondary w-100" @onclick="LimpiarFiltros">
-            <i class="bi bi-x-circle me-1"></i>Limpiar
-        </button>
-    </div>
 </div>
 
-<MensajeAlerta Mensaje="@_mensaje" Tipo="@_tipoMensaje" OnCerrar="() => _mensaje = string.Empty" />
-
-<!-- Grilla de productos -->
-@if (!_cargando && _productosFiltrados.Count == 0)
-{
-    <div class="empty-state">
-        <i class="bi bi-search"></i>
-        <p>No se encontraron productos con esos filtros.</p>
-        <button class="btn btn-outline-primary" @onclick="LimpiarFiltros">
-            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
-        </button>
+<!-- ═══════════════════ PRODUCTOS DESTACADOS (tiles tipo Apple.com) ═══════════════════ -->
+<section class="py-4">
+    <div class="section-header mt-4 mb-3">
+        <h2 class="section-title">Descubre lo más nuevo</h2>
+        <a href="#catalogo" class="btn-ver-todo">Ver todo <i class="bi bi-arrow-right"></i></a>
     </div>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
-        @foreach (var producto in _productosFiltrados)
+
+    <div class="apple-product-grid">
+        <div class="apple-product-tile dark-tile" @onclick='() => VerDetalle(1)'>
+            <div class="apple-tile-eyebrow">Laptop Pro</div>
+            <div class="apple-tile-title">MacBook Air M3</div>
+            <div class="apple-tile-sub">El chip M3. Velocidad increíble.</div>
+            <div class="apple-tile-device"><i class="bi bi-laptop"></i></div>
+            <div class="apple-tile-price">Desde $1.299 USD</div>
+            <div class="tile-cta-group mt-2">
+                <span class="tile-link"><i class="bi bi-plus-circle"></i> Más información</span>
+                <span class="tile-link ms-2"><i class="bi bi-cart3"></i> Comprar</span>
+            </div>
+        </div>
+
+        <div class="apple-product-tile blue-tile" @onclick='() => VerDetalle(2)'>
+            <div class="apple-tile-eyebrow">Smartphone</div>
+            <div class="apple-tile-title">iPhone 15 Pro</div>
+            <div class="apple-tile-sub">Titanio. Tan resistente como hermoso.</div>
+            <div class="apple-tile-device"><i class="bi bi-phone"></i></div>
+            <div class="apple-tile-price">Desde $1.199 USD</div>
+            <div class="tile-cta-group mt-2">
+                <span class="tile-link"><i class="bi bi-plus-circle"></i> Más información</span>
+                <span class="tile-link ms-2"><i class="bi bi-cart3"></i> Comprar</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="apple-product-grid mt-3" style="grid-template-columns:repeat(3,1fr)">
+        <div class="apple-product-tile" @onclick='() => VerDetalle(5)'>
+            <div class="apple-tile-eyebrow">Monitor</div>
+            <div class="apple-tile-title">LG UltraWide<br/>34"</div>
+            <div class="apple-tile-device" style="font-size:5rem"><i class="bi bi-display"></i></div>
+            <div class="apple-tile-price">$449 USD</div>
+            <div class="tile-cta-group mt-2">
+                <span class="tile-link"><i class="bi bi-plus-circle"></i> Ver</span>
+            </div>
+        </div>
+        <div class="apple-product-tile gradient-tile" @onclick='() => VerDetalle(7)'>
+            <div class="apple-tile-eyebrow">Gaming</div>
+            <div class="apple-tile-title">RTX 4060<br/>8GB</div>
+            <div class="apple-tile-device" style="font-size:5rem"><i class="bi bi-gpu-card"></i></div>
+            <div class="apple-tile-price">$399 USD</div>
+            <div class="tile-cta-group mt-2">
+                <span class="tile-link"><i class="bi bi-plus-circle"></i> Ver</span>
+            </div>
+        </div>
+        <div class="apple-product-tile" @onclick='() => VerDetalle(6)'>
+            <div class="apple-tile-eyebrow">Teclado</div>
+            <div class="apple-tile-title">Keychron K2<br/>TKL</div>
+            <div class="apple-tile-device" style="font-size:5rem"><i class="bi bi-keyboard"></i></div>
+            <div class="apple-tile-price">$89 USD</div>
+            <div class="tile-cta-group mt-2">
+                <span class="tile-link"><i class="bi bi-plus-circle"></i> Ver</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ CATEGORÍAS ═══════════════════ -->
+<section class="py-3">
+    <div class="section-header">
+        <h2 class="section-title">Explorar por categoría</h2>
+    </div>
+    <div class="row g-3">
+        @foreach (var cat in _categorias)
         {
-            <div class="col">
-                <ProductoCard Producto="producto" OnAgregar="AgregarAlCarrito" />
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <div class="categoria-card @(_categoriaFiltro == cat.Slug ? "activa" : "")"
+                     @onclick="() => FiltrarCategoria(cat.Slug)">
+                    <div class="cat-icon-wrap @cat.IconClass">
+                        <i class="@cat.Icono"></i>
+                    </div>
+                    <div style="font-size:.83rem;font-weight:600">@cat.Nombre</div>
+                    <div style="font-size:.7rem;color:var(--apple-gray)">@cat.Cantidad productos</div>
+                </div>
             </div>
         }
+    </div>
+</section>
+
+<!-- ═══════════════════ PROMO BANNER ═══════════════════ -->
+<div class="promo-banner">
+    <div>
+        <div style="font-size:.8rem;color:#89d4f5;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.4rem">
+            <i class="bi bi-lightning-charge-fill me-1"></i> Oferta especial
+        </div>
+        <h3 style="font-size:clamp(1.4rem,3vw,2rem);font-weight:700;letter-spacing:-.025em;margin:0 0 .4rem">
+            Samsung Galaxy S24 — $999 USD
+        </h3>
+        <p style="color:rgba(255,255,255,.72);margin:0 0 1.25rem;font-size:.9rem">
+            Envío gratis + auricularres Galaxy Buds de regalo por tiempo limitado.
+        </p>
+        <button class="btn-apple btn-apple-primary" @onclick='() => VerDetalle(3)'>
+            <i class="bi bi-arrow-right-circle-fill"></i> Aprovechar oferta
+        </button>
+    </div>
+    <div style="font-size:8rem;opacity:.18"><i class="bi bi-phone-fill"></i></div>
+</div>
+
+<!-- ═══════════════════ CATALOGO ═══════════════════ -->
+<section id="catalogo" class="py-3">
+    <div class="section-header">
+        <h2 class="section-title">Catálogo <span class="title-accent">completo</span></h2>
+        <span class="result-count">@_productosFiltrados.Count productos</span>
+    </div>
+
+    <!-- Filtros -->
+    <div class="catalog-filters mb-4">
+        <div class="input-group" style="max-width:100%">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input class="form-control" type="search" placeholder="Buscar en catálogo…"
+                   @bind="_busqueda" @bind:event="oninput" />
+        </div>
+        <select class="form-select" @bind="_ordenFiltro">
+            <option value="">Ordenar por</option>
+            <option value="precio_asc">Precio: menor a mayor</option>
+            <option value="precio_desc">Precio: mayor a menor</option>
+            <option value="nombre">Nombre A-Z</option>
+        </select>
+        <select class="form-select" @bind="_categoriaFiltro">
+            <option value="">Todas las categorías</option>
+            @foreach (var cat in _categorias)
+            {
+                <option value="@cat.Slug">@cat.Nombre</option>
+            }
+        </select>
+        <button class="btn-apple btn-apple-ghost" @onclick="LimpiarFiltros" title="Limpiar filtros">
+            <i class="bi bi-x-circle"></i>
+        </button>
+    </div>
+
+    @if (_productosFiltrados.Count == 0)
+    {
+        <div class="empty-state py-5">
+            <i class="bi bi-search"></i>
+            <p class="mt-2">No se encontraron productos. <br/> <a @onclick="LimpiarFiltros" class="text-primary" style="cursor:pointer">Limpiar filtros</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var p in _productosFiltrados)
+            {
+                <div class="col-sm-6 col-md-4 col-lg-3 fade-in-up">
+                    <div class="producto-card h-100 cursor-pointer" @onclick="() => VerDetalle(p.Id)">
+                        <div class="card-img-wrapper">
+                            <img class="card-img-top" src="@p.ImagenUrl" alt="@p.Nombre"
+                                 onerror="this.src='https://placehold.co/400x300/f5f5f7/0071e3?text=TecnoE'" />
+                            @if (p.EsNuevo)
+                            {
+                                <span class="producto-badge badge-nuevo">Nuevo</span>
+                            }
+                            @if (p.DescuentoPct > 0)
+                            {
+                                <span class="producto-badge badge-oferta" style="top:@(p.EsNuevo?"34px":"10px")">-@p.DescuentoPct%</span>
+                            }
+                            <button class="btn-wishlist @(_wishlist.Contains(p.Id) ? "active" : "")"
+                                    @onclick:stopPropagation="true"
+                                    @onclick="() => ToggleWishlist(p.Id)"
+                                    title="Lista de deseos">
+                                <i class="bi @(_wishlist.Contains(p.Id) ? "bi-heart-fill" : "bi-heart")"></i>
+                            </button>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="producto-categoria-badge">@p.Categoria</div>
+                            <h3 class="mb-1">@p.Nombre</h3>
+                            <p class="text-muted mb-2" style="font-size:.82rem;flex:1">@p.Descripcion</p>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="rating-stars">★★★★@(p.Rating >= 4.5 ? "★" : "☆")</span>
+                                <span class="rating-score">(@p.Resenas)</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="producto-precio">$@p.Precio.ToString("N0")</span>
+                                @if (p.PrecioOriginal > 0)
+                                {
+                                    <span style="font-size:.78rem;color:var(--apple-gray);text-decoration:line-through">$@p.PrecioOriginal.ToString("N0")</span>
+                                }
+                            </div>
+                            <button class="btn-apple btn-apple-primary mt-3"
+                                    @onclick:stopPropagation="true"
+                                    @onclick="() => AgregarAlCarrito(p)">
+                                <i class="bi bi-cart3"></i> Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
+
+<!-- ═══════════════════ RESEÑAS ═══════════════════ -->
+<section class="resenas-section py-4">
+    <div class="section-header">
+        <h2 class="section-title">Lo que dicen nuestros <span class="title-accent">clientes</span></h2>
+    </div>
+
+    <div class="resenas-summary">
+        <div>
+            <div class="resenas-score-big">4.8</div>
+            <div class="rating-stars" style="font-size:1rem">★★★★★</div>
+            <div style="font-size:.75rem;color:var(--apple-gray);margin-top:.2rem">10.421 reseñas</div>
+        </div>
+        <div>
+            @foreach (var b in new[] { (5,82),(4,11),(3,4),(2,2),(1,1) })
+            {
+                <div class="resenas-bar-row">
+                    <span class="bar-label">@b.Item1</span>
+                    <div class="progress"><div class="progress-bar" style="width:@b.Item2%"></div></div>
+                    <span>@b.Item2%</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row g-3">
+        @foreach (var r in _resenas)
+        {
+            <div class="col-md-4">
+                <div class="resena-card">
+                    <div class="resena-header">
+                        <div class="resena-avatar">@r.Inicial</div>
+                        <div>
+                            <p class="resena-nombre">@r.Nombre</p>
+                            <p class="resena-fecha">@r.Fecha</p>
+                        </div>
+                        <span class="ms-auto rating-stars">★★★★★</span>
+                    </div>
+                    <p class="resena-texto">"@r.Texto"</p>
+                    <div style="margin-top:.75rem;font-size:.78rem;color:var(--apple-gray)">
+                        <i class="bi bi-bag-check-fill me-1" style="color:var(--apple-blue)"></i>
+                        Compra verificada · @r.Producto
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- ═══════════════════ RECOMENDADOS ═══════════════════ -->
+<section class="recomendados-section py-3">
+    <div class="section-header">
+        <h2 class="section-title">También te puede interesar</h2>
+    </div>
+    <div class="productos-scroll">
+        @foreach (var p in _productos.Take(6))
+        {
+            <div class="producto-scroll-item">
+                <div class="producto-card cursor-pointer" @onclick="() => VerDetalle(p.Id)">
+                    <div class="card-img-wrapper">
+                        <img class="card-img-top" src="@p.ImagenUrl" alt="@p.Nombre"
+                             onerror="this.src='https://placehold.co/400x300/f5f5f7/0071e3?text=TecnoE'" />
+                    </div>
+                    <div class="card-body">
+                        <div class="producto-categoria-badge">@p.Categoria</div>
+                        <h3 class="mb-1" style="font-size:.95rem">@p.Nombre</h3>
+                        <span class="producto-precio">$@p.Precio.ToString("N0")</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Toast -->
+@if (_mostrarToast)
+{
+    <div class="toast-container-custom">
+        <div class="toast-item toast-success">
+            <span class="toast-icon"><i class="bi bi-check-circle-fill" style="color:#34c759"></i></span>
+            <span class="toast-text">@_mensajeToast</span>
+        </div>
     </div>
 }
 
 @code {
-    private List<ProductoDto>  _productos         = new();
-    private List<ProductoDto>  _productosFiltrados = new();
-    private List<CategoriaDto> _categorias        = new();
-    private string             _busqueda          = string.Empty;
-    private int                _categoriaSeleccionada;
-    private bool               _cargando          = true;
-    private string             _mensaje           = string.Empty;
-    private string             _tipoMensaje       = "success";
+    // ─── Mock data ───────────────────────────────────────────────
+    private record MockProducto(int Id, string Nombre, string Categoria, string CategoriaSlug,
+        decimal Precio, decimal PrecioOriginal, string Descripcion, string ImagenUrl,
+        bool EsNuevo, int DescuentoPct, double Rating, int Resenas);
 
-    /// <inheritdoc/>
-    protected override async Task OnInitializedAsync()
+    private record MockCategoria(string Nombre, string Slug, string Icono, string IconClass, int Cantidad);
+
+    private record MockResena(string Nombre, string Inicial, string Fecha, string Texto, string Producto);
+
+    private readonly List<MockProducto> _productos = new()
     {
-        var taskProductos  = ProductoServicio.ObtenerTodosAsync();
-        var taskCategorias = CategoriaServicio.ObtenerTodasAsync();
-        await Task.WhenAll(taskProductos, taskCategorias);
+        new(1, "MacBook Air M3", "Laptops", "laptops", 1299m, 1399m,
+            "Chip M3, 8GB RAM, SSD 256GB, pantalla Liquid Retina 13.6\"",
+            "https://placehold.co/400x300/1d1d1f/ffffff?text=MacBook+Air", true, 7, 4.9, 3241),
+        new(2, "iPhone 15 Pro", "Smartphones", "smartphones", 1199m, 0,
+            "Chip A17 Pro, cámara 48MP, Dynamic Island, carcasa de titanio",
+            "https://placehold.co/400x300/3d3d3d/ffffff?text=iPhone+15+Pro", true, 0, 4.8, 5102),
+        new(3, "Samsung Galaxy S24", "Smartphones", "smartphones", 999m, 1099m,
+            "Snapdragon 8 Gen 3, 256GB, Galaxy AI, cámara 50MP",
+            "https://placehold.co/400x300/0a1628/ffffff?text=Galaxy+S24", false, 9, 4.7, 2874),
+        new(4, "ASUS VivoBook 15", "Laptops", "laptops", 899m, 0,
+            "Intel Core i7 13th Gen, 16GB RAM, SSD 512GB, FHD IPS",
+            "https://placehold.co/400x300/0071e3/ffffff?text=ASUS+VivoBook", false, 0, 4.5, 987),
+        new(5, "LG UltraWide 34\"", "Monitores", "monitores", 449m, 499m,
+            "Panel IPS, 100Hz, WQHD 3440×1440, HDR10, AMD FreeSync",
+            "https://placehold.co/400x300/059669/ffffff?text=LG+UltraWide", false, 10, 4.6, 654),
+        new(6, "Keychron K2 V2", "Accesorios", "accesorios", 89m, 0,
+            "Teclado mecánico TKL, switches Gateron Brown, RGB, inalámbrico",
+            "https://placehold.co/400x300/d97706/ffffff?text=Keychron+K2", true, 0, 4.8, 1432),
+        new(7, "RTX 4060 8GB", "Gaming", "gaming", 399m, 449m,
+            "GPU Nvidia Ada Lovelace, DLSS 3, 4K gaming, 8GB GDDR6X",
+            "https://placehold.co/400x300/7c3aed/ffffff?text=RTX+4060", false, 11, 4.7, 2103),
+        new(8, "HyperX Cloud III", "Gaming", "gaming", 149m, 0,
+            "Auriculares gaming, DTS Headphone:X, micrófono retráctil, USB-C",
+            "https://placehold.co/400x300/dc2626/ffffff?text=HyperX+Cloud+III", true, 0, 4.6, 876),
+    };
 
-        _productos  = await taskProductos;
-        _categorias = await taskCategorias;
-        _productosFiltrados = new List<ProductoDto>(_productos);
-        _cargando = false;
-    }
-
-    /// <summary>Filtra la lista según búsqueda y categoría seleccionada.</summary>
-    private void FiltrarProductos()
+    private readonly List<MockCategoria> _categorias = new()
     {
-        _productosFiltrados = _productos
+        new("Laptops",      "laptops",     "bi bi-laptop",       "cat-icon-blue",   48),
+        new("Smartphones",  "smartphones", "bi bi-phone",        "cat-icon-cyan",   62),
+        new("Gaming",       "gaming",      "bi bi-controller",   "cat-icon-purple", 35),
+        new("Monitores",    "monitores",   "bi bi-display",      "cat-icon-green",  24),
+        new("Accesorios",   "accesorios",  "bi bi-keyboard",     "cat-icon-yellow", 80),
+        new("Componentes",  "componentes", "bi bi-cpu",          "cat-icon-red",    29),
+    };
+
+    private readonly List<MockResena> _resenas = new()
+    {
+        new("Laura M.", "L", "Hace 2 días",
+            "Pedí el MacBook Air y llegó en menos de 24 horas. El empaque perfecto y el producto tal como se describe. Definitivamente volveré.",
+            "MacBook Air M3"),
+        new("Andrés P.", "A", "Hace 1 semana",
+            "Excelente atención al cliente. Tuve una duda con el pago y en minutos me la resolvieron. El Galaxy S24 es una maravilla.",
+            "Samsung Galaxy S24"),
+        new("Valentina R.", "V", "Hace 3 días",
+            "La RTX 4060 llegó sellada, con garantía y a un precio que no encontré en ningún otro lado. Los mejores precios del mercado.",
+            "RTX 4060 8GB"),
+    };
+
+    // ─── State ───────────────────────────────────────────────────
+    private string _busqueda      = string.Empty;
+    private string _categoriaFiltro = string.Empty;
+    private string _ordenFiltro   = string.Empty;
+    private bool   _mostrarToast  = false;
+    private string _mensajeToast  = string.Empty;
+    private readonly HashSet<int> _wishlist = new();
+
+    private List<MockProducto> _productosFiltrados =>
+        _productos
             .Where(p =>
-                (string.IsNullOrEmpty(_busqueda) ||
-                 p.Nombre.Contains(_busqueda, StringComparison.OrdinalIgnoreCase)) &&
-                (_categoriaSeleccionada == 0 || p.CategoriaId == _categoriaSeleccionada))
-            .ToList();
+                (string.IsNullOrEmpty(_busqueda)       || p.Nombre.Contains(_busqueda, StringComparison.OrdinalIgnoreCase) || p.Descripcion.Contains(_busqueda, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrEmpty(_categoriaFiltro) || p.CategoriaSlug == _categoriaFiltro))
+            .OrderBy(p => _ordenFiltro switch {
+                "precio_asc"  => (object)(int)p.Precio,
+                "precio_desc" => (object)(int)(-p.Precio),
+                "nombre"      => (object)p.Nombre,
+                _             => (object)p.Id
+            }).ToList();
+
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? QueryParam { get; set; }
+
+    [SupplyParameterFromQuery(Name = "cat")]
+    public string? CatParam { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(QueryParam)) _busqueda = QueryParam;
+        if (!string.IsNullOrEmpty(CatParam))   _categoriaFiltro = CatParam;
     }
 
-    /// <summary>Limpia todos los filtros activos.</summary>
+    private void VerDetalle(int id) => Navegacion.NavigateTo($"/producto/{id}");
+
+    private void FiltrarCategoria(string slug)
+    {
+        _categoriaFiltro = _categoriaFiltro == slug ? string.Empty : slug;
+    }
+
     private void LimpiarFiltros()
     {
         _busqueda = string.Empty;
-        _categoriaSeleccionada = 0;
-        _productosFiltrados = new List<ProductoDto>(_productos);
+        _categoriaFiltro = string.Empty;
+        _ordenFiltro = string.Empty;
     }
 
-    /// <summary>Agrega el producto al carrito del usuario autenticado.</summary>
-    private async Task AgregarAlCarrito(int productoId)
+    private void ToggleWishlist(int id)
     {
-        if (!Sesion.EstaAutenticado)
-        {
-            _tipoMensaje = "warning";
-            _mensaje = "Debes iniciar sesión para agregar productos al carrito.";
-            return;
-        }
+        if (_wishlist.Contains(id)) _wishlist.Remove(id);
+        else _wishlist.Add(id);
+    }
 
-        var dto      = new AgregarItemCarritoDto { ProductoId = productoId, Cantidad = 1 };
-        var carrito  = await CarritoServicio.AgregarItemAsync(dto);
+    private async Task AgregarAlCarrito(MockProducto p)
+    {
+        await MostrarToast($"✓ {p.Nombre} añadido al carrito");
+    }
 
-        _tipoMensaje = carrito is not null ? "success" : "danger";
-        _mensaje     = carrito is not null ? "Producto agregado al carrito." : "No se pudo agregar el producto.";
+    private async Task MostrarToast(string msg)
+    {
+        _mensajeToast = msg;
+        _mostrarToast = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        _mostrarToast = false;
+        StateHasChanged();
     }
 }

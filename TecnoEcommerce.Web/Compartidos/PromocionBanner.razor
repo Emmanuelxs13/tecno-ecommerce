@@ -1,0 +1,95 @@
+@*
+    Banner promocional reutilizable para destacar ofertas, novedades o campañas.
+    Principio OCP: totalmente parametrizable sin modificar la implementación.
+*@
+
+<div class="promo-banner @VarianteClase" style="@EstiloExtra">
+    <i class="bi @IconoFondo promo-icon-bg d-none d-lg-block"></i>
+    <div class="row align-items-center g-4 position-relative" style="z-index:1;">
+        <div class="col-12 col-md-7">
+            @if (!string.IsNullOrEmpty(Etiqueta))
+            {
+                <span class="promo-badge">
+                    <i class="bi @IconoEtiqueta me-1"></i>@Etiqueta
+                </span>
+            }
+            <h3 class="promo-title">@Titulo</h3>
+            <p class="promo-subtitle">@Subtitulo</p>
+
+            @if (!string.IsNullOrEmpty(TextoBoton))
+            {
+                <a href="@UrlBoton" class="btn-hero-primary" style="width:fit-content;">
+                    <i class="bi @IconoBoton"></i>@TextoBoton
+                </a>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(PrecioDestacado))
+        {
+            <div class="col-12 col-md-5 text-md-end">
+                <div style="color:rgba(255,255,255,0.65);font-size:.85rem;margin-bottom:.25rem;">@LabelPrecio</div>
+                <div>
+                    <span class="promo-price-highlight">@PrecioDestacado</span>
+                    @if (!string.IsNullOrEmpty(PrecioAnterior))
+                    {
+                        <span class="promo-price-old">@PrecioAnterior</span>
+                    }
+                </div>
+                @if (!string.IsNullOrEmpty(DescuentoPorcentaje))
+                {
+                    <div style="display:inline-block;background:rgba(255,255,255,0.15);color:#fff;
+                                border-radius:20px;padding:.3rem .9rem;font-weight:700;
+                                font-size:.9rem;margin-top:.5rem;border:1px solid rgba(255,255,255,.3);">
+                        <i class="bi bi-lightning-fill me-1"></i>@DescuentoPorcentaje% OFF
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>Título principal del banner.</summary>
+    [Parameter, EditorRequired] public string Titulo { get; set; } = default!;
+
+    /// <summary>Subtítulo o descripción.</summary>
+    [Parameter] public string Subtitulo { get; set; } = string.Empty;
+
+    /// <summary>Etiqueta/chip superior (ej. "Oferta del día").</summary>
+    [Parameter] public string Etiqueta { get; set; } = string.Empty;
+
+    /// <summary>Icono Bootstrap para la etiqueta.</summary>
+    [Parameter] public string IconoEtiqueta { get; set; } = "bi-star-fill";
+
+    /// <summary>Precio principal destacado.</summary>
+    [Parameter] public string PrecioDestacado { get; set; } = string.Empty;
+
+    /// <summary>Precio antiguo (para mostrar el descuento).</summary>
+    [Parameter] public string PrecioAnterior { get; set; } = string.Empty;
+
+    /// <summary>Label encima del precio.</summary>
+    [Parameter] public string LabelPrecio { get; set; } = "Desde";
+
+    /// <summary>Porcentaje de descuento a mostrar.</summary>
+    [Parameter] public string DescuentoPorcentaje { get; set; } = string.Empty;
+
+    /// <summary>Texto del botón CTA.</summary>
+    [Parameter] public string TextoBoton { get; set; } = string.Empty;
+
+    /// <summary>URL del botón CTA.</summary>
+    [Parameter] public string UrlBoton { get; set; } = "/";
+
+    /// <summary>Icono del botón.</summary>
+    [Parameter] public string IconoBoton { get; set; } = "bi-arrow-right";
+
+    /// <summary>Icono de fondo decorativo grande.</summary>
+    [Parameter] public string IconoFondo { get; set; } = "bi-bag-heart-fill";
+
+    /// <summary>Variante de color: "offer" (azul) o "new" (verde).</summary>
+    [Parameter] public string Variante { get; set; } = "offer";
+
+    /// <summary>Estilos inline adicionales.</summary>
+    [Parameter] public string EstiloExtra { get; set; } = string.Empty;
+
+    private string VarianteClase => Variante == "new" ? "promo-banner-new" : "promo-banner-offer";
+}

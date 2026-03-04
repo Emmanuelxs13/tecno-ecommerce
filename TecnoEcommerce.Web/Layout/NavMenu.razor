@@ -1,121 +1,243 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using TecnoEcommerce.Web.Servicios
 @implements IDisposable
 
-@inject SesionServicio Sesion
-@inject NavigationManager Navegacion
+@inject SesionServicio     Sesion
+@inject NavigationManager  Navegacion
+@inject CarritoApiServicio CarritoServicio
+@inject IJSRuntime         JS
 
-@*
-    Menú de navegación principal.
-    Principio SRP: solo gestiona la barra de navegación y el estado de sesión visible.
-    Se suscribe a OnCambio para reaccionar cuando el usuario inicia o cierra sesión.
-*@
+<nav class="navbar navbar-expand-lg navbar-tecno">
+    <div class="nav-inner">
 
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-tecno">
-    <div class="container">
-        <!-- Marca -->
-        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <a class="navbar-brand" href="/">
             <span class="brand-icon"><i class="bi bi-cpu-fill"></i></span>
             TecnoEcommerce
         </a>
 
-        <!-- Botón colapso móvil -->
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navPrincipal">
+        <button class="navbar-toggler border-0 ms-auto" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navPrincipal"
+                aria-controls="navPrincipal" aria-expanded="false"
+                aria-label="Abrir menu">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navPrincipal">
-            <!-- Enlace catálogo -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
-                        <i class="bi bi-grid-fill me-1"></i>Catálogo
-                    </NavLink>
+
+            <ul class="nav-cats">
+                <li>
+                    <a class="nav-link @CategoriaActiva(string.Empty)" href="/" @onclick="CerrarMenuMovil">Inicio</a>
+                </li>
+                <li>
+                    <a class="nav-link @CategoriaActiva("laptops")" href="/?cat=laptops" @onclick="CerrarMenuMovil">Laptops</a>
+                </li>
+                <li>
+                    <a class="nav-link @CategoriaActiva("smartphones")" href="/?cat=smartphones" @onclick="CerrarMenuMovil">Smartphones</a>
+                </li>
+                <li>
+                    <a class="nav-link @CategoriaActiva("gaming")" href="/?cat=gaming" @onclick="CerrarMenuMovil">Gaming</a>
+                </li>
+                <li>
+                    <a class="nav-link @CategoriaActiva("accesorios")" href="/?cat=accesorios" @onclick="CerrarMenuMovil">Accesorios</a>
+                </li>
+                <li>
+                    <a class="nav-link @CategoriaActiva("monitores")" href="/?cat=monitores" @onclick="CerrarMenuMovil">Monitores</a>
                 </li>
             </ul>
 
-            <!-- Acciones de usuario -->
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
+            <div class="nav-right">
 
-                @if (_autenticado)
-                {
-                    <!-- Carrito -->
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="/carrito">
-                            <i class="bi bi-cart3 fs-5"></i>
-                        </NavLink>
-                    </li>
+                <form class="navbar-search d-none d-lg-flex" role="search"
+                      @onsubmit="BuscarYNavegar" @onsubmit:preventDefault>
+                    <input class="form-control" type="search"
+                           placeholder="Buscar productos"
+                           @bind="_terminoBusqueda"
+                           @bind:event="oninput"
+                           @onkeydown="TeclaSearch" />
+                    @if (!string.IsNullOrWhiteSpace(_terminoBusqueda))
+                    {
+                        <button type="button" class="nav-search-clear btn btn-link px-1"
+                                @onclick="LimpiarBusqueda" title="Limpiar">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    }
+                    <button class="nav-search-btn btn btn-link px-2" type="submit" title="Buscar">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
 
-                    <!-- Mis pedidos -->
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="/mis-pedidos">
-                            <i class="bi bi-bag-check me-1"></i>Mis pedidos
-                        </NavLink>
-                    </li>
+                <ul class="nav-actions">
+                    @if (_autenticado)
+                    {
+                        <li>
+                            <a class="nav-link nav-icon-link @(_enCarrito ? "active" : "")"
+                               href="/carrito"
+                               title="@(_totalItems > 0 ? "Carrito — " + _totalItems + " items" : "Carrito vacio")"
+                               @onclick="CerrarMenuMovil">
+                                <span class="nav-cart-wrap">
+                                    <i class="bi bi-bag3"></i>
+                                    @if (_totalItems > 0)
+                                    {
+                                        <span class="cart-badge @(_animarBadge ? "cart-badge-bump" : "")">
+                                            @(_totalItems > 9 ? "9+" : _totalItems.ToString())
+                                        </span>
+                                    }
+                                </span>
+                            </a>
+                        </li>
 
-                    <!-- Nombre + logout -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-1"
-                           href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i>
-                            <span>@Sesion.UsuarioActual?.Nombre</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <button class="dropdown-item text-danger" @onclick="CerrarSesion">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
-                                </button>
-                            </li>
-                        </ul>
-                    </li>
-                }
-                else
-                {
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="/login">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
-                        </NavLink>
-                    </li>
-                    <li class="nav-item">
-                        <NavLink class="nav-link btn-nav-registro" href="/registro">
-                            <i class="bi bi-person-plus me-1"></i>Registrarse
-                        </NavLink>
-                    </li>
-                }
-            </ul>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link nav-icon-link dropdown-toggle"
+                               href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i>
+                                <span class="nav-username d-none d-lg-inline">@_nombreCorto</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li>
+                                    <div class="dropdown-item-text py-2">
+                                        <div class="fw-semibold small">@Sesion.UsuarioActual?.Nombre</div>
+                                        <div class="text-muted" style="font-size:.75rem">@Sesion.UsuarioActual?.Email</div>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider my-1" /></li>
+                                <li>
+                                    <a class="dropdown-item" href="/mis-pedidos" @onclick="CerrarMenuMovil">
+                                        <i class="bi bi-bag-check me-2 text-primary"></i>Mis pedidos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/carrito" @onclick="CerrarMenuMovil">
+                                        <i class="bi bi-bag3 me-2 text-primary"></i>Mi carrito
+                                        @if (_totalItems > 0)
+                                        {
+                                            <span class="badge bg-primary rounded-pill ms-1">@_totalItems</span>
+                                        }
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-1" /></li>
+                                <li>
+                                    <button class="dropdown-item text-danger" @onclick="CerrarSesion">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesion
+                                    </button>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <a class="nav-link nav-text-link" href="/login" @onclick="CerrarMenuMovil">
+                                Iniciar sesion
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link btn-nav-registro" href="/registro" @onclick="CerrarMenuMovil">
+                                Registrarse
+                            </a>
+                        </li>
+                    }
+                </ul>
+
+            </div>
         </div>
     </div>
 </nav>
 
 @code {
-    /// <summary>Refleja si hay un usuario autenticado en la sesión actual.</summary>
-    private bool _autenticado;
+    private bool   _autenticado;
+    private string _terminoBusqueda   = string.Empty;
+    private int    _totalItems;
+    private bool   _animarBadge;
 
-    /// <inheritdoc/>
-    protected override void OnInitialized()
+    private bool   _enCarrito    => Navegacion.Uri.Contains("/carrito");
+    private string _nombreCorto  => Sesion.UsuarioActual?.Nombre?.Split(' ')[0] ?? "";
+
+    protected override async Task OnInitializedAsync()
     {
         _autenticado = Sesion.EstaAutenticado;
-        Sesion.OnCambio += ActualizarEstado;
+        Sesion.OnCambio                 += OnSesionCambio;
+        CarritoServicio.OnCambioCarrito += OnCarritoCambio;
+        Navegacion.LocationChanged      += OnLocationChanged;
+        await CargarTotalCarrito();
     }
 
-    /// <summary>Actualiza la UI cuando cambia el estado de sesión.</summary>
-    private void ActualizarEstado()
+    private async void OnSesionCambio()
     {
         _autenticado = Sesion.EstaAutenticado;
-        InvokeAsync(StateHasChanged);
+        await CargarTotalCarrito();
+        await InvokeAsync(StateHasChanged);
     }
 
-    /// <summary>Cierra la sesión del usuario y redirige al inicio.</summary>
+    private async void OnCarritoCambio()
+    {
+        _animarBadge = true;
+        await CargarTotalCarrito();
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(400);
+        _animarBadge = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        _autenticado = Sesion.EstaAutenticado;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CargarTotalCarrito()
+    {
+        if (!Sesion.EstaAutenticado) { _totalItems = 0; return; }
+        try
+        {
+            var carrito = await CarritoServicio.ObtenerCarritoAsync();
+            _totalItems = carrito?.Items?.Sum(i => i.Cantidad) ?? 0;
+        }
+        catch { _totalItems = 0; }
+    }
+
+    private string CategoriaActiva(string cat)
+    {
+        var uri = Navegacion.Uri;
+        if (string.IsNullOrEmpty(cat))
+            return uri.Contains("cat=") ? "" : (uri.EndsWith("/") || uri.Contains("/#") ? "active" : "");
+        return uri.Contains("cat=" + cat, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    }
+
+    private void TeclaSearch(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") BuscarYNavegar();
+        if (e.Key == "Escape") LimpiarBusqueda();
+    }
+
+    private void BuscarYNavegar()
+    {
+        var termino = _terminoBusqueda.Trim();
+        if (!string.IsNullOrWhiteSpace(termino))
+        {
+            _terminoBusqueda = string.Empty;
+            CerrarMenuMovil();
+            Navegacion.NavigateTo("/?q=" + Uri.EscapeDataString(termino));
+        }
+    }
+
+    private void LimpiarBusqueda() => _terminoBusqueda = string.Empty;
+
     private void CerrarSesion()
     {
         Sesion.CerrarSesion();
+        CerrarMenuMovil();
         Navegacion.NavigateTo("/");
     }
 
-    /// <inheritdoc/>
+    private void CerrarMenuMovil()
+    {
+        _ = JS.InvokeVoidAsync("cerrarNavbarMovil");
+    }
+
     public void Dispose()
     {
-        Sesion.OnCambio -= ActualizarEstado;
+        Sesion.OnCambio                 -= OnSesionCambio;
+        CarritoServicio.OnCambioCarrito -= OnCarritoCambio;
+        Navegacion.LocationChanged      -= OnLocationChanged;
     }
 }

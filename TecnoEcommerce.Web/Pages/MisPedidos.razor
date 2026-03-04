@@ -1,118 +1,191 @@
 @page "/mis-pedidos"
-@using TecnoEcommerce.Web.Servicios
-@using TecnoEcommerce.Modelos.DTOs
-@using TecnoEcommerce.Modelos.Enumeraciones
 
-@inject PedidoApiServicio PedidoServicio
-@inject SesionServicio    Sesion
-@inject NavigationManager Navegacion
+<PageTitle>Mis pedidos — TecnoEcommerce</PageTitle>
 
-@*
-    Página de historial de pedidos del usuario autenticado.
-    Principio SRP: única responsabilidad de listar y mostrar el estado de los pedidos.
-*@
+<!-- Header -->
+<div class="mis-pedidos-header">
+    <div>
+        <h1 class="mis-pedidos-title"><i class="bi bi-bag-check me-2"></i>Mis pedidos</h1>
+        <p class="mis-pedidos-sub">@_pedidos.Count pedido(s) en tu historial</p>
+    </div>
+    <span class="hero-icon"><i class="bi bi-bag-check"></i></span>
+</div>
 
-<PageTitle>Mis pedidos – TecnoEcommerce</PageTitle>
-
-<CargandoSpinner Visible="@_cargando" />
-
-<h2 class="fw-bold mb-4"><i class="bi bi-bag-check me-2 text-primary"></i>Mis pedidos</h2>
-
-@if (!Sesion.EstaAutenticado)
+@if (_pedidos.Count == 0)
 {
-    <div class="text-center py-5">
-        <i class="bi bi-person-lock display-4 text-muted"></i>
-        <p class="mt-3 text-muted">Debes iniciar sesión para ver tus pedidos.</p>
-        <a href="/login" class="btn btn-primary">Iniciar sesión</a>
+    <div class="empty-state">
+        <i class="bi bi-bag3"></i>
+        <h3 style="font-size:1.2rem;font-weight:700;margin:.4rem 0">No tienes pedidos aún</h3>
+        <p style="margin-bottom:1.5rem">Haz tu primera compra y aparecerá aquí</p>
+        <a href="/" class="btn-apple btn-apple-primary">
+            <i class="bi bi-grid-fill"></i> Explorar productos
+        </a>
     </div>
 }
-else if (!_cargando)
+else
 {
-    @if (_pedidos.Count == 0)
-    {
-        <div class="empty-state">
-            <i class="bi bi-inbox"></i>
-            <p>Aún no has realizado ningún pedido.</p>
-            <a href="/" class="btn btn-outline-primary">Explorar catálogo</a>
-        </div>
-    }
-    else
-    {
+    <div class="row g-3">
         @foreach (var pedido in _pedidos)
         {
-            <div class="card pedido-card mb-3 shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="fw-bold"># @pedido.Id</span>
-                        <small class="text-muted ms-2">@pedido.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</small>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <span class="badge @ObtenerClasePedido(pedido.EstadoPedido)">
-                            @pedido.EstadoPedido
-                        </span>
-                        <span class="badge @ObtenerClasePago(pedido.EstadoPago)">
-                            <i class="bi bi-credit-card me-1"></i>@pedido.EstadoPago
-                        </span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Detalles del pedido -->
-                    @foreach (var detalle in pedido.Detalles)
-                    {
-                        <div class="d-flex justify-content-between small text-muted py-1 border-bottom">
-                            <span>@detalle.NombreProducto × @detalle.Cantidad</span>
-                            <span>$@detalle.Subtotal.ToString("N2")</span>
+            <div class="col-12">
+                <div class="pedido-card fade-in-up">
+
+                    <!-- Header del pedido -->
+                    <div class="pedido-header">
+                        <div>
+                            <span class="pedido-num">Pedido @pedido.Numero</span>
+                            <div class="pedido-fecha">Realizado el @pedido.Fecha</div>
                         </div>
-                    }
-                    <div class="d-flex justify-content-between fw-bold mt-2">
-                        <span>Total</span>
-                        <span class="text-primary">$@pedido.Total.ToString("N2")</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge @ObtenerBadgeEstado(pedido.Estado)" style="padding:.4em .8em;border-radius:8px;font-size:.75rem">
+                                @pedido.Estado
+                            </span>
+                            <span class="badge @ObtenerBadgePago(pedido.EstadoPago)" style="padding:.4em .8em;border-radius:8px;font-size:.75rem">
+                                @pedido.EstadoPago
+                            </span>
+                        </div>
                     </div>
 
-                    <!-- Dirección y estado de envío -->
-                    @if (pedido.EstadoEnvio.HasValue)
-                    {
-                        <div class="mt-2 p-2 bg-light rounded small">
-                            <i class="bi bi-truck me-1"></i>
-                            <strong>Envío:</strong> @pedido.EstadoEnvio
-                            &mdash;
-                            <span class="text-muted">@pedido.DireccionEntrega</span>
+                    <!-- Timeline -->
+                    <div class="pedido-timeline">
+                        @foreach (var (paso, i) in _pasosTiempos.Select((p,i) => (p,i)))
+                        {
+                            var orden = pedido.PasoActual;
+                            var clase = i < orden ? "active" : i == orden ? "current" : "";
+                            <div class="timeline-step @clase">
+                                <div class="timeline-dot">
+                                    @if (i < orden) { <i class="bi bi-check-lg"></i> }
+                                    else { <span style="font-size:.65rem;font-weight:700">@(i+1)</span> }
+                                </div>
+                                <span class="timeline-label">@paso</span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Items del pedido -->
+                    <div class="pedido-body">
+                        @foreach (var item in pedido.Items)
+                        {
+                            <div class="pedido-detalle-row">
+                                <span>@item.Nombre <span style="color:var(--apple-gray)">×@item.Cantidad</span></span>
+                                <span>$@((item.Precio * item.Cantidad).ToString("N2"))</span>
+                            </div>
+                        }
+
+                        <div class="resumen-row">
+                            <span>Subtotal</span><span>$@pedido.Items.Sum(i => i.Precio * i.Cantidad).ToString("N2")</span>
                         </div>
-                    }
+                        <div class="resumen-row">
+                            <span>Envío</span>
+                            <span class="@(pedido.EnvioGratis ? "text-success fw-semibold" : "")">
+                                @(pedido.EnvioGratis ? "Gratis" : "$15.00")
+                            </span>
+                        </div>
+                        <div class="pedido-total-row">
+                            <span>Total</span>
+                            <span>$@pedido.Total.ToString("N2") USD</span>
+                        </div>
+
+                        <div class="pedido-envio-box">
+                            <i class="bi bi-truck me-1" style="color:var(--apple-blue)"></i>
+                            <div>
+                                <strong>@pedido.DireccionEnvio</strong>
+                                @if (!string.IsNullOrEmpty(pedido.NumeroGuia))
+                                {
+                                    <span class="ms-2 text-muted" style="font-size:.78rem">
+                                        Guía: @pedido.NumeroGuia
+                                    </span>
+                                }
+                                <div style="font-size:.78rem;color:var(--apple-gray)">@pedido.TransportadoraMensaje</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3 flex-wrap">
+                            @if (pedido.Estado == "Enviado" || pedido.Estado == "Entregado")
+                            {
+                                <button class="btn-apple btn-apple-ghost" style="font-size:.82rem">
+                                    <i class="bi bi-geo-alt me-1"></i> Rastrear envío
+                                </button>
+                            }
+                            <button class="btn-apple btn-apple-white" style="font-size:.82rem">
+                                <i class="bi bi-file-earmark-text me-1"></i> Ver factura
+                            </button>
+                            @if (pedido.Estado == "Entregado")
+                            {
+                                <button class="btn-apple btn-apple-white" style="font-size:.82rem">
+                                    <i class="bi bi-star me-1"></i> Calificar
+                                </button>
+                            }
+                        </div>
+                    </div>
+
                 </div>
             </div>
         }
-    }
+    </div>
 }
 
 @code {
-    private List<PedidoDto> _pedidos = new();
-    private bool            _cargando = true;
-
-    /// <inheritdoc/>
-    protected override async Task OnInitializedAsync()
+    private record ItemPedido(string Nombre, int Cantidad, decimal Precio);
+    private class MockPedido
     {
-        if (!Sesion.EstaAutenticado) { _cargando = false; return; }
-        _pedidos  = await PedidoServicio.ObtenerMisPedidosAsync();
-        _cargando = false;
+        public string Numero           { get; set; } = "";
+        public string Fecha            { get; set; } = "";
+        public string Estado           { get; set; } = "";
+        public string EstadoPago       { get; set; } = "";
+        public int    PasoActual       { get; set; }
+        public string DireccionEnvio   { get; set; } = "";
+        public string NumeroGuia       { get; set; } = "";
+        public string TransportadoraMensaje { get; set; } = "";
+        public bool   EnvioGratis      { get; set; }
+        public decimal Total           { get; set; }
+        public List<ItemPedido> Items  { get; set; } = new();
     }
 
-    /// <summary>Devuelve la clase CSS de Bootstrap para el badge del estado de pedido.</summary>
-    private static string ObtenerClasePedido(EstadoPedido estado) => estado switch
+    private readonly string[] _pasosTiempos = { "Recibido", "Procesando", "Empacado", "Enviado", "Entregado" };
+
+    private readonly List<MockPedido> _pedidos = new()
     {
-        EstadoPedido.Pendiente   => "badge-pendiente",
-        EstadoPedido.Procesando  => "badge-procesando",
-        EstadoPedido.Enviado     => "badge-enviado",
-        EstadoPedido.Entregado   => "bg-success",
-        EstadoPedido.Cancelado   => "bg-danger",
-        _                        => "bg-secondary"
+        new() {
+            Numero = "#TE-84712", Fecha = "28 de febrero, 2026", Estado = "Enviado",
+            EstadoPago = "Aprobado", PasoActual = 3,
+            DireccionEnvio = "Calle 123 #45-67, Bogotá, Colombia",
+            NumeroGuia = "COL829341", TransportadoraMensaje = "Servientrega — Llegará el 5 de marzo",
+            EnvioGratis = true, Total = 1609.22m,
+            Items = new() { new("MacBook Air M3", 1, 1299m), new("Keychron K2 V2", 2, 89m) }
+        },
+        new() {
+            Numero = "#TE-71234", Fecha = "14 de enero, 2026", Estado = "Entregado",
+            EstadoPago = "Aprobado", PasoActual = 5,
+            DireccionEnvio = "Carrera 7 #80-10, Medellín, Colombia",
+            NumeroGuia = "", TransportadoraMensaje = "Entregado el 17 de enero — Conforme",
+            EnvioGratis = false, Total = 1242.19m,
+            Items = new() { new("iPhone 15 Pro", 1, 1199m) }
+        },
+        new() {
+            Numero = "#TE-65481", Fecha = "3 de diciembre, 2025", Estado = "Procesando",
+            EstadoPago = "Aprobado", PasoActual = 1,
+            DireccionEnvio = "Av. El Dorado #90-10, Bogotá, Colombia",
+            NumeroGuia = "", TransportadoraMensaje = "Tu pedido está siendo preparado",
+            EnvioGratis = true, Total = 474.51m,
+            Items = new() { new("RTX 4060 8GB", 1, 399m) }
+        },
     };
 
-    /// <summary>Devuelve la clase CSS para el badge del estado de pago.</summary>
-    private static string ObtenerClasePago(EstadoPago estado) => estado switch
+    private string ObtenerBadgeEstado(string estado) => estado switch
     {
-        EstadoPago.Aprobado  => "bg-success",
-        EstadoPago.Rechazado => "bg-danger",
-        _                    => "bg-warning text-dark"
+        "Pendiente"   => "badge-pendiente",
+        "Procesando"  => "badge-procesando",
+        "Enviado"     => "badge-enviado",
+        "Entregado"   => "badge-entregado",
+        "Cancelado"   => "badge-cancelado",
+        _             => "badge-pendiente",
+    };
+
+    private string ObtenerBadgePago(string estado) => estado switch
+    {
+        "Aprobado"  => "badge-aprobado",
+        "Rechazado" => "badge-rechazado",
+        _           => "badge-pendiente",
     };
 }

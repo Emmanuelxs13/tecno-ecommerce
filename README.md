@@ -315,3 +315,54 @@ Configurada en `TecnoEcommerce.API/appsettings.json` (se activa en Sprint 4):
 > Próximo: Sprint 4 — Migración a EF Core + PostgreSQL.
 
 ---
+
+---
+
+## Modo Visual con Datos de Prueba
+
+> **Importante:** La rama `feature_frontend` utiliza **datos completamente quemados (hardcoded)**
+> con el unico proposito de demostrar la experiencia visual y de usuario del diseno Apple-inspired.
+
+### Por que datos mock?
+
+El objetivo de esta rama es validar el diseno de UI/UX antes de conectar la capa de datos real.
+Esto permite iterar sobre la estetica visualmente sin depender del estado de la API o la base de datos.
+
+### Que significa esto?
+
+- Los productos, precios, categorias e imagenes son **ficticios y estaticos** (no provienen de la API).
+- El carrito incluye articulos precargados para visualizacion inmediata.
+- El historial de pedidos muestra ordenes de ejemplo con lineas de tiempo.
+- Los formularios de Login y Registro simulan autenticacion (cualquier credencial valida funciona).
+- Las llamadas a la API real ocurren en segundo plano; si fallan, los datos mock se mantienen.
+
+### Productos mock incluidos
+
+| ID | Producto | Categoria | Precio |
+|----|----------|-----------|--------|
+| 1 | MacBook Air M3 | Laptops | $1,299 USD |
+| 2 | iPhone 15 Pro | Smartphones | $1,199 USD |
+| 3 | Samsung Galaxy S24 | Smartphones | $999 USD |
+| 4 | ASUS VivoBook 15 | Laptops | $899 USD |
+| 5 | LG UltraWide 34" | Monitores | $449 USD |
+| 6 | Keychron K2 V2 | Accesorios | $89 USD |
+| 7 | RTX 4060 8GB | Gaming | $399 USD |
+| 8 | HyperX Cloud III | Gaming | $149 USD |
+
+### Paginas rediseñadas en `feature_frontend`
+
+| Pagina | Archivo | Descripcion |
+|--------|---------|-------------|
+| Inicio | `Pages/Inicio.razor` | Hero, tiles de producto, categorias, reseñas, banner promo |
+| Detalle | `Pages/ProductoDetalle.razor` | Selector de color, specs, cantidad, productos relacionados |
+| Carrito | `Pages/Carrito.razor` | Bolsa de compra stilizada, resumen de orden, confirmacion |
+| Login | `Pages/Login.razor` | Formulario estilo Apple ID, mock auth |
+| Registro | `Pages/Registro.razor` | Creacion de cuenta estilo Apple, validaciones |
+| Mis Pedidos | `Pages/MisPedidos.razor` | Historial con linea de tiempo de 5 pasos |
+
+### Para usar datos reales
+
+Cambiar a la rama `main` o asegurarse de que la API este corriendo en el puerto configurado en `appsettings.json`.
+El frontend intentara automaticamente las llamadas a la API; los datos mock solo se muestran como fallback.
+
+---

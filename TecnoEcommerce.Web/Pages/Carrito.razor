@@ -1,162 +1,204 @@
 @page "/carrito"
-@using TecnoEcommerce.Web.Servicios
-@using TecnoEcommerce.Modelos.DTOs
 
-@inject CarritoApiServicio CarritoServicio
-@inject PedidoApiServicio  PedidoServicio
-@inject SesionServicio     Sesion
-@inject NavigationManager  Navegacion
+@inject NavigationManager Navegacion
 
-@*
-    Página del carrito de compras y confirmación de pedido.
-    Principio SRP: gestiona los ítems del carrito y el proceso de checkout.
-*@
+<PageTitle>Mi carrito — TecnoEcommerce</PageTitle>
 
-<PageTitle>Mi carrito – TecnoEcommerce</PageTitle>
-
-<CargandoSpinner Visible="@_cargando" />
-
-<div class="hero-banner mb-4 d-flex align-items-center justify-content-between">
+<!-- Header -->
+<div class="carrito-page-header">
     <div>
-        <h2 class="hero-title"><i class="bi bi-cart3 me-2"></i>Mi carrito</h2>
-        <p class="hero-sub">Revisa y confirma tu pedido</p>
+        <h1 class="carrito-page-title"><i class="bi bi-bag3 me-2"></i>Mi carrito</h1>
+        <p class="carrito-page-sub">@_items.Sum(i => i.Cantidad) artículo(s) en tu bolsa</p>
     </div>
-    <i class="bi bi-bag hero-icon d-none d-md-block"></i>
+    <span class="hero-icon"><i class="bi bi-bag3"></i></span>
 </div>
 
-@if (!Sesion.EstaAutenticado)
+@if (_items.Count == 0)
 {
-    <div class="text-center py-5">
-        <i class="bi bi-person-lock display-4 text-muted"></i>
-        <p class="mt-3 text-muted">Debes iniciar sesión para ver tu carrito.</p>
-        <a href="/login" class="btn btn-primary">Iniciar sesión</a>
+    <div class="carrito-vacio">
+        <div class="carrito-vacio-icon"><i class="bi bi-bag3"></i></div>
+        <h2 style="font-size:1.4rem;font-weight:700;margin:.5rem 0">Tu carrito está vacío</h2>
+        <p style="color:var(--apple-gray);margin-bottom:1.5rem">Agrega productos para comenzar tu compra</p>
+        <a href="/" class="btn-apple btn-apple-primary">
+            <i class="bi bi-grid-fill"></i> Explorar productos
+        </a>
     </div>
 }
-else if (!_cargando)
+else
 {
-    <MensajeAlerta Mensaje="@_mensaje" Tipo="@_tipoMensaje" OnCerrar="() => _mensaje = string.Empty" />
+    <div class="row g-4">
 
-    @if (_carrito is null || _carrito.Items.Count == 0)
-    {
-        <div class="empty-state">
-            <i class="bi bi-cart-x"></i>
-            <p>Tu carrito está vacío.</p>
-            <a href="/" class="btn btn-outline-primary">Explorar catálogo</a>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            <!-- Lista de ítems -->
-            <div class="col-12 col-lg-7">
-                @foreach (var item in _carrito.Items)
-                {
-                    <div class="carrito-item-card d-flex align-items-center gap-3">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0 fw-semibold">@item.NombreProducto</h6>
-                            <small class="text-muted">$@item.PrecioUnitario.ToString("N2") × @item.Cantidad</small>
+        <!-- Items -->
+        <div class="col-lg-8">
+
+            @if (_mostrarConfirmacion)
+            {
+                <div class="alert alert-success d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-check-circle-fill fs-5"></i>
+                    <div>
+                        <strong>¡Pedido realizado con éxito!</strong>
+                        <div style="font-size:.85rem">Recibirás un email de confirmación. Número de pedido: #TE-@_numeroPedido</div>
+                    </div>
+                </div>
+            }
+
+            @foreach (var item in _items)
+            {
+                <div class="carrito-item-card fade-in-up">
+                    <div class="carrito-item-img">
+                        <img src="@item.ImagenUrl" alt="@item.Nombre"
+                             onerror="this.src='https://placehold.co/70x70/f5f5f7/0071e3?text=P'" />
+                    </div>
+                    <div class="carrito-item-detalle">
+                        <div class="carrito-item-nombre">@item.Nombre</div>
+                        <div class="carrito-item-precio-unit">$@item.Precio.ToString("N2") USD c/u</div>
+                        @if (!string.IsNullOrEmpty(item.Color))
+                        {
+                            <div style="font-size:.78rem;color:var(--apple-gray);margin-top:.15rem">
+                                <i class="bi bi-circle-fill me-1" style="font-size:.5rem"></i>@item.Color
+                            </div>
+                        }
+                        <div class="qty-control mt-2">
+                            <button class="qty-btn" @onclick="() => CambiarCantidad(item, -1)" disabled="@(item.Cantidad <= 1)">−</button>
+                            <span class="qty-value">@item.Cantidad</span>
+                            <button class="qty-btn" @onclick="() => CambiarCantidad(item, 1)" disabled="@(item.Cantidad >= 10)">+</button>
                         </div>
-                        <span class="fw-bold producto-precio">$@item.Subtotal.ToString("N2")</span>
-                        <button class="btn btn-outline-danger btn-sm" @onclick="() => EliminarItem(item.Id)">
-                            <i class="bi bi-trash"></i>
+                    </div>
+                    <div class="carrito-item-acciones">
+                        <span class="carrito-item-subtotal">$@((item.Precio * item.Cantidad).ToString("N2"))</span>
+                        <button class="btn btn-sm btn-link text-danger p-0 mt-1" @onclick="() => Eliminar(item)">
+                            <i class="bi bi-trash3 me-1"></i>Eliminar
                         </button>
                     </div>
-                }
+                </div>
+            }
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <a href="/" style="font-size:.85rem;color:var(--apple-blue)">
+                    <i class="bi bi-arrow-left me-1"></i> Seguir comprando
+                </a>
+                <button class="btn btn-sm btn-outline-secondary" style="border-radius:8px;font-size:.8rem" @onclick="VaciarCarrito">
+                    <i class="bi bi-trash3 me-1"></i>Vaciar carrito
+                </button>
             </div>
+        </div>
 
-            <!-- Resumen y checkout -->
-            <div class="col-12 col-lg-5">
-                <div class="carrito-resumen-card">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-receipt me-2 text-primary"></i>Resumen</h5>
+        <!-- Resumen -->
+        <div class="col-lg-4">
+            <div class="carrito-resumen-card">
+                <h2 class="carrito-resumen-title">Resumen del pedido</h2>
 
-                    @foreach (var item in _carrito.Items)
-                    {
-                        <div class="d-flex justify-content-between small text-muted mb-1">
-                            <span>@item.NombreProducto × @item.Cantidad</span>
-                            <span>$@item.Subtotal.ToString("N2")</span>
-                        </div>
-                    }
-                    <hr />
-                    <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
-                        <span>Total</span>
-                        <span class="producto-precio">$@_carrito.Total.ToString("N2")</span>
+                @foreach (var item in _items)
+                {
+                    <div class="resumen-row">
+                        <span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@item.Nombre ×@item.Cantidad</span>
+                        <span>$@((item.Precio * item.Cantidad).ToString("N2"))</span>
                     </div>
+                }
 
-                    <!-- Dirección de envío -->
-                    <div class="mb-3">
-                        <label class="form-label">Dirección de entrega</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                            <InputText @bind-Value="_direccion" class="form-control"
-                                       placeholder="Calle, número, ciudad..." />
-                        </div>
-                    </div>
+                <div class="resumen-row">
+                    <span>Subtotal</span>
+                    <span>$@_subtotal.ToString("N2")</span>
+                </div>
+                <div class="resumen-row">
+                    <span>Envío</span>
+                    <span class="@(_envioGratis ? "text-success fw-semibold" : "")">
+                        @(_envioGratis ? "Gratis" : "$" + _costoEnvio.ToString("N2"))
+                    </span>
+                </div>
+                <div class="resumen-row">
+                    <span>Impuestos (19%)</span>
+                    <span>$@_impuestos.ToString("N2")</span>
+                </div>
+                <div class="resumen-total-row">
+                    <span>Total</span>
+                    <span>$@_total.ToString("N2") USD</span>
+                </div>
 
-                    <button class="btn btn-primary w-100 py-2"
-                            @onclick="ConfirmarPedido"
-                            disabled="@(_confirmando || string.IsNullOrWhiteSpace(_direccion))">
-                        @if (_confirmando)
+                <div class="shipping-progress-wrap">
+                    <div class="shipping-progress-label">
+                        @if (_envioGratis)
                         {
-                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span><i class="bi bi-check-circle-fill me-1 text-success"></i>¡Tienes envío gratis!</span>
                         }
                         else
                         {
-                            <i class="bi bi-bag-check me-2"></i>
+                            <span>Te faltan <strong>$@(_limiteEnvioGratis - _subtotal):N2</strong> para envío gratis</span>
                         }
-                        Confirmar pedido
+                    </div>
+                    <div class="progress" style="height:5px;border-radius:999px">
+                        <div class="progress-bar bg-success" style="width:@Math.Min(100,(int)(_subtotal/_limiteEnvioGratis*100))%"></div>
+                    </div>
+                </div>
+
+                @if (!_mostrarConfirmacion)
+                {
+                    <button class="btn-apple btn-apple-primary btn-apple-wide mt-3" @onclick="RealizarPedido">
+                        @if (_procesando) { <span class="spinner-border spinner-border-sm me-2"></span> }
+                        <i class="bi bi-lock-fill me-1"></i> Confirmar pedido
                     </button>
+                }
+
+                <div class="secure-badges">
+                    <span><i class="bi bi-shield-lock-fill me-1" style="color:#34c759"></i>Pago seguro SSL</span>
+                    <span><i class="bi bi-credit-card me-1"></i>VISA, Mastercard, Nequi</span>
+                    <span><i class="bi bi-arrow-return-left me-1"></i>30 días devolución</span>
                 </div>
             </div>
         </div>
-    }
+
+    </div>
 }
 
 @code {
-    private CarritoDto? _carrito;
-    private string      _direccion   = string.Empty;
-    private bool        _cargando    = true;
-    private bool        _confirmando;
-    private string      _mensaje     = string.Empty;
-    private string      _tipoMensaje = "info";
+    private record ItemCarrito(int Id, string Nombre, string Categoria, decimal Precio, string ImagenUrl, string Color = "");
 
-    /// <inheritdoc/>
-    protected override async Task OnInitializedAsync()
+    private class LineaCarrito
     {
-        if (!Sesion.EstaAutenticado) { _cargando = false; return; }
-        await CargarCarrito();
+        public int       Id         { get; set; }
+        public string    Nombre     { get; set; } = "";
+        public string    Categoria  { get; set; } = "";
+        public decimal   Precio     { get; set; }
+        public string    ImagenUrl  { get; set; } = "";
+        public string    Color      { get; set; } = "";
+        public int       Cantidad   { get; set; }
     }
 
-    /// <summary>Carga el carrito del usuario autenticado.</summary>
-    private async Task CargarCarrito()
+    private List<LineaCarrito> _items = new()
     {
-        _cargando = true;
-        _carrito  = await CarritoServicio.ObtenerCarritoAsync();
-        _cargando = false;
+        new() { Id=1, Nombre="MacBook Air M3",      Categoria="Laptops",     Precio=1299m, ImagenUrl="https://placehold.co/70x70/1d1d1f/ffffff?text=MacBook", Color="Medianoche",  Cantidad=1 },
+        new() { Id=2, Nombre="iPhone 15 Pro",        Categoria="Smartphones", Precio=1199m, ImagenUrl="https://placehold.co/70x70/3d3d3d/ffffff?text=iPhone",  Color="Titanio Negro",Cantidad=1 },
+        new() { Id=6, Nombre="Keychron K2 V2",       Categoria="Accesorios",  Precio=89m,   ImagenUrl="https://placehold.co/70x70/d97706/ffffff?text=Keychron",Color="Aluminio",     Cantidad=2 },
+    };
+
+    private readonly decimal _limiteEnvioGratis = 200m;
+    private readonly decimal _costoEnvio        = 15m;
+
+    private decimal _subtotal  => _items.Sum(i => i.Precio * i.Cantidad);
+    private bool    _envioGratis => _subtotal >= _limiteEnvioGratis;
+    private decimal _impuestos => _subtotal * 0.19m;
+    private decimal _total     => _subtotal + (_envioGratis ? 0 : _costoEnvio) + _impuestos;
+
+    private bool   _procesando         = false;
+    private bool   _mostrarConfirmacion = false;
+    private string _numeroPedido        = "";
+
+    private void CambiarCantidad(LineaCarrito item, int delta)
+    {
+        item.Cantidad = Math.Clamp(item.Cantidad + delta, 1, 10);
     }
 
-    /// <summary>Elimina un ítem del carrito y recarga.</summary>
-    private async Task EliminarItem(int itemId)
+    private void Eliminar(LineaCarrito item) => _items.Remove(item);
+
+    private void VaciarCarrito() => _items.Clear();
+
+    private async Task RealizarPedido()
     {
-        var resultado = await CarritoServicio.EliminarItemAsync(itemId);
-        if (resultado is not null) _carrito = resultado;
-        else { _tipoMensaje = "danger"; _mensaje = "No se pudo eliminar el artículo."; }
-    }
-
-    /// <summary>Crea el pedido y redirige al historial de pedidos.</summary>
-    private async Task ConfirmarPedido()
-    {
-        _confirmando = true;
-        var dto      = new CrearPedidoDto { DireccionEntrega = _direccion };
-        var pedido   = await PedidoServicio.CrearPedidoAsync(dto);
-        _confirmando = false;
-
-        if (pedido is null)
-        {
-            _tipoMensaje = "danger";
-            _mensaje     = "No se pudo procesar el pedido. Verifica el stock e inténtalo de nuevo.";
-            return;
-        }
-
-        Navegacion.NavigateTo("/mis-pedidos");
+        _procesando = true;
+        await Task.Delay(1200);
+        _procesando = false;
+        _numeroPedido = new Random().Next(10000, 99999).ToString();
+        _mostrarConfirmacion = true;
+        _items.Clear();
     }
 }

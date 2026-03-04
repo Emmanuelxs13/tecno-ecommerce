@@ -68,6 +68,27 @@ public class CarritoController : ControllerBase
     }
 
     /// <summary>
+    /// Actualiza la cantidad de un ítem del carrito.
+    /// PUT api/carrito/{usuarioId}/items/{itemId}
+    /// </summary>
+    [HttpPut("{usuarioId:int}/items/{itemId:int}")]
+    [ProducesResponseType(typeof(CarritoDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ActualizarCantidad(
+        int usuarioId, int itemId, [FromBody] ActualizarCantidadItemDto dto)
+    {
+        try
+        {
+            var carrito = await _servicio.ActualizarCantidadItemAsync(usuarioId, itemId, dto.Cantidad);
+            return Ok(carrito);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensaje = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Vacía por completo el carrito del usuario.
     /// DELETE api/carrito/{usuarioId}
     /// </summary>

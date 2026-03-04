@@ -15,6 +15,16 @@ public class AgregarItemCarritoDto
     public int Cantidad { get; set; }
 }
 
+/// <summary>
+/// Datos requeridos para actualizar la cantidad de un ítem existente en el carrito.
+/// Si la cantidad es 0 o inferior el servicio elimina el ítem.
+/// </summary>
+public class ActualizarCantidadItemDto
+{
+    /// <summary>Nueva cantidad deseada. Valores ≤ 0 provocan la eliminación del ítem.</summary>
+    public int Cantidad { get; set; }
+}
+
 // ── Respuestas ────────────────────────────────────────────────────────────────
 
 /// <summary>

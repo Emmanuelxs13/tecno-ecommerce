@@ -13,6 +13,12 @@ public class CarritoApiServicio
     private readonly HttpClient     _http;
     private readonly SesionServicio _sesion;
 
+    /// <summary>
+    /// Evento que se dispara cuando el carrito cambia (ítem agregado, eliminado o actualizado).
+    /// Los componentes como NavMenu se suscriben para refrescar el badge.
+    /// </summary>
+    public event Action? OnCambioCarrito;
+
     /// <summary>Inicializa el servicio con las dependencias requeridas.</summary>
     public CarritoApiServicio(HttpClient http, SesionServicio sesion)
     {
@@ -46,7 +52,9 @@ public class CarritoApiServicio
         var respuesta = await _http.PostAsJsonAsync(
             $"api/carrito/{_sesion.UsuarioActual!.Id}/items", dto);
         if (!respuesta.IsSuccessStatusCode) return null;
-        return await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        var resultado = await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        OnCambioCarrito?.Invoke();
+        return resultado;
     }
 
     /// <summary>
@@ -61,7 +69,39 @@ public class CarritoApiServicio
         var respuesta = await _http.DeleteAsync(
             $"api/carrito/{_sesion.UsuarioActual!.Id}/items/{itemId}");
         if (!respuesta.IsSuccessStatusCode) return null;
-        return await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        var resultado = await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        OnCambioCarrito?.Invoke();
+        return resultado;
+    }
+
+    /// <summary>
+    /// Vacía por completo el carrito del usuario autenticado.
+    /// </summary>
+    public async Task VaciarCarritoAsync()
+    {
+        if (!_sesion.EstaAutenticado) return;
+        AgregarTokenAlCliente();
+        await _http.DeleteAsync($"api/carrito/{_sesion.UsuarioActual!.Id}");
+        OnCambioCarrito?.Invoke();
+    }
+
+    /// <summary>
+    /// Actualiza la cantidad de un ítem específico del carrito.
+    /// </summary>
+    /// <param name="itemId">Identificador del ítem a actualizar.</param>
+    /// <param name="nuevaCantidad">Nueva cantidad. Si es 0, el ítem se elimina.</param>
+    /// <returns>El carrito actualizado, o <c>null</c> si la operación falla.</returns>
+    public async Task<CarritoDto?> ActualizarCantidadAsync(int itemId, int nuevaCantidad)
+    {
+        if (!_sesion.EstaAutenticado) return null;
+        AgregarTokenAlCliente();
+        var respuesta = await _http.PutAsJsonAsync(
+            $"api/carrito/{_sesion.UsuarioActual!.Id}/items/{itemId}",
+            new { Cantidad = nuevaCantidad });
+        if (!respuesta.IsSuccessStatusCode) return null;
+        var resultado = await respuesta.Content.ReadFromJsonAsync<CarritoDto>();
+        OnCambioCarrito?.Invoke();
+        return resultado;
     }
 
     /// <summary>

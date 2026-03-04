@@ -1,0 +1,53 @@
+@using TecnoEcommerce.Modelos.DTOs
+
+@*
+    Tarjeta visual para una categoría de producto.
+    Permite filtrar el catálogo con un solo clic o navegar directamente.
+    Principio OCP: comportamiento personalizable vía parámetros sin tocar el componente.
+*@
+
+<a class="categoria-card @(Activa ? "active" : "")"
+   href="@(UrlDestino ?? "/")"
+   @onclick:preventDefault="@(OnSeleccionar.HasDelegate)"
+   @onclick="HandleClick">
+
+    <div class="categoria-card-icon @ColorIcono">
+        <i class="bi @Icono"></i>
+    </div>
+
+    <div class="categoria-card-nombre">@Nombre</div>
+
+    @if (CantidadProductos.HasValue)
+    {
+        <div class="categoria-card-count">@CantidadProductos productos</div>
+    }
+</a>
+
+@code {
+    /// <summary>Nombre de la categoría.</summary>
+    [Parameter, EditorRequired] public string Nombre { get; set; } = default!;
+
+    /// <summary>Clase Bootstrap Icon a usar (ej. bi-cpu, bi-headphones).</summary>
+    [Parameter] public string Icono { get; set; } = "bi-grid";
+
+    /// <summary>Clase CSS de color del icono (cat-icon-blue, cat-icon-green…).</summary>
+    [Parameter] public string ColorIcono { get; set; } = "cat-icon-blue";
+
+    /// <summary>Cantidad de productos en esta categoría.</summary>
+    [Parameter] public int? CantidadProductos { get; set; }
+
+    /// <summary>URL de navegación directa. Si se omite y OnSeleccionar está definido, se usa el evento.</summary>
+    [Parameter] public string? UrlDestino { get; set; }
+
+    /// <summary>Si esta categoría está activa (seleccionada).</summary>
+    [Parameter] public bool Activa { get; set; }
+
+    /// <summary>Evento disparado al hacer clic (para filtrado in-page).</summary>
+    [Parameter] public EventCallback OnSeleccionar { get; set; }
+
+    private async Task HandleClick()
+    {
+        if (OnSeleccionar.HasDelegate)
+            await OnSeleccionar.InvokeAsync();
+    }
+}

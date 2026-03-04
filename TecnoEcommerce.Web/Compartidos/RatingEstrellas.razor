@@ -1,0 +1,43 @@
+@*
+    Componente de estrellas de calificación (solo visual, no interactivo).
+    Muestra hasta 5 estrellas llenas, medias o vacías según el valor recibido.
+    Principio SRP: única responsabilidad de representar visualmente una puntuación.
+*@
+
+<span class="rating-stars" role="img" aria-label="@Valor de 5 estrellas">
+    @for (int i = 1; i <= 5; i++)
+    {
+        var idx = i;
+        @if (Valor >= idx)
+        {
+            <i class="bi bi-star-fill star-fill" aria-hidden="true"></i>
+        }
+        else if (Valor >= idx - 0.5m)
+        {
+            <i class="bi bi-star-half star-half" aria-hidden="true"></i>
+        }
+        else
+        {
+            <i class="bi bi-star star-empty" aria-hidden="true"></i>
+        }
+    }
+    @if (MostrarPuntuacion)
+    {
+        <span class="rating-score">@Valor.ToString("0.#")</span>
+    }
+    @if (TotalResenas > 0)
+    {
+        <span class="rating-count">(@TotalResenas)</span>
+    }
+</span>
+
+@code {
+    /// <summary>Valor entre 0 y 5 (admite decimales como 4.5).</summary>
+    [Parameter] public decimal Valor { get; set; }
+
+    /// <summary>Muestra el número junto a las estrellas.</summary>
+    [Parameter] public bool MostrarPuntuacion { get; set; } = true;
+
+    /// <summary>Total de reseñas (si > 0, se muestra entre paréntesis).</summary>
+    [Parameter] public int TotalResenas { get; set; }
+}

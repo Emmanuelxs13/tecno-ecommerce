@@ -1,150 +1,281 @@
 @page "/producto/{Id:int}"
 @using TecnoEcommerce.Web.Servicios
-@using TecnoEcommerce.Modelos.DTOs
 
-@inject ProductoApiServicio ProductoServicio
-@inject CarritoApiServicio  CarritoServicio
-@inject SesionServicio      Sesion
-@inject NavigationManager   Navegacion
+@inject NavigationManager Navegacion
 
-@*
-    Página de detalle de un producto individual.
-    Principio SRP: única responsabilidad de mostrar el detalle y gestionar la adición al carrito.
-*@
+<PageTitle>@(_producto?.Nombre ?? "Producto") — TecnoEcommerce</PageTitle>
 
-<PageTitle>@(_producto?.Nombre ?? "Producto") – TecnoEcommerce</PageTitle>
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="py-2">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="/?cat=@(_producto?.CategoriaSlug)">@(_producto?.Categoria)</a></li>
+        <li class="breadcrumb-item active">@_producto?.Nombre</li>
+    </ol>
+</nav>
 
-<CargandoSpinner Visible="@_cargando" />
-
-@if (!_cargando && _producto is not null)
+@if (_producto == null)
 {
-    <!-- Miga de pan -->
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Catálogo</a></li>
-            <li class="breadcrumb-item active">@_producto.Nombre</li>
-        </ol>
-    </nav>
-
-    <div class="row g-4">
-        <!-- Imagen -->
-        <div class="col-12 col-md-5">
-            <img src="@(string.IsNullOrEmpty(_producto.ImagenUrl) ? "img/sin-imagen.png" : _producto.ImagenUrl)"
-                 class="img-fluid rounded shadow" alt="@_producto.Nombre"
-                 style="width:100%;max-height:380px;object-fit:cover;" />
-        </div>
-
-        <!-- Info -->
-        <div class="col-12 col-md-7">
-            <span class="producto-categoria-badge mb-2">@_producto.NombreCategoria</span>
-            <h2 class="fw-bold">@_producto.Nombre</h2>
-            <p class="text-muted">@_producto.Descripcion</p>
-
-            <h3 class="producto-precio my-3">$@_producto.Precio.ToString("N2")</h3>
-
-            <!-- Stock -->
-            @if (_producto.Stock > 0)
-            {
-                <span class="badge mb-3" style="background:#dcfce7;color:#166534;font-size:.9rem;padding:.4em .85em;">
-                    <i class="bi bi-check-circle me-1"></i>En stock (@_producto.Stock disponibles)
-                </span>
-            }
-            else
-            {
-                <span class="badge badge-cancelado mb-3" style="font-size:.9rem;padding:.4em .85em;">
-                    <i class="bi bi-x-circle me-1"></i>Producto agotado
-                </span>
-            }
-
-            <MensajeAlerta Mensaje="@_mensaje" Tipo="@_tipoMensaje"
-                           OnCerrar="() => _mensaje = string.Empty" />
-
-            @if (_producto.Stock > 0)
-            {
-                <!-- Selector de cantidad -->
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <label class="fw-semibold">Cantidad:</label>
-                    <div class="input-group" style="width:130px;">
-                        <button class="btn btn-outline-secondary" @onclick="() => AjustarCantidad(-1)">–</button>
-                        <input type="number" class="form-control text-center" @bind="_cantidad" min="1" max="@_producto.Stock" />
-                        <button class="btn btn-outline-secondary" @onclick="() => AjustarCantidad(1)">+</button>
-                    </div>
-                </div>
-
-                <button class="btn btn-primary btn-lg px-5" @onclick="AgregarAlCarrito" disabled="@_agregando">
-                    @if (_agregando)
-                    {
-                        <span class="spinner-border spinner-border-sm me-2"></span>
-                    }
-                    else
-                    {
-                        <i class="bi bi-cart-plus me-2"></i>
-                    }
-                    Agregar al carrito
-                </button>
-            }
-
-            <button class="btn btn-outline-secondary ms-2" @onclick="VolverAlCatalogo">
-                <i class="bi bi-arrow-left me-1"></i>Volver al catálogo
-            </button>
+    <div class="skeleton-detalle">
+        <div><div class="skeleton" style="height:460px;border-radius:18px"></div></div>
+        <div class="ps-2">
+            <div class="skeleton skeleton-text mb-3" style="width:60%;height:18px"></div>
+            <div class="skeleton skeleton-text mb-2" style="width:90%;height:32px"></div>
+            <div class="skeleton skeleton-text mb-4" style="width:40%;height:28px"></div>
+            <div class="skeleton skeleton-text mb-2" style="height:16px"></div>
+            <div class="skeleton skeleton-text mb-2" style="height:16px;width:80%"></div>
+            <div class="skeleton skeleton-btn mt-4" style="height:52px"></div>
         </div>
     </div>
 }
-else if (!_cargando)
+else
 {
-    <div class="text-center py-5 text-muted">
-        <i class="bi bi-exclamation-circle display-4"></i>
-        <p class="mt-3">Producto no encontrado.</p>
-        <a href="/" class="btn btn-primary">Ir al catálogo</a>
+    <div class="detalle-wrapper">
+
+        <!-- Imagen -->
+        <div class="detalle-img-col">
+            <div class="detalle-img">
+                <img src="@_producto.ImagenUrl" alt="@_producto.Nombre"
+                     onerror="this.src='https://placehold.co/600x600/f5f5f7/0071e3?text=@Uri.EscapeDataString(_producto.Nombre)'" />
+            </div>
+            <!-- Miniaturas colores / vistas -->
+            <div class="d-flex gap-2 mt-3 justify-content-center flex-wrap">
+                @foreach (var color in _producto.Colores)
+                {
+                    <button class="btn-apple @(_colorSeleccionado == color.Nombre ? "btn-apple-dark" : "btn-apple-white")"
+                            style="width:40px;height:40px;padding:0;border-radius:50%"
+                            @onclick="() => _colorSeleccionado = color.Nombre"
+                            title="@color.Nombre">
+                        <span style="display:block;width:20px;height:20px;background:@color.Hex;border-radius:50%;margin:auto"></span>
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="detalle-info-col">
+            <div class="producto-categoria-badge">@_producto.Categoria</div>
+            <h1 class="detalle-nombre">@_producto.Nombre</h1>
+
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="rating-stars fs-6">★★★★@(_producto.Rating >= 4.5 ? "★" : "☆")</span>
+                <span class="rating-score">@_producto.Rating — @_producto.Resenas.ToString("N0") reseñas</span>
+            </div>
+
+            <div class="detalle-precio">
+                $@_producto.Precio.ToString("N2") USD
+                @if (_producto.PrecioOriginal > 0)
+                {
+                    <span style="font-size:1rem;color:var(--apple-gray);text-decoration:line-through;margin-left:.5rem">
+                        $@_producto.PrecioOriginal.ToString("N2")
+                    </span>
+                    <span class="badge ms-2" style="background:var(--apple-red);color:#fff;font-size:.75rem">
+                        -@_producto.DescuentoPct%
+                    </span>
+                }
+            </div>
+
+            <p style="color:var(--apple-gray);font-size:.9rem;line-height:1.6;margin:.5rem 0 1rem">
+                @_producto.Descripcion
+            </p>
+
+            <!-- Color seleccionado -->
+            @if (_producto.Colores.Count > 1)
+            {
+                <div class="mb-3">
+                    <span style="font-size:.85rem;font-weight:600">Color: </span>
+                    <span style="font-size:.85rem;color:var(--apple-gray)">@_colorSeleccionado</span>
+                </div>
+            }
+
+            <!-- Cantidad -->
+            <div class="mb-3">
+                <label class="form-label">Cantidad</label>
+                <div class="qty-control">
+                    <button class="qty-btn" @onclick="() => _cantidad = Math.Max(1, _cantidad-1)" disabled="@(_cantidad <= 1)">−</button>
+                    <span class="qty-value">@_cantidad</span>
+                    <button class="qty-btn" @onclick="() => _cantidad = Math.Min(10, _cantidad+1)" disabled="@(_cantidad >= 10)">+</button>
+                </div>
+            </div>
+
+            <!-- Especificaciones -->
+            <dl class="detalle-specs">
+                @foreach (var s in _producto.Specs)
+                {
+                    <div class="spec-row">
+                        <dt>@s.Key</dt>
+                        <dd>@s.Value</dd>
+                    </div>
+                }
+            </dl>
+
+            <!-- CTA -->
+            <div class="d-flex flex-column gap-2 mt-3">
+                <button class="btn-agregar-carrito" @onclick="AgregarAlCarrito">
+                    <i class="bi bi-cart3"></i>
+                    @if (_agregando) { <span class="spinner-border spinner-border-sm"></span> }
+                    else { <span>Agregar al carrito — $@((_producto.Precio * _cantidad).ToString("N2"))</span> }
+                </button>
+                <button class="btn-apple btn-apple-ghost btn-apple-wide" @onclick="ComprarAhora">
+                    <i class="bi bi-lightning-charge-fill"></i> Comprar ahora
+                </button>
+            </div>
+
+            <!-- Trust badges -->
+            <div class="detalle-trust">
+                <span><i class="bi bi-shield-check" style="color:#34c759"></i> Garantía oficial</span>
+                <span><i class="bi bi-truck" style="color:var(--apple-blue)"></i> Envío en 24–48h</span>
+                <span><i class="bi bi-arrow-return-left" style="color:#ff9f0a"></i> 30 días devolución</span>
+                <span><i class="bi bi-lock-fill" style="color:var(--apple-gray)"></i> Pago seguro</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recomendados -->
+    <section class="py-3 mt-2">
+        <div class="section-header">
+            <h2 class="section-title">También te puede interesar</h2>
+        </div>
+        <div class="row g-3">
+            @foreach (var p in _relacionados)
+            {
+                <div class="col-6 col-md-3">
+                    <div class="producto-card cursor-pointer h-100" @onclick="() => IrAProducto(p.Id)">
+                        <img class="card-img-top" src="@p.ImagenUrl" alt="@p.Nombre"
+                             onerror="this.src='https://placehold.co/400x300/f5f5f7/0071e3?text=TecnoE'" />
+                        <div class="card-body">
+                            <div class="producto-categoria-badge">@p.Categoria</div>
+                            <h3 style="font-size:.9rem">@p.Nombre</h3>
+                            <span class="producto-precio">$@p.Precio.ToString("N0")</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@if (_mostrarToast)
+{
+    <div class="toast-container-custom">
+        <div class="toast-item toast-success">
+            <span class="toast-icon"><i class="bi bi-check-circle-fill" style="color:#34c759"></i></span>
+            <span class="toast-text">@_mensajeToast</span>
+        </div>
     </div>
 }
 
 @code {
-    /// <summary>Identificador del producto tomado de la URL.</summary>
     [Parameter] public int Id { get; set; }
 
-    private ProductoDto? _producto;
-    private int          _cantidad  = 1;
-    private bool         _cargando  = true;
-    private bool         _agregando;
-    private string       _mensaje     = string.Empty;
-    private string       _tipoMensaje = "success";
+    private record ColorOpcion(string Nombre, string Hex);
+    private record MockProductoDetalle(int Id, string Nombre, string Categoria, string CategoriaSlug,
+        decimal Precio, decimal PrecioOriginal, int DescuentoPct, string Descripcion, string ImagenUrl,
+        double Rating, int Resenas, List<(string Key, string Value)> Specs, List<ColorOpcion> Colores);
+    private record MockRelacionado(int Id, string Nombre, string Categoria, decimal Precio, string ImagenUrl);
 
-    /// <inheritdoc/>
-    protected override async Task OnParametersSetAsync()
+    private static readonly Dictionary<int, MockProductoDetalle> _catalogo = new()
     {
-        _cargando = true;
-        _producto = await ProductoServicio.ObtenerPorIdAsync(Id);
-        _cargando = false;
+        [1] = new(1, "MacBook Air M3", "Laptops", "laptops", 1299m, 1399m, 7,
+            "El MacBook Air con chip M3 es increíblemente delgado y potente. Con hasta 18 horas de batería, pantalla Liquid Retina de 13.6\" y cámara FaceTime de 1080p, es la laptop perfecta para el trabajo creativo y cotidiano.",
+            "https://placehold.co/600x600/1d1d1f/ffffff?text=MacBook+Air+M3", 4.9, 3241,
+            new() { ("Procesador","Apple M3 8-core"), ("RAM","8 GB Unified Memory"), ("Almacenamiento","SSD 256 GB"), ("Pantalla","13.6\" Liquid Retina 2560×1664"), ("Batería","Hasta 18 horas"), ("SO","macOS Sonoma"), ("Peso","1.24 kg") },
+            new() { new("Medianoche","#1c1c1e"), new("Blanco Estelar","#f2ede4"), new("Gris Espacial","#5a5a5a") }),
+
+        [2] = new(2, "iPhone 15 Pro", "Smartphones", "smartphones", 1199m, 0m, 0,
+            "El iPhone 15 Pro presenta el nuevo chip A17 Pro, carcasa de titanio grado 5, sistema de cámara Pro de 48 MP y el nuevo botón de acción personalizable. Un teléfono diseñado para los que quieren más.",
+            "https://placehold.co/600x600/3d3d3d/ffffff?text=iPhone+15+Pro", 4.8, 5102,
+            new() { ("Chip","Apple A17 Pro"), ("Pantalla","6.1\" Super Retina XDR, OLED"), ("Cámara principal","48 MP, f/1.78"), ("RAM","8 GB"), ("Almacenamiento","256 GB"), ("Batería","3274 mAh"), ("5G","Sí"), ("SO","iOS 17") },
+            new() { new("Titanio Negro","#292929"), new("Titanio Natural","#a8a29e"), new("Titanio Azul","#486b8a"), new("Titanio Blanco","#e8e3dd") }),
+
+        [3] = new(3, "Samsung Galaxy S24", "Smartphones", "smartphones", 999m, 1099m, 9,
+            "El Galaxy S24 potenciado por Galaxy AI redefine el smartphone. Snapdragon 8 Gen 3, cámara de 50 MP, pantalla Dynamic AMOLED 2X de 6.2\" y Galaxy AI para traducción en tiempo real y Circle to Search.",
+            "https://placehold.co/600x600/0a1628/ffffff?text=Galaxy+S24", 4.7, 2874,
+            new() { ("Procesador","Snapdragon 8 Gen 3"), ("RAM","8 GB"), ("Almacenamiento","256 GB"), ("Pantalla","6.2\" Dynamic AMOLED 2X, 120Hz"), ("Cámara","50 + 12 + 10 MP"), ("Batería","4000 mAh"), ("5G","Sí"), ("SO","Android 14, One UI 6.1") },
+            new() { new("Onyx Black","#1c1c1e"), new("Marble Gray","#9b9590"), new("Cobalt Violet","#4d3f70"), new("Amber Yellow","#c8a84b") }),
+
+        [4] = new(4, "ASUS VivoBook 15", "Laptops", "laptops", 899m, 0m, 0,
+            "Productividad sin compromiso: Intel Core i7 de 13.ª generación, 16GB RAM, SSD de 512GB y pantalla FHD IPS 90Hz para un trabajo fluido todo el día.",
+            "https://placehold.co/600x600/0071e3/ffffff?text=ASUS+VivoBook", 4.5, 987,
+            new() { ("Procesador","Intel Core i7-1355U"), ("RAM","16 GB DDR4"), ("Almacenamiento","SSD 512 GB NVMe"), ("Pantalla","15.6\" FHD IPS, 90Hz"), ("GPU","Intel Iris Xe"), ("Batería","Hasta 10 horas"), ("SO","Windows 11 Home") },
+            new() { new("Tranquil Grey","#8e9aaf"), new("Indie Black","#181818") }),
+
+        [5] = new(5, "LG UltraWide 34\"", "Monitores", "monitores", 449m, 499m, 10,
+            "Monitor curvo IPS UltraWide de 34\", resolución WQHD 3440×1440, 100Hz, HDR10, AMD FreeSync Premium y altavoces integrados. El espacio de trabajo definitivo.",
+            "https://placehold.co/600x600/059669/ffffff?text=LG+UltraWide+34", 4.6, 654,
+            new() { ("Tamaño","34\" Curvo (1800R)"), ("Resolución","WQHD 3440×1440"), ("Panel","IPS"), ("Tasa de refresco","100 Hz"), ("HDR","HDR10"), ("Puertos","2× HDMI 2.0, 1× DisplayPort 1.4, USB-C"), ("Altavoces","Sí, 14W") },
+            new() { new("Negro","#1c1c1e") }),
+
+        [6] = new(6, "Keychron K2 V2", "Accesorios", "accesorios", 89m, 0m, 0,
+            "Teclado mecánico tenkeyless (TKL) con retroiluminación RGB, conexión inalámbrica Bluetooth 5.1 o USB-C, batería de 4000 mAh. Compatible con Mac, Windows y iOS.",
+            "https://placehold.co/600x600/d97706/ffffff?text=Keychron+K2", 4.8, 1432,
+            new() { ("Layout","75% TKL"), ("Switch","Gateron Brown"), ("Conexión","Bluetooth 5.1 / USB-C"), ("Batería","4000 mAh"), ("Compatibilidad","macOS, Windows, iOS, Android"), ("Retroiluminación","RGB por tecla") },
+            new() { new("Aluminio Gris","#8e9aaf"), new("Negro","#1c1c1e") }),
+
+        [7] = new(7, "RTX 4060 8GB", "Gaming", "gaming", 399m, 449m, 11,
+            "La NVIDIA GeForce RTX 4060 con arquitectura Ada Lovelace ofrece rendimiento excepcional en 1080p y 1440p. DLSS 3, Frame Generation y Ray Tracing de última generación.",
+            "https://placehold.co/600x600/7c3aed/ffffff?text=RTX+4060", 4.7, 2103,
+            new() { ("GPU","NVIDIA GeForce RTX 4060"), ("VRAM","8 GB GDDR6X"), ("TDP","115W"), ("Conectores","1× HDMI 2.1, 3× DP 1.4a"), ("DLSS","3.0 / Frame Gen"), ("DirectX","12 Ultimate"), ("Ray Tracing","Sí") },
+            new() { new("Black","#1c1c1e") }),
+
+        [8] = new(8, "HyperX Cloud III", "Gaming", "gaming", 149m, 0m, 0,
+            "Auriculares gaming premium con drivers de 53mm, sonido DTS Headphone:X espacial, micrófono retráctil con cancelación de ruido y conexión USB-C / 3.5mm.",
+            "https://placehold.co/600x600/dc2626/ffffff?text=HyperX+Cloud+III", 4.6, 876,
+            new() { ("Drivers","53 mm, neodimio"), ("Respuesta en frecuencia","10 Hz – 21 kHz"), ("Micrófono","Retráctil, cardioide"), ("Conexión","USB-C / 3.5 mm"), ("DTS","Headphone:X"), ("Peso","320 g") },
+            new() { new("Negro/Rojo","#dc2626"), new("Negro","#1c1c1e") }),
+    };
+
+    private MockProductoDetalle? _producto;
+    private int    _cantidad = 1;
+    private string _colorSeleccionado = string.Empty;
+    private bool   _agregando = false;
+    private bool   _mostrarToast = false;
+    private string _mensajeToast = string.Empty;
+
+    private List<MockRelacionado> _relacionados = new();
+
+    protected override void OnParametersSet()
+    {
+        _catalogo.TryGetValue(Id, out _producto);
+        _colorSeleccionado = _producto?.Colores.FirstOrDefault()?.Nombre ?? string.Empty;
+        _cantidad = 1;
+        _relacionados = _catalogo.Values
+            .Where(p => p.Id != Id && p.CategoriaSlug == _producto?.CategoriaSlug)
+            .Take(4)
+            .Select(p => new MockRelacionado(p.Id, p.Nombre, p.Categoria, p.Precio, p.ImagenUrl))
+            .ToList();
+        if (_relacionados.Count < 4)
+        {
+            _relacionados.AddRange(_catalogo.Values
+                .Where(p => p.Id != Id && !_relacionados.Any(r => r.Id == p.Id))
+                .Take(4 - _relacionados.Count)
+                .Select(p => new MockRelacionado(p.Id, p.Nombre, p.Categoria, p.Precio, p.ImagenUrl)));
+        }
     }
 
-    /// <summary>Navega de regreso al catálogo principal.</summary>
-    private void VolverAlCatalogo() => Navegacion.NavigateTo("/");
-
-    /// <summary>Aumenta o disminuye la cantidad en el rango válido.</summary>
-    private void AjustarCantidad(int delta)
-    {
-        _cantidad = Math.Clamp(_cantidad + delta, 1, _producto?.Stock ?? 1);
-    }
-
-    /// <summary>Agrega el producto al carrito si el usuario está autenticado.</summary>
     private async Task AgregarAlCarrito()
     {
-        if (!Sesion.EstaAutenticado)
-        {
-            _tipoMensaje = "warning";
-            _mensaje = "Debes iniciar sesión para agregar productos al carrito.";
-            return;
-        }
-
+        if (_producto == null) return;
         _agregando = true;
-        var dto      = new AgregarItemCarritoDto { ProductoId = Id, Cantidad = _cantidad };
-        var carrito  = await CarritoServicio.AgregarItemAsync(dto);
-        _agregando   = false;
+        await Task.Delay(600);
+        _agregando = false;
+        await MostrarToast($"✓ {_producto.Nombre} añadido al carrito");
+    }
 
-        _tipoMensaje = carrito is not null ? "success" : "danger";
-        _mensaje     = carrito is not null
-            ? $"{_cantidad} × {_producto!.Nombre} agregado(s) al carrito."
-            : "No se pudo agregar el producto. Inténtalo de nuevo.";
+    private void IrAProducto(int id) => Navegacion.NavigateTo("/producto/" + id);
+
+    private void ComprarAhora()
+    {
+        Navegacion.NavigateTo("/carrito");
+    }
+
+    private async Task MostrarToast(string msg)
+    {
+        _mensajeToast = msg;
+        _mostrarToast = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        _mostrarToast = false;
+        StateHasChanged();
     }
 }

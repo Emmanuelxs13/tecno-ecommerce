@@ -3,7 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TecnoEcommerce</title>
+    <title>TecnoEcommerce — Tecnología para tu vida</title>
+    <meta
+      name="description"
+      content="Descubre laptops, smartphones, accesorios gaming y más. Envío gratis, garantía oficial y la mejor experiencia de compra en tecnología."
+    />
+    <meta name="theme-color" content="#1d1d1f" />
+    <meta
+      property="og:title"
+      content="TecnoEcommerce — Tecnología para tu vida"
+    />
+    <meta
+      property="og:description"
+      content="Laptops, smartphones, gaming y accesorios. Los mejores precios con envío gratis."
+    />
+    <meta property="og:type" content="website" />
     <base href="/" />
 
     <!-- Bootstrap 5 — Framework CSS principal -->
@@ -68,6 +82,18 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmM8Sq3JZLJPWPElcijjK3A0X6X4"
       crossorigin="anonymous"
     ></script>
+
+    <!-- Utilidades JS expuestas a Blazor via IJSRuntime -->
+    <script>
+      // Cierra el collapse del navbar en pantallas móviles (Bootstrap 5)
+      window.cerrarNavbarMovil = function () {
+        const nav = document.getElementById("navPrincipal");
+        if (nav && nav.classList.contains("show")) {
+          const bsCollapse = bootstrap.Collapse.getInstance(nav);
+          if (bsCollapse) bsCollapse.hide();
+        }
+      };
+    </script>
 
     <!-- Motor del lado del cliente de Blazor WebAssembly -->
     <script src="_framework/blazor.webassembly.js"></script>
