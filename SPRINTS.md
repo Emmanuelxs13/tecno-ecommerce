@@ -60,13 +60,13 @@ Framework: **.NET 8 Web API**
 **Carpeta**: `Servicios/`  
 **Objetivo**: Implementar la lógica de negocio de la aplicación.
 
-- [ ] `UsuarioServicio.cs` — Registro, login, perfil
-- [ ] `ProductoServicio.cs` — Listar, buscar, filtrar productos
-- [ ] `CategoriaServicio.cs` — Gestión de categorías
-- [ ] `CarritoServicio.cs` — Agregar, eliminar, vaciar carrito
-- [ ] `PedidoServicio.cs` — Crear pedido, consultar historial
-- [ ] `PagoSimuladoServicio.cs` — Simular procesamiento de pago
-- [ ] `EnvioSimuladoServicio.cs` — Simular seguimiento de envío
+- [x] `UsuarioServicio.cs` — Registro, login, perfil
+- [x] `ProductoServicio.cs` — Listar, buscar, filtrar productos
+- [x] `CategoriaServicio.cs` — Gestión de categorías
+- [x] `CarritoServicio.cs` — Agregar, eliminar, vaciar carrito
+- [x] `PedidoServicio.cs` — Crear pedido, consultar historial
+- [x] `PagoSimuladoServicio.cs` — Simular procesamiento de pago
+- [x] `EnvioSimuladoServicio.cs` — Simular seguimiento de envío
 
 ---
 
