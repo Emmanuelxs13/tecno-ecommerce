@@ -1,232 +1,300 @@
-# TecnoEcommerce
+﻿# TecnoEcommerce
 
-Plataforma de comercio electronico desarrollada con **.NET 8** aplicando la arquitectura **Modelo - Vista - Controlador (MVC)**, dividida en tres proyectos independientes que representan cada capa de la arquitectura.
+Plataforma de comercio electrónico desarrollada con **.NET 9** aplicando la arquitectura **Modelo - Vista - Controlador (MVC)**, distribuida en cuatro proyectos .NET independientes que separan claramente las responsabilidades del sistema.
 
 ---
 
-## ¿Que es la Arquitectura MVC?
+## ¿Qué es la Arquitectura MVC?
 
-**MVC (Modelo - Vista - Controlador)** es un patron de diseño de software que separa una aplicacion en tres capas con responsabilidades bien definidas. El objetivo principal es que cada parte del sistema se encargue de una sola cosa, lo que hace el codigo mas organizado, facil de entender y de mantener.
+**MVC (Modelo - Vista - Controlador)** es un patrón de diseño de software que divide la aplicación en tres capas con responsabilidades bien definidas, haciendo el código más organizado, fácil de entender y de mantener.
 
 ```
 +-------------------+       +-------------------+       +-------------------+
 |                   |       |                   |       |                   |
-|      MODELO       | <---- |   CONTROLADOR     | <---- |   CLIENTE/VISTA   |
-|                   |       |                   |       |  (Swagger / App)  |
-|  - Entidades      |       |  - Recibe la      |       |                   |
-|  - Reglas de      |       |    solicitud HTTP |       |  Envia peticiones |
-|    negocio        |       |  - Llama al       |       |  GET, POST, PUT,  |
-|  - Acceso a BD    |       |    Servicio       |       |  DELETE           |
-|                   |       |  - Devuelve       |       |                   |
-|                   | ----> |    la respuesta   | ----> |                   |
+|      MODELO       | <---- |   CONTROLADOR     | <---- |   VISTA           |
+|                   |       |                   |       |  (Blazor WASM)    |
+|  - Entidades      |       |  - Recibe HTTP    |       |                   |
+|  - Reglas de      |       |  - Delega al      |       |  Componentes .razor
+|    negocio        |       |    Servicio       |       |  Páginas de UI    |
+|  - Repositorios   |       |  - Devuelve JSON  |       |                   |
+|                   | ----> |                   | ----> |                   |
 +-------------------+       +-------------------+       +-------------------+
 ```
 
-### Las tres capas explicadas
+### Las tres capas en TecnoEcommerce
 
-#### M — Modelo (TecnoEcommerce.Modelos + TecnoEcommerce.Datos)
-Es el corazon de la aplicacion. Contiene:
-- **Las entidades**: las clases que representan los datos del negocio (Producto, Usuario, Pedido, etc.)
-- **Las interfaces**: los contratos que definen que operaciones se pueden hacer
-- **El acceso a datos**: la conexion con la base de datos a traves de Entity Framework Core
-- **Los repositorios**: las clases que ejecutan las consultas a la base de datos
+| Capa            | Proyecto(s)                                       | Responsabilidad                                   |
+| --------------- | ------------------------------------------------- | ------------------------------------------------- |
+| **M**odelo      | `TecnoEcommerce.Modelos` + `TecnoEcommerce.Datos` | Entidades, DTOs, interfaces, acceso a datos       |
+| **V**ista       | `TecnoEcommerce.Web` (Blazor WASM)                | UI en el navegador, llama a la API via HttpClient |
+| **C**ontrolador | `TecnoEcommerce.API` – carpeta `Controladores/`   | Endpoints REST, delega lógica a `Servicios/`      |
 
-> El Modelo NO sabe nada sobre como se muestra la informacion ni quien la pidio.
-> Solo sabe como guardar, leer y manipular datos.
-
-#### V — Vista (Cliente externo)
-En una API REST, la Vista no es una pagina web dentro del proyecto.
-La Vista es el **cliente que consume la API**: puede ser Swagger, una app movil, un frontend en React/Angular, o cualquier aplicacion externa que haga peticiones HTTP.
-
-> En este proyecto, Swagger hace las veces de Vista durante el desarrollo.
-
-#### C — Controlador (TecnoEcommerce.API — Controladores y Servicios)
-Es el intermediario entre la Vista y el Modelo. Su trabajo es:
-1. Recibir la solicitud HTTP del cliente (GET /api/productos)
-2. Delegar la logica al Servicio correspondiente
-3. Pedir los datos al Repositorio (a traves del Servicio)
-4. Devolver la respuesta HTTP con los datos al cliente
-
-> El Controlador NO contiene logica de negocio compleja. Solo coordina.
-> La logica vive en los Servicios.
-
-### Flujo de una solicitud en TecnoEcommerce
+### Flujo de una solicitud
 
 ```
-Cliente (Swagger)
-      |
-      | GET /api/productos
-      v
-ProductosControlador       <- Recibe la peticion HTTP
-      |
-      | llama a
-      v
-ProductoServicio           <- Aplica la logica de negocio
-      |
-      | llama a
-      v
-ProductoRepositorio        <- Consulta la base de datos
-      |
-      | usa
-      v
-TecnoEcommerceContexto     <- Entity Framework Core / SQL Server
-      |
-      | devuelve datos
-      v
-ProductoServicio           <- Prepara la respuesta (DTO)
-      |
-      v
-ProductosControlador       <- Devuelve HTTP 200 OK + JSON
-      |
-      v
-Cliente (Swagger)          <- Muestra el resultado
+Blazor (navegador)
+      │  GET /api/productos
+      ▼
+ProductosController        ← Recibe la petición HTTP
+      │  llama a
+      ▼
+ProductoServicio            ← Aplica la lógica de negocio
+      │  llama a
+      ▼
+IProductoRepositorio        ← Acceso a datos (en memoria ahora / EF Core en Sprint 4)
+      │  devuelve datos
+      ▼
+ProductoServicio            ← Mapea a DTO
+      ▼
+ProductosController         ← HTTP 200 OK + JSON
+      ▼
+Blazor (navegador)          ← Renderiza los productos
 ```
 
 ---
 
 ## Estructura del Proyecto
 
-Este proyecto implementa MVC dividido en **3 proyectos de .NET** independientes:
-
 ```
 TecnoEcommerce.sln
-|
-+-- TecnoEcommerce.Modelos      (Capa M — parte 1: definicion)
-+-- TecnoEcommerce.Datos        (Capa M — parte 2: acceso a datos)
-+-- TecnoEcommerce.API          (Capa C — controladores y servicios)
+├── TecnoEcommerce.Modelos      ← Capa M parte 1: definición del dominio
+├── TecnoEcommerce.Datos        ← Capa M parte 2: acceso a datos (EF Core, Sprint 4)
+├── TecnoEcommerce.API          ← Capa C: API REST (controladores + servicios)
+└── TecnoEcommerce.Web          ← Capa V: frontend Blazor WebAssembly
 ```
 
 ### Dependencias entre proyectos
 
 ```
+TecnoEcommerce.Web
+    └── HttpClient → TecnoEcommerce.API
+
 TecnoEcommerce.API
-    |-- referencia --> TecnoEcommerce.Modelos
-    |-- referencia --> TecnoEcommerce.Datos
+    ├── → TecnoEcommerce.Modelos
+    └── → TecnoEcommerce.Datos
 
 TecnoEcommerce.Datos
-    |-- referencia --> TecnoEcommerce.Modelos
+    └── → TecnoEcommerce.Modelos
 
 TecnoEcommerce.Modelos
-    (no depende de nadie)
+    (sin dependencias externas)
 ```
-
-La regla es: las capas superiores conocen a las inferiores, pero nunca al reves.
 
 ---
 
 ## Detalle de cada Proyecto
 
-### TecnoEcommerce.Modelos — Definicion del Negocio
+### TecnoEcommerce.Modelos
 
-Este proyecto es el nucleo de toda la aplicacion. Define **que existe** en el sistema sin importar como se guarda o quien lo pide.
+| Carpeta          | Contenido                                                                                                                                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Entidades/`     | Usuario, Producto, Categoria, Carrito, ItemCarrito, Pedido, DetallePedido, Envio                                                                                                                            |
+| `Enumeraciones/` | Rol, EstadoPedido, EstadoPago, EstadoEnvio                                                                                                                                                                  |
+| `DTOs/`          | Objetos de transferencia (entrada/salida de la API)                                                                                                                                                         |
+| `Interfaces/`    | IRepositorio\<T\>, IProductoRepositorio, ICarritoRepositorio, IPedidoRepositorio, IUsuarioServicio, IProductoServicio, ICategoriaServicio, ICarritoServicio, IPedidoServicio, IPagoServicio, IEnvioServicio |
 
-| Carpeta | Que contiene | Para que sirve |
-|---------|-------------|----------------|
-| `Entidades/` | Clases C# (Usuario, Producto, Pedido...) | Representan las tablas de la base de datos y los objetos del negocio |
-| `Enumeraciones/` | Enums (Rol, EstadoPedido...) | Definen valores fijos y controlados, evitan "magic strings" |
-| `DTOs/` | Clases de transferencia de datos | Controlan que informacion entra y sale de la API (sin exponer la entidad completa) |
-| `Interfaces/` | Contratos (IRepositorio, IServicio...) | Definen que metodos deben implementar los repositorios y servicios |
+### TecnoEcommerce.Datos
 
-**Entidades planificadas**: Usuario, Producto, Categoria, Carrito, ItemCarrito, Pedido, DetallePedido, Envio
+| Carpeta         | Contenido                                      |
+| --------------- | ---------------------------------------------- |
+| `Contexto/`     | `TecnoEcommerceContexto` (DbContext, Sprint 4) |
+| `Repositorios/` | Repositorios EF Core (Sprint 4)                |
 
-**Enumeraciones planificadas**: Rol, EstadoPedido, EstadoPago, EstadoEnvio
+### TecnoEcommerce.API
 
-**Interfaces planificadas**: IRepositorio, IProductoRepositorio, ICarritoRepositorio, IPedidoRepositorio, IPagoServicio, IEnvioServicio
+| Carpeta          | Contenido                                                                                                                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Controladores/` | UsuariosController, ProductosController, CategoriasController, CarritoController, PedidosController                                                                                                                |
+| `Servicios/`     | UsuarioServicio, ProductoServicio, CategoriaServicio, CarritoServicio, PedidoServicio, PagoSimuladoServicio, EnvioSimuladoServicio                                                                                 |
+| `Repositorios/`  | Implementaciones en memoria (temporales hasta Sprint 4): RepositorioEnMemoria\<T\>, ProductoRepositorioEnMemoria, CarritoRepositorioEnMemoria, PedidoRepositorioEnMemoria, EnvioRepositorioEnMemoria, DatosSemilla |
 
----
+### TecnoEcommerce.Web (Blazor WASM)
 
-### TecnoEcommerce.Datos — Acceso a la Base de Datos
-
-Este proyecto se encarga exclusivamente de comunicarse con SQL Server usando **Entity Framework Core**.
-
-| Carpeta | Que contiene | Para que sirve |
-|---------|-------------|----------------|
-| `Contexto/` | TecnoEcommerceContexto.cs | Es el DbContext de EF Core. Representa la base de datos y todas sus tablas como colecciones de objetos C# |
-| `Repositorios/` | Repositorio.cs, ProductoRepositorio.cs... | Implementan las interfaces definidas en Modelos. Aqui estan las consultas reales a la BD (SELECT, INSERT, UPDATE, DELETE) |
-
-**¿Por que un Repositorio separado del Controlador?**
-Porque si mañana se cambia SQL Server por MongoDB o se cambia EF Core por Dapper, solo se modifica este proyecto. El resto de la aplicacion no se entera del cambio.
-
----
-
-### TecnoEcommerce.API — Controladores y Servicios
-
-Este proyecto es el punto de entrada de la aplicacion. Expone la API REST y contiene la logica de negocio.
-
-| Carpeta | Que contiene | Para que sirve |
-|---------|-------------|----------------|
-| `Controladores/` | Clases que heredan de `ControllerBase` | Reciben las peticiones HTTP, validan los datos de entrada y devuelven respuestas HTTP. Son el punto de contacto con el cliente. |
-| `Servicios/` | Clases de logica de negocio | Aqui vive la logica compleja: calcular totales, validar stock, procesar pagos, coordinar entre repositorios. Los controladores los llaman en lugar de hacer la logica ellos mismos. |
-
-**Controladores planificados**: UsuariosControlador, ProductosControlador, CategoriasControlador, CarritoControlador, PedidosControlador
-
-**Servicios planificados**: UsuarioServicio, ProductoServicio, CategoriaServicio, CarritoServicio, PedidoServicio, PagoSimuladoServicio, EnvioSimuladoServicio
+| Carpeta      | Contenido                                                                                                            |
+| ------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `Pages/`     | Inicio, ProductoDetalle, Carrito, Login, Registro, MisPedidos                                                        |
+| `Shared/`    | NavMenu, MainLayout, ProductoCard, CargandoSpinner, MensajeAlerta                                                    |
+| `Servicios/` | SesionServicio, UsuarioApiServicio, ProductoApiServicio, CategoriaApiServicio, CarritoApiServicio, PedidoApiServicio |
 
 ---
 
-## Tecnologias
+## Tecnologías
 
-| Tecnologia            | Version | Uso en el proyecto               |
-|-----------------------|---------|----------------------------------|
-| .NET                  | 8.0     | Framework principal              |
-| ASP.NET Core Web API  | 8.0     | Capa de Controladores (API REST) |
-| Entity Framework Core | 8.x     | Acceso a datos en capa Datos     |
-| SQL Server / LocalDB  | -       | Base de datos relacional         |
-| Swashbuckle (Swagger) | 6.x     | Vista durante desarrollo         |
+| Tecnología            | Versión | Uso                       |
+| --------------------- | ------- | ------------------------- |
+| .NET                  | 9.0     | Framework principal       |
+| ASP.NET Core Web API  | 9.0     | API REST (Controladores)  |
+| Blazor WebAssembly    | 9.0     | Frontend (Vista)          |
+| Entity Framework Core | 9.x     | Acceso a datos (Sprint 4) |
+| PostgreSQL            | -       | Base de datos (Sprint 4)  |
+| Swagger / Scalar      | -       | Documentación de la API   |
 
 ---
 
 ## Plan de Sprints
 
-| Sprint   | Capa              | Objetivo                                   |
-|----------|-------------------|--------------------------------------------|
-| Sprint 1 | Modelos           | Entidades, Enumeraciones e Interfaces      |
-| Sprint 2 | API / Servicios   | Implementacion de servicios de negocio     |
-| Sprint 3 | Datos             | DbContext, EF Core, Repositorios y migracion |
-| Sprint 4 | API / Controladores | Controladores REST y configuracion Swagger |
-| Sprint 5 | Integracion       | Pruebas end-to-end y ajustes finales       |
+| Sprint   | Capa            | Estado        | Objetivo                               |
+| -------- | --------------- | ------------- | -------------------------------------- |
+| Sprint 0 | Solución        | ✅ Completado | Estructura base de 4 proyectos         |
+| Sprint 1 | Modelos         | ✅ Completado | Entidades, Enumeraciones, Interfaces   |
+| Sprint 2 | API / Servicios | ✅ Completado | Implementación de servicios de negocio |
+| Sprint 3 | Web (Blazor)    | ✅ Completado | UI completa, servicios API, CORS       |
+| Sprint 4 | Datos           | 🔜 Siguiente  | EF Core + PostgreSQL + migraciones     |
+| Sprint 5 | Integración     | 🔜 Pendiente  | Pruebas end-to-end y refinamiento      |
 
-Ver el archivo [SPRINTS.md](SPRINTS.md) para el detalle completo de cada sprint.
-
----
-
-## Requisitos Previos
-
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8)
-- SQL Server LocalDB (incluido con Visual Studio 2022)
-- Visual Studio 2022 o VS Code
+Ver [SPRINTS.md](SPRINTS.md) para el detalle completo.
 
 ---
 
-## Primeros Pasos
+## Cómo Ejecutar y Probar la Aplicación
+
+### Requisitos Previos
+
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9)
+- Visual Studio 2022 (17.8+) o VS Code con extensión C#
+- Un navegador moderno (Chrome, Edge, Firefox)
+
+> **Nota:** En este Sprint 3 la API usa repositorios **en memoria**.
+> No se necesita instalar ninguna base de datos para probar la aplicación.
+> Los datos se reinician cada vez que se detiene la API.
+
+---
+
+### Paso 1 — Clonar y restaurar
 
 ```bash
-# Clonar el repositorio
 git clone https://github.com/Emmanuelxs13/tecno-ecommerce.git
 cd tecno-ecommerce
 
-# Restaurar paquetes NuGet
 dotnet restore
-
-# Compilar toda la solucion
 dotnet build
-
-# Ejecutar la API (disponible a partir del Sprint 3)
-cd TecnoEcommerce.API
-dotnet run
 ```
-
-Una vez ejecutando, abrir en el navegador: `https://localhost:PORT/` para ver Swagger.
 
 ---
 
-## Cadena de Conexion
+### Paso 2 — Ejecutar la API
 
-Configurada en `TecnoEcommerce.API/appsettings.json`:
+Abrir una terminal en la raíz del repositorio y ejecutar:
+
+```bash
+dotnet run --project TecnoEcommerce.API/TecnoEcommerce.API.csproj
+```
+
+La API estará disponible en:
+
+| URL                      | Descripción                     |
+| ------------------------ | ------------------------------- |
+| `http://localhost:5247`  | API REST (HTTP)                 |
+| `http://localhost:5247/` | Swagger UI (solo en desarrollo) |
+
+> Al iniciar, la API carga automáticamente **4 categorías** y **8 productos** de ejemplo.
+
+---
+
+### Paso 3 — Ejecutar el Frontend Blazor
+
+Abrir una **segunda terminal** en la raíz del repositorio:
+
+```bash
+dotnet run --project TecnoEcommerce.Web/TecnoEcommerce.Web.csproj
+```
+
+El frontend estará disponible en:
+
+| URL                      | Descripción         |
+| ------------------------ | ------------------- |
+| `http://localhost:5074`  | Blazor WASM (HTTP)  |
+| `https://localhost:7154` | Blazor WASM (HTTPS) |
+
+---
+
+### Paso 4 — Probar el flujo completo
+
+Abrir `http://localhost:5074` en el navegador y seguir esta secuencia:
+
+#### 1. Registro e inicio de sesión
+
+- Ir a **Registro** (menú superior)
+- Completar el formulario y crear la cuenta
+- Ir a **Login** e iniciar sesión con el usuario creado
+
+#### 2. Explorar el catálogo
+
+- La página de **Inicio** muestra los 8 productos de ejemplo
+- Usar el buscador o filtrar por categoría
+- Hacer clic en cualquier producto para ver su detalle
+
+#### 3. Carrito de compras
+
+- Desde la página de detalle, hacer clic en **"Agregar al carrito"**
+- Ir a **Carrito** (menú superior)
+- Verificar que el producto aparece con su precio y cantidad
+- Se puede aumentar/disminuir cantidad o eliminar items
+
+#### 4. Realizar un pedido
+
+- Desde el carrito, hacer clic en **"Proceder al pago"**
+- Ingresar una dirección de entrega
+- Confirmar el pedido (el pago y envío son simulados)
+
+#### 5. Historial de pedidos
+
+- Ir a **Mis Pedidos** (menú superior)
+- Verificar que el pedido creado aparece con su estado
+
+---
+
+### Probar la API directamente con Swagger
+
+Navegar a `http://localhost:5247/` para acceder a Swagger UI.
+
+Endpoints disponibles:
+
+| Método | Ruta                                      | Descripción                |
+| ------ | ----------------------------------------- | -------------------------- |
+| POST   | `/api/usuarios/registro`                  | Crear cuenta               |
+| POST   | `/api/usuarios/login`                     | Iniciar sesión             |
+| GET    | `/api/productos`                          | Listar todos los productos |
+| GET    | `/api/productos/{id}`                     | Obtener producto por ID    |
+| GET    | `/api/productos/categoria/{id}`           | Productos por categoría    |
+| GET    | `/api/productos/buscar?nombre=...`        | Buscar por nombre          |
+| GET    | `/api/categorias`                         | Listar categorías          |
+| GET    | `/api/carrito/{usuarioId}`                | Ver carrito del usuario    |
+| POST   | `/api/carrito/{usuarioId}/items`          | Agregar item al carrito    |
+| DELETE | `/api/carrito/{usuarioId}/items/{itemId}` | Eliminar item              |
+| POST   | `/api/pedidos/{usuarioId}`                | Crear pedido               |
+| GET    | `/api/pedidos/mis-pedidos/{usuarioId}`    | Ver mis pedidos            |
+
+---
+
+## Datos de Ejemplo (Precargados)
+
+Al iniciar la API se cargan automáticamente:
+
+**Categorías:** Laptops, Smartphones, Accesorios, Gaming
+
+**Productos:**
+
+| Nombre                   | Categoría   | Precio    |
+| ------------------------ | ----------- | --------- |
+| ASUS VivoBook 15         | Laptops     | $899.99   |
+| MacBook Air M2           | Laptops     | $1,299.99 |
+| iPhone 15 Pro            | Smartphones | $1,199.99 |
+| Samsung Galaxy S24       | Smartphones | $999.99   |
+| Monitor LG UltraWide 34" | Accesorios  | $449.99   |
+| Teclado Keychron K2      | Accesorios  | $89.99    |
+| NVIDIA GeForce RTX 4060  | Gaming      | $399.99   |
+| HyperX Cloud III         | Gaming      | $149.99   |
+
+---
+
+## Cadena de Conexión (Sprint 4)
+
+Configurada en `TecnoEcommerce.API/appsettings.json` (se activa en Sprint 4):
 
 ```json
 "ConnectionStrings": {
-  "ConexionPrincipal": "Server=(localdb)\\mssqllocaldb;Database=TecnoEcommerceDB;Trusted_Connection=True;MultipleActiveResultSets=true"
+  "ConexionPrincipal": "Host=localhost;Database=TecnoEcommerceDB;Username=postgres;Password=tu_password"
 }
 ```
 
@@ -235,12 +303,15 @@ Configurada en `TecnoEcommerce.API/appsettings.json`:
 ## Autores
 
 - Juan Esteban Correa
-- Andrés Quiroz Gomez
-- Emmanuel Berrio
+- Andrés Quiroz Gómez
+- Emmanuel Berrío
 
 ---
 
 ## Estado del Proyecto
 
-> Sprint 0 completado — Arquitectura base MVC creada y compilando sin errores.
-> Esperando inicio del Sprint 1.
+> **Sprint 3 completado** — Frontend Blazor WebAssembly + API REST con repositorios en memoria.
+> La aplicación es completamente funcional para pruebas sin base de datos.
+> Próximo: Sprint 4 — Migración a EF Core + PostgreSQL.
+
+---

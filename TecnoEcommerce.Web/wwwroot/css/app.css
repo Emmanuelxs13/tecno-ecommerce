@@ -1,0 +1,479 @@
+﻿/* ================================================================
+   TecnoEcommerce — Hoja de estilos principal
+   Diseño: Tech e-commerce moderno, paleta azul-índigo cohesiva.
+   ================================================================ */
+
+/* ── Variables de diseño ────────────────────────────────────────── */
+:root {
+  /* Colores de marca */
+  --primary: #2563eb; /* azul brillante */
+  --primary-dark: #1d4ed8;
+  --primary-deeper: #1e3a8a;
+  --accent: #06b6d4; /* cian tecnológico */
+  --teco-primary: #2563eb;
+
+  /* Fondos */
+  --bg-app: #f1f5fb;
+  --bg-card: #ffffff;
+
+  /* Texto */
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+
+  /* Sombras */
+  --shadow-sm:
+    0 1px 3px rgba(15, 23, 42, 0.1), 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.12);
+  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.14);
+
+  /* Navbar gradient */
+  --nav-gradient: linear-gradient(
+    135deg,
+    #1e3a8a 0%,
+    #2563eb 60%,
+    #0ea5e9 100%
+  );
+
+  /* Hero gradient */
+  --hero-gradient: linear-gradient(
+    135deg,
+    #1e3a8a 0%,
+    #2563eb 55%,
+    #06b6d4 100%
+  );
+
+  --teco-card-shadow: var(--shadow-md);
+}
+
+/* ── Reset / Base ───────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main.container {
+  flex: 1;
+}
+
+/* ── Barra de navegación ────────────────────────────────────────── */
+.navbar-tecno {
+  background: var(--nav-gradient) !important;
+  box-shadow: 0 2px 12px rgba(30, 58, 138, 0.35);
+}
+
+.navbar-brand {
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.3px;
+  color: #fff !important;
+}
+
+.navbar-brand .brand-icon {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 4px 7px;
+  margin-right: 6px;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-weight: 500;
+  transition: color 0.15s;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem !important;
+}
+.nav-link:hover,
+.nav-link.active {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-nav-registro {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff !important;
+  border-radius: 20px;
+  padding: 0.35rem 1.1rem !important;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.btn-nav-registro:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.dropdown-menu {
+  border: none;
+  box-shadow: var(--shadow-lg);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* ── Hero banner ────────────────────────────────────────────────── */
+.hero-banner {
+  background: var(--hero-gradient);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-banner .hero-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+}
+.hero-banner .hero-sub {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+.hero-banner .hero-icon {
+  font-size: 5rem;
+  color: rgba(255, 255, 255, 0.18);
+  line-height: 1;
+}
+
+/* ── Filtros de búsqueda ────────────────────────────────────────── */
+.filtros-container {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Tarjetas de producto ───────────────────────────────────────── */
+.producto-card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+.producto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+.producto-card .card-img-top {
+  height: 200px;
+  object-fit: cover;
+  background: #e8eef8;
+}
+.producto-categoria-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #eff6ff;
+  color: var(--primary);
+  border: 1px solid #bfdbfe;
+  border-radius: 20px;
+  padding: 0.25em 0.75em;
+  display: inline-block;
+}
+.producto-precio {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+/* ── Botones personalizados ─────────────────────────────────────── */
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  font-weight: 600;
+  border-radius: 10px;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+}
+.btn-primary:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+.btn-outline-primary {
+  border-color: var(--primary);
+  color: var(--primary);
+  border-radius: 10px;
+  font-weight: 600;
+}
+.btn-outline-primary:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ── Inputs y formularios ───────────────────────────────────────── */
+.form-control,
+.form-select {
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  font-size: 0.95rem;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.input-group-text {
+  background: #eff6ff;
+  border: 1.5px solid #cbd5e1;
+  color: var(--primary);
+  border-radius: 10px 0 0 10px;
+}
+.input-group .form-control {
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+}
+.form-label {
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 0.35rem;
+}
+
+/* ── Tarjeta de auth (login / registro) ─────────────────────────── */
+.auth-wrapper {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+.auth-card {
+  border: none;
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 440px;
+  overflow: hidden;
+}
+.auth-card-header {
+  background: var(--hero-gradient);
+  padding: 2rem 2rem 1.5rem;
+  text-align: center;
+  color: #fff;
+}
+.auth-card-header h4 {
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+  font-size: 1.5rem;
+}
+.auth-card-header p {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+.auth-card-body {
+  padding: 2rem;
+}
+
+/* ── Carrito ────────────────────────────────────────────────────── */
+.carrito-item-card {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  background: #fff;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.15s;
+}
+.carrito-item-card:hover {
+  border-color: #93c5fd;
+}
+.carrito-resumen-card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  background: #fff;
+  padding: 1.5rem;
+  position: sticky;
+  top: 80px;
+}
+
+/* ── Pedidos ────────────────────────────────────────────────────── */
+.pedido-card {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.pedido-header {
+  background: linear-gradient(to right, #eff6ff, #f0f9ff);
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* ── Badges de estado ───────────────────────────────────────────── */
+.badge-pendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+.badge-procesando {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.badge-enviado {
+  background: #e0f2fe;
+  color: #075985;
+}
+.badge-entregado {
+  background: #dcfce7;
+  color: #166534;
+}
+.badge-cancelado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.badge-aprobado {
+  background: #dcfce7;
+  color: #166534;
+}
+.badge-rechazado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.badge-stock-bajo {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ── Página vacía / empty state ─────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-muted);
+}
+.empty-state .bi {
+  font-size: 3.5rem;
+  color: #cbd5e1;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────── */
+footer.site-footer {
+  background: var(--text-main);
+  color: #94a3b8;
+  text-align: center;
+  padding: 1.25rem 1rem;
+  font-size: 0.85rem;
+  margin-top: auto;
+}
+footer.site-footer a {
+  color: #60a5fa;
+}
+
+/* ── Spinner de carga ───────────────────────────────────────────── */
+.spinner-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+}
+
+/* ── Utilidades ─────────────────────────────────────────────────── */
+.cursor-pointer {
+  cursor: pointer;
+}
+.text-precio {
+  color: var(--primary);
+  font-weight: 700;
+}
+.section-title {
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 1.25rem;
+}
+
+.valid.modified:not([type="checkbox"]) {
+  outline: 1px solid #22c55e;
+}
+.invalid {
+  outline: 1px solid #ef4444;
+}
+.validation-message {
+  color: #dc2626;
+  font-size: 0.83rem;
+}
+
+/* ── Blazor internos ────────────────────────────────────────────── */
+#blazor-error-ui {
+  color-scheme: light only;
+  background: #fef3c7;
+  bottom: 0;
+  left: 0;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.15);
+  display: none;
+  padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+}
+#blazor-error-ui .dismiss {
+  cursor: pointer;
+  position: absolute;
+  right: 0.75rem;
+  top: 0.5rem;
+}
+
+.blazor-error-boundary {
+  background: #b91c1c;
+  padding: 1rem 1rem 1rem 3.7rem;
+  color: white;
+  border-radius: 8px;
+}
+.blazor-error-boundary::after {
+  content: "Ocurrió un error en la aplicación.";
+}
+
+.loading-progress {
+  position: relative;
+  display: block;
+  width: 8rem;
+  height: 8rem;
+  margin: 20vh auto 1rem auto;
+}
+.loading-progress circle {
+  fill: none;
+  stroke: #e0e0e0;
+  stroke-width: 0.6rem;
+  transform-origin: 50% 50%;
+  transform: rotate(-90deg);
+}
+.loading-progress circle:last-child {
+  stroke: var(--primary);
+  stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
+  transition: stroke-dasharray 0.05s ease-in-out;
+}
+.loading-progress-text {
+  position: absolute;
+  text-align: center;
+  font-weight: bold;
+  inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+}
+.loading-progress-text:after {
+  content: var(--blazor-load-percentage-text, "Cargando...");
+}

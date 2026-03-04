@@ -1,0 +1,136 @@
+@page "/"
+@using TecnoEcommerce.Web.Servicios
+@using TecnoEcommerce.Modelos.DTOs
+
+@inject ProductoApiServicio   ProductoServicio
+@inject CategoriaApiServicio  CategoriaServicio
+@inject CarritoApiServicio    CarritoServicio
+@inject SesionServicio        Sesion
+
+@*
+    Página principal: catálogo de productos con filtros por categoría y búsqueda.
+    Principio SRP: orquesta la visualización del catálogo y la adición al carrito.
+*@
+
+<PageTitle>Catálogo – TecnoEcommerce</PageTitle>
+
+<CargandoSpinner Visible="@_cargando" />
+
+<!-- Banner hero -->
+<div class="hero-banner mb-4 d-flex align-items-center justify-content-between">
+    <div>
+        <h2 class="hero-title"><i class="bi bi-cpu me-2"></i>Catálogo</h2>
+        <p class="hero-sub">Encuentra la tecnología que necesitas</p>
+    </div>
+    <i class="bi bi-laptop hero-icon d-none d-md-block"></i>
+</div>
+
+<!-- Filtros -->
+<div class="filtros-container row g-3 align-items-center mb-4">
+    <div class="col-12 col-md-6">
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" placeholder="Buscar productos..."
+                   @bind="_busqueda" @bind:after="FiltrarProductos" />
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <select class="form-select" @bind="_categoriaSeleccionada" @bind:after="FiltrarProductos">
+            <option value="0">Todas las categorías</option>
+            @foreach (var cat in _categorias)
+            {
+                <option value="@cat.Id">@cat.Nombre</option>
+            }
+        </select>
+    </div>
+    <div class="col-12 col-md-2">
+        <button class="btn btn-outline-secondary w-100" @onclick="LimpiarFiltros">
+            <i class="bi bi-x-circle me-1"></i>Limpiar
+        </button>
+    </div>
+</div>
+
+<MensajeAlerta Mensaje="@_mensaje" Tipo="@_tipoMensaje" OnCerrar="() => _mensaje = string.Empty" />
+
+<!-- Grilla de productos -->
+@if (!_cargando && _productosFiltrados.Count == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-search"></i>
+        <p>No se encontraron productos con esos filtros.</p>
+        <button class="btn btn-outline-primary" @onclick="LimpiarFiltros">
+            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+        </button>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
+        @foreach (var producto in _productosFiltrados)
+        {
+            <div class="col">
+                <ProductoCard Producto="producto" OnAgregar="AgregarAlCarrito" />
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<ProductoDto>  _productos         = new();
+    private List<ProductoDto>  _productosFiltrados = new();
+    private List<CategoriaDto> _categorias        = new();
+    private string             _busqueda          = string.Empty;
+    private int                _categoriaSeleccionada;
+    private bool               _cargando          = true;
+    private string             _mensaje           = string.Empty;
+    private string             _tipoMensaje       = "success";
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        var taskProductos  = ProductoServicio.ObtenerTodosAsync();
+        var taskCategorias = CategoriaServicio.ObtenerTodasAsync();
+        await Task.WhenAll(taskProductos, taskCategorias);
+
+        _productos  = await taskProductos;
+        _categorias = await taskCategorias;
+        _productosFiltrados = new List<ProductoDto>(_productos);
+        _cargando = false;
+    }
+
+    /// <summary>Filtra la lista según búsqueda y categoría seleccionada.</summary>
+    private void FiltrarProductos()
+    {
+        _productosFiltrados = _productos
+            .Where(p =>
+                (string.IsNullOrEmpty(_busqueda) ||
+                 p.Nombre.Contains(_busqueda, StringComparison.OrdinalIgnoreCase)) &&
+                (_categoriaSeleccionada == 0 || p.CategoriaId == _categoriaSeleccionada))
+            .ToList();
+    }
+
+    /// <summary>Limpia todos los filtros activos.</summary>
+    private void LimpiarFiltros()
+    {
+        _busqueda = string.Empty;
+        _categoriaSeleccionada = 0;
+        _productosFiltrados = new List<ProductoDto>(_productos);
+    }
+
+    /// <summary>Agrega el producto al carrito del usuario autenticado.</summary>
+    private async Task AgregarAlCarrito(int productoId)
+    {
+        if (!Sesion.EstaAutenticado)
+        {
+            _tipoMensaje = "warning";
+            _mensaje = "Debes iniciar sesión para agregar productos al carrito.";
+            return;
+        }
+
+        var dto      = new AgregarItemCarritoDto { ProductoId = productoId, Cantidad = 1 };
+        var carrito  = await CarritoServicio.AgregarItemAsync(dto);
+
+        _tipoMensaje = carrito is not null ? "success" : "danger";
+        _mensaje     = carrito is not null ? "Producto agregado al carrito." : "No se pudo agregar el producto.";
+    }
+}

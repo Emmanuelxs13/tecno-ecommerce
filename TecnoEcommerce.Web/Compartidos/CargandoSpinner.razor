@@ -1,0 +1,23 @@
+@*
+    Indicador de carga superpuesto.
+    Se muestra mientras se espera una respuesta asíncrona.
+    Principio SRP: responsabilidad única de comunicar estado de carga al usuario.
+*@
+
+@if (Visible)
+{
+    <div class="spinner-overlay">
+        <div class="text-center text-white">
+            <div class="spinner-border" style="width:3rem;height:3rem;" role="status"></div>
+            <div class="mt-2 fw-semibold">@Mensaje</div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>Controla si el spinner es visible.</summary>
+    [Parameter] public bool Visible { get; set; }
+
+    /// <summary>Texto que se muestra debajo del spinner.</summary>
+    [Parameter] public string Mensaje { get; set; } = "Cargando...";
+}

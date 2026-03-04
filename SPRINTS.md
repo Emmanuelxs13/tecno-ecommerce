@@ -70,16 +70,54 @@ Framework: **.NET 8 Web API**
 
 ---
 
-## Sprint 3 — Capa de Datos (EF Core + Repositorios)
+## Sprint 3 — Interfaz Web (Blazor WebAssembly)
+
+**Proyecto**: `TecnoEcommerce.Web` (blazorwasm)  
+**Objetivo**: Proveer una interfaz gráfica para que el usuario pueda interactuar con la plataforma sin usar Swagger.
+
+### Configuración (`/`)
+
+- [ ] Crear proyecto Blazor WebAssembly `TecnoEcommerce.Web`
+- [ ] Agregar a la solución y configurar Bootstrap 5
+- [ ] Configurar CORS en `TecnoEcommerce.API/Program.cs`
+- [ ] Configurar `HttpClient` base apuntando a la URL de la API
+
+### Servicios HTTP (`Servicios/`)
+
+- [ ] `ProductoApiServicio.cs` — GET productos, filtrar por categoría, buscar por nombre
+- [ ] `CategoriaApiServicio.cs` — GET categorías
+- [ ] `UsuarioApiServicio.cs` — Registro, login, gestionar sesión en memoria
+- [ ] `CarritoApiServicio.cs` — Ver carrito, agregar/eliminar ítems
+- [ ] `PedidoApiServicio.cs` — Crear pedido, ver historial
+
+### Páginas (`Pages/`)
+
+- [ ] `Inicio.razor` — Catálogo de productos con buscador y filtro por categoría
+- [ ] `ProductoDetalle.razor` — Ficha del producto con botón de agregar al carrito
+- [ ] `Carrito.razor` — Lista de ítems, subtotales, total y botón de confirmar pedido
+- [ ] `Login.razor` — Formulario de inicio de sesión
+- [ ] `Registro.razor` — Formulario de registro de usuario
+- [ ] `MisPedidos.razor` — Historial de pedidos con estado de pago y envío
+
+### Componentes compartidos (`Shared/`)
+
+- [ ] `NavMenu.razor` — Barra de navegación con contador de ítems en carrito
+- [ ] `ProductoCard.razor` — Tarjeta reutilizable de producto (imagen, nombre, precio, botón)
+- [ ] `CargandoSpinner.razor` — Indicador visual de carga durante peticiones HTTP
+- [ ] `MensajeAlerta.razor` — Componente de alertas de éxito/error reutilizable
+
+---
+
+## Sprint 4 — Capa de Datos (EF Core + Repositorios)
 
 **Proyecto**: `TecnoEcommerce.Datos`  
-**Objetivo**: Conectar con SQL Server mediante Entity Framework Core.
+**Objetivo**: Conectar con PostgreSQL mediante Entity Framework Core y Npgsql.
 
 ### Instalación de paquetes NuGet
 
 ```bash
 dotnet add TecnoEcommerce.Datos package Microsoft.EntityFrameworkCore
-dotnet add TecnoEcommerce.Datos package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add TecnoEcommerce.Datos package Npgsql.EntityFrameworkCore.PostgreSQL
 dotnet add TecnoEcommerce.Datos package Microsoft.EntityFrameworkCore.Tools
 dotnet add TecnoEcommerce.API package Microsoft.EntityFrameworkCore.Design
 ```
@@ -104,7 +142,7 @@ dotnet ef database update --project TecnoEcommerce.Datos --startup-project Tecno
 
 ---
 
-## Sprint 4 — Capa Controladores (Endpoints REST)
+## Sprint 5 — Capa Controladores (Endpoints REST)
 
 **Proyecto**: `TecnoEcommerce.API`  
 **Carpeta**: `Controladores/`  
@@ -124,7 +162,7 @@ dotnet ef database update --project TecnoEcommerce.Datos --startup-project Tecno
 
 ---
 
-## Sprint 5 — Integración y Pruebas Finales
+## Sprint 6 — Integración y Pruebas Finales
 
 **Objetivo**: Probar el sistema completo end-to-end.
 

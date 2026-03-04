@@ -1,0 +1,17 @@
+﻿@inherits LayoutComponentBase
+
+@*
+    Layout principal de la aplicación.
+    Principio SRP: encapsula únicamente la estructura visual global (navbar + contenido).
+    Cualquier cambio en el layout afecta a toda la app desde un solo lugar.
+*@
+
+<NavMenu />
+
+<main class="container py-4">
+    @Body
+</main>
+
+<footer class="site-footer">
+    &copy; @DateTime.Now.Year TecnoEcommerce &mdash; Todos los derechos reservados.
+</footer>

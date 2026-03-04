@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TecnoEcommerce.Datos", "Tec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TecnoEcommerce.API", "TecnoEcommerce.API\TecnoEcommerce.API.csproj", "{22CC2705-EB29-4641-B399-C7799CC5C62E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TecnoEcommerce.Web", "TecnoEcommerce.Web\TecnoEcommerce.Web.csproj", "{70E53E02-C3CD-4BDD-862B-842F62C98697}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{22CC2705-EB29-4641-B399-C7799CC5C62E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22CC2705-EB29-4641-B399-C7799CC5C62E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22CC2705-EB29-4641-B399-C7799CC5C62E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70E53E02-C3CD-4BDD-862B-842F62C98697}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70E53E02-C3CD-4BDD-862B-842F62C98697}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70E53E02-C3CD-4BDD-862B-842F62C98697}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70E53E02-C3CD-4BDD-862B-842F62C98697}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

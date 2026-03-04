@@ -1,0 +1,150 @@
+@page "/producto/{Id:int}"
+@using TecnoEcommerce.Web.Servicios
+@using TecnoEcommerce.Modelos.DTOs
+
+@inject ProductoApiServicio ProductoServicio
+@inject CarritoApiServicio  CarritoServicio
+@inject SesionServicio      Sesion
+@inject NavigationManager   Navegacion
+
+@*
+    Página de detalle de un producto individual.
+    Principio SRP: única responsabilidad de mostrar el detalle y gestionar la adición al carrito.
+*@
+
+<PageTitle>@(_producto?.Nombre ?? "Producto") – TecnoEcommerce</PageTitle>
+
+<CargandoSpinner Visible="@_cargando" />
+
+@if (!_cargando && _producto is not null)
+{
+    <!-- Miga de pan -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Catálogo</a></li>
+            <li class="breadcrumb-item active">@_producto.Nombre</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Imagen -->
+        <div class="col-12 col-md-5">
+            <img src="@(string.IsNullOrEmpty(_producto.ImagenUrl) ? "img/sin-imagen.png" : _producto.ImagenUrl)"
+                 class="img-fluid rounded shadow" alt="@_producto.Nombre"
+                 style="width:100%;max-height:380px;object-fit:cover;" />
+        </div>
+
+        <!-- Info -->
+        <div class="col-12 col-md-7">
+            <span class="producto-categoria-badge mb-2">@_producto.NombreCategoria</span>
+            <h2 class="fw-bold">@_producto.Nombre</h2>
+            <p class="text-muted">@_producto.Descripcion</p>
+
+            <h3 class="producto-precio my-3">$@_producto.Precio.ToString("N2")</h3>
+
+            <!-- Stock -->
+            @if (_producto.Stock > 0)
+            {
+                <span class="badge mb-3" style="background:#dcfce7;color:#166534;font-size:.9rem;padding:.4em .85em;">
+                    <i class="bi bi-check-circle me-1"></i>En stock (@_producto.Stock disponibles)
+                </span>
+            }
+            else
+            {
+                <span class="badge badge-cancelado mb-3" style="font-size:.9rem;padding:.4em .85em;">
+                    <i class="bi bi-x-circle me-1"></i>Producto agotado
+                </span>
+            }
+
+            <MensajeAlerta Mensaje="@_mensaje" Tipo="@_tipoMensaje"
+                           OnCerrar="() => _mensaje = string.Empty" />
+
+            @if (_producto.Stock > 0)
+            {
+                <!-- Selector de cantidad -->
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <label class="fw-semibold">Cantidad:</label>
+                    <div class="input-group" style="width:130px;">
+                        <button class="btn btn-outline-secondary" @onclick="() => AjustarCantidad(-1)">–</button>
+                        <input type="number" class="form-control text-center" @bind="_cantidad" min="1" max="@_producto.Stock" />
+                        <button class="btn btn-outline-secondary" @onclick="() => AjustarCantidad(1)">+</button>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-lg px-5" @onclick="AgregarAlCarrito" disabled="@_agregando">
+                    @if (_agregando)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-cart-plus me-2"></i>
+                    }
+                    Agregar al carrito
+                </button>
+            }
+
+            <button class="btn btn-outline-secondary ms-2" @onclick="VolverAlCatalogo">
+                <i class="bi bi-arrow-left me-1"></i>Volver al catálogo
+            </button>
+        </div>
+    </div>
+}
+else if (!_cargando)
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-exclamation-circle display-4"></i>
+        <p class="mt-3">Producto no encontrado.</p>
+        <a href="/" class="btn btn-primary">Ir al catálogo</a>
+    </div>
+}
+
+@code {
+    /// <summary>Identificador del producto tomado de la URL.</summary>
+    [Parameter] public int Id { get; set; }
+
+    private ProductoDto? _producto;
+    private int          _cantidad  = 1;
+    private bool         _cargando  = true;
+    private bool         _agregando;
+    private string       _mensaje     = string.Empty;
+    private string       _tipoMensaje = "success";
+
+    /// <inheritdoc/>
+    protected override async Task OnParametersSetAsync()
+    {
+        _cargando = true;
+        _producto = await ProductoServicio.ObtenerPorIdAsync(Id);
+        _cargando = false;
+    }
+
+    /// <summary>Navega de regreso al catálogo principal.</summary>
+    private void VolverAlCatalogo() => Navegacion.NavigateTo("/");
+
+    /// <summary>Aumenta o disminuye la cantidad en el rango válido.</summary>
+    private void AjustarCantidad(int delta)
+    {
+        _cantidad = Math.Clamp(_cantidad + delta, 1, _producto?.Stock ?? 1);
+    }
+
+    /// <summary>Agrega el producto al carrito si el usuario está autenticado.</summary>
+    private async Task AgregarAlCarrito()
+    {
+        if (!Sesion.EstaAutenticado)
+        {
+            _tipoMensaje = "warning";
+            _mensaje = "Debes iniciar sesión para agregar productos al carrito.";
+            return;
+        }
+
+        _agregando = true;
+        var dto      = new AgregarItemCarritoDto { ProductoId = Id, Cantidad = _cantidad };
+        var carrito  = await CarritoServicio.AgregarItemAsync(dto);
+        _agregando   = false;
+
+        _tipoMensaje = carrito is not null ? "success" : "danger";
+        _mensaje     = carrito is not null
+            ? $"{_cantidad} × {_producto!.Nombre} agregado(s) al carrito."
+            : "No se pudo agregar el producto. Inténtalo de nuevo.";
+    }
+}

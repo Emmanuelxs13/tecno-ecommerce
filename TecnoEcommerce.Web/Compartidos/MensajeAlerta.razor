@@ -1,0 +1,45 @@
+@*
+    Alerta de retroalimentación para el usuario.
+    Soporta los tipos de Bootstrap: success, danger, warning, info.
+    Principio SRP: responsabilidad única de mostrar mensajes de estado al usuario.
+*@
+
+@if (!string.IsNullOrEmpty(Mensaje))
+{
+    <div class="alert alert-@Tipo alert-dismissible fade show d-flex align-items-center gap-2"
+         role="alert">
+        <!-- Ícono según tipo -->
+        <i class="bi @ObtenerIcono() fs-5"></i>
+        <span>@Mensaje</span>
+        <button type="button" class="btn-close ms-auto" @onclick="Limpiar"></button>
+    </div>
+}
+
+@code {
+    /// <summary>Texto del mensaje a mostrar. Si está vacío el componente no se renderiza.</summary>
+    [Parameter] public string Mensaje { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Tipo Bootstrap de la alerta: success | danger | warning | info.
+    /// </summary>
+    [Parameter] public string Tipo { get; set; } = "info";
+
+    /// <summary>Evento que se dispara cuando el usuario cierra la alerta.</summary>
+    [Parameter] public EventCallback OnCerrar { get; set; }
+
+    /// <summary>Devuelve el ícono de Bootstrap Icons según el tipo.</summary>
+    private string ObtenerIcono() => Tipo switch
+    {
+        "success" => "bi-check-circle-fill",
+        "danger"  => "bi-x-circle-fill",
+        "warning" => "bi-exclamation-triangle-fill",
+        _         => "bi-info-circle-fill"
+    };
+
+    /// <summary>Limpia el mensaje y notifica al padre.</summary>
+    private async Task Limpiar()
+    {
+        Mensaje = string.Empty;
+        await OnCerrar.InvokeAsync();
+    }
+}

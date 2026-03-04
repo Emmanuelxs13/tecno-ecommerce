@@ -1,0 +1,113 @@
+@page "/registro"
+@using TecnoEcommerce.Web.Servicios
+@using TecnoEcommerce.Modelos.DTOs
+
+@inject UsuarioApiServicio UsuarioServicio
+@inject NavigationManager  Navegacion
+@inject SesionServicio     Sesion
+
+@*
+    Página de registro de nuevos usuarios.
+    Principio SRP: única responsabilidad de crear la cuenta del usuario.
+*@
+
+<PageTitle>Crear cuenta – TecnoEcommerce</PageTitle>
+
+<div class="auth-wrapper">
+    <div class="auth-card shadow-lg">
+        <!-- Header con gradiente -->
+        <div class="auth-card-header">
+            <div style="font-size:2.5rem; margin-bottom:.5rem;"><i class="bi bi-person-plus-fill"></i></div>
+            <h4>Crear cuenta</h4>
+            <p>Regístrate para empezar a comprar</p>
+        </div>
+
+        <div class="auth-card-body">
+            <MensajeAlerta Mensaje="@_error" Tipo="danger"  OnCerrar="() => _error = string.Empty" />
+            <MensajeAlerta Mensaje="@_exito" Tipo="success" OnCerrar="() => _exito = string.Empty" />
+
+            <EditForm Model="@_modelo" OnValidSubmit="Registrar">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre completo</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <InputText @bind-Value="_modelo.Nombre" class="form-control"
+                                   placeholder="Tu nombre" />
+                    </div>
+                    <ValidationMessage For="() => _modelo.Nombre" class="validation-message" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Correo electrónico</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <InputText @bind-Value="_modelo.Email" class="form-control"
+                                   placeholder="correo@ejemplo.com" type="email" />
+                    </div>
+                    <ValidationMessage For="() => _modelo.Email" class="validation-message" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Contraseña</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <InputText @bind-Value="_modelo.Contrasena" class="form-control"
+                                   placeholder="Mínimo 6 caracteres" type="password" />
+                    </div>
+                    <ValidationMessage For="() => _modelo.Contrasena" class="validation-message" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2" disabled="@_cargando">
+                    @if (_cargando)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Crear cuenta
+                </button>
+            </EditForm>
+
+            <hr class="my-3" />
+            <p class="text-center text-muted small mb-0">
+                ¿Ya tienes cuenta?
+                <a href="/login" class="fw-semibold">Ínicia sesión</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>Modelo de formulario enlazado con EditForm.</summary>
+    private readonly RegistroUsuarioDto _modelo = new();
+
+    private string _error  = string.Empty;
+    private string _exito  = string.Empty;
+    private bool   _cargando;
+
+    /// <summary>Redirige si ya está autenticado.</summary>
+    protected override void OnInitialized()
+    {
+        if (Sesion.EstaAutenticado) Navegacion.NavigateTo("/");
+    }
+
+    /// <summary>Envía el registro a la API; en caso de éxito redirige al catálogo.</summary>
+    private async Task Registrar()
+    {
+        _cargando = true;
+        _error    = string.Empty;
+
+        var resultado = await UsuarioServicio.RegistrarAsync(_modelo);
+        _cargando = false;
+
+        if (resultado is null)
+        {
+            _error = "No se pudo crear la cuenta. El correo podría estar en uso.";
+            return;
+        }
+
+        _exito = $"¡Bienvenido/a, {resultado.Nombre}! Redirigiendo...";
+        await Task.Delay(1500);
+        Navegacion.NavigateTo("/");
+    }
+}

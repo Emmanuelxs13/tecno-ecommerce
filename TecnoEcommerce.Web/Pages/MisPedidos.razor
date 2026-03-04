@@ -1,0 +1,118 @@
+@page "/mis-pedidos"
+@using TecnoEcommerce.Web.Servicios
+@using TecnoEcommerce.Modelos.DTOs
+@using TecnoEcommerce.Modelos.Enumeraciones
+
+@inject PedidoApiServicio PedidoServicio
+@inject SesionServicio    Sesion
+@inject NavigationManager Navegacion
+
+@*
+    Página de historial de pedidos del usuario autenticado.
+    Principio SRP: única responsabilidad de listar y mostrar el estado de los pedidos.
+*@
+
+<PageTitle>Mis pedidos – TecnoEcommerce</PageTitle>
+
+<CargandoSpinner Visible="@_cargando" />
+
+<h2 class="fw-bold mb-4"><i class="bi bi-bag-check me-2 text-primary"></i>Mis pedidos</h2>
+
+@if (!Sesion.EstaAutenticado)
+{
+    <div class="text-center py-5">
+        <i class="bi bi-person-lock display-4 text-muted"></i>
+        <p class="mt-3 text-muted">Debes iniciar sesión para ver tus pedidos.</p>
+        <a href="/login" class="btn btn-primary">Iniciar sesión</a>
+    </div>
+}
+else if (!_cargando)
+{
+    @if (_pedidos.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>Aún no has realizado ningún pedido.</p>
+            <a href="/" class="btn btn-outline-primary">Explorar catálogo</a>
+        </div>
+    }
+    else
+    {
+        @foreach (var pedido in _pedidos)
+        {
+            <div class="card pedido-card mb-3 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="fw-bold"># @pedido.Id</span>
+                        <small class="text-muted ms-2">@pedido.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <span class="badge @ObtenerClasePedido(pedido.EstadoPedido)">
+                            @pedido.EstadoPedido
+                        </span>
+                        <span class="badge @ObtenerClasePago(pedido.EstadoPago)">
+                            <i class="bi bi-credit-card me-1"></i>@pedido.EstadoPago
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Detalles del pedido -->
+                    @foreach (var detalle in pedido.Detalles)
+                    {
+                        <div class="d-flex justify-content-between small text-muted py-1 border-bottom">
+                            <span>@detalle.NombreProducto × @detalle.Cantidad</span>
+                            <span>$@detalle.Subtotal.ToString("N2")</span>
+                        </div>
+                    }
+                    <div class="d-flex justify-content-between fw-bold mt-2">
+                        <span>Total</span>
+                        <span class="text-primary">$@pedido.Total.ToString("N2")</span>
+                    </div>
+
+                    <!-- Dirección y estado de envío -->
+                    @if (pedido.EstadoEnvio.HasValue)
+                    {
+                        <div class="mt-2 p-2 bg-light rounded small">
+                            <i class="bi bi-truck me-1"></i>
+                            <strong>Envío:</strong> @pedido.EstadoEnvio
+                            &mdash;
+                            <span class="text-muted">@pedido.DireccionEntrega</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+}
+
+@code {
+    private List<PedidoDto> _pedidos = new();
+    private bool            _cargando = true;
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Sesion.EstaAutenticado) { _cargando = false; return; }
+        _pedidos  = await PedidoServicio.ObtenerMisPedidosAsync();
+        _cargando = false;
+    }
+
+    /// <summary>Devuelve la clase CSS de Bootstrap para el badge del estado de pedido.</summary>
+    private static string ObtenerClasePedido(EstadoPedido estado) => estado switch
+    {
+        EstadoPedido.Pendiente   => "badge-pendiente",
+        EstadoPedido.Procesando  => "badge-procesando",
+        EstadoPedido.Enviado     => "badge-enviado",
+        EstadoPedido.Entregado   => "bg-success",
+        EstadoPedido.Cancelado   => "bg-danger",
+        _                        => "bg-secondary"
+    };
+
+    /// <summary>Devuelve la clase CSS para el badge del estado de pago.</summary>
+    private static string ObtenerClasePago(EstadoPago estado) => estado switch
+    {
+        EstadoPago.Aprobado  => "bg-success",
+        EstadoPago.Rechazado => "bg-danger",
+        _                    => "bg-warning text-dark"
+    };
+}
