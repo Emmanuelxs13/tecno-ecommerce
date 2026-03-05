@@ -1,5 +1,13 @@
 ﻿# TecnoEcommerce
 
+## Autores
+
+- Juan Esteban Correa
+- Andrés Quiroz Gómez
+- Emmanuel Berrío
+
+---
+
 Plataforma de comercio electrónico desarrollada con **.NET 9** aplicando la arquitectura **Modelo - Vista - Controlador (MVC)**, distribuida en cuatro proyectos .NET independientes que separan claramente las responsabilidades del sistema.
 
 ---
