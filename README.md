@@ -320,11 +320,11 @@ Configurada en `TecnoEcommerce.API/appsettings.json` (se activa en Sprint 4):
 
 ### Requisitos
 
-| Herramienta       | Versión mínima | Descarga                                      |
-| ----------------- | -------------- | --------------------------------------------- |
-| PostgreSQL        | 15 o superior  | https://www.postgresql.org/download/          |
-| pgAdmin 4         | 7.x            | https://www.pgadmin.org/download/             |
-| dotnet-ef (CLI)   | 9.x (opcional) | `dotnet tool install --global dotnet-ef`      |
+| Herramienta     | Versión mínima | Descarga                                 |
+| --------------- | -------------- | ---------------------------------------- |
+| PostgreSQL      | 15 o superior  | https://www.postgresql.org/download/     |
+| pgAdmin 4       | 7.x            | https://www.pgadmin.org/download/        |
+| dotnet-ef (CLI) | 9.x (opcional) | `dotnet tool install --global dotnet-ef` |
 
 ### 1 — Crear la base de datos en pgAdmin 4
 
@@ -357,27 +357,27 @@ Ejecutar en el mismo Query Tool:
 
 Datos que se insertan:
 
-| Tabla        | Registros              |
-| ------------ | ---------------------- |
-| categorías   | 6 (Laptops, Smartphones, Accesorios, Gaming, Audio, Almacenamiento) |
-| productos    | 20 productos reales    |
-| usuarios     | 5 (1 admin + 4 clientes de prueba) |
-| pedidos      | 3 (entregado, en proceso, pendiente) |
-| detalles     | 5 líneas               |
-| envíos       | 3                      |
-| pagos        | 3                      |
-| reseñas      | 4                      |
-| carrito      | 1 (usuario Valentina)  |
+| Tabla      | Registros                                                           |
+| ---------- | ------------------------------------------------------------------- |
+| categorías | 6 (Laptops, Smartphones, Accesorios, Gaming, Audio, Almacenamiento) |
+| productos  | 20 productos reales                                                 |
+| usuarios   | 5 (1 admin + 4 clientes de prueba)                                  |
+| pedidos    | 3 (entregado, en proceso, pendiente)                                |
+| detalles   | 5 líneas                                                            |
+| envíos     | 3                                                                   |
+| pagos      | 3                                                                   |
+| reseñas    | 4                                                                   |
+| carrito    | 1 (usuario Valentina)                                               |
 
 **Credenciales de prueba:**
 
-| Email                          | Contraseña  | Rol           |
-| ------------------------------ | ----------- | ------------- |
-| admin@tecnoecommerce.com       | `admin123`  | Administrador |
-| carlos.ramirez@email.com       | `cliente123`| Cliente       |
-| laura.martinez@email.com       | `cliente123`| Cliente       |
-| andres.torres@email.com        | `cliente123`| Cliente       |
-| valentina.lopez@email.com      | `cliente123`| Cliente       |
+| Email                     | Contraseña   | Rol           |
+| ------------------------- | ------------ | ------------- |
+| admin@tecnoecommerce.com  | `admin123`   | Administrador |
+| carlos.ramirez@email.com  | `cliente123` | Cliente       |
+| laura.martinez@email.com  | `cliente123` | Cliente       |
+| andres.torres@email.com   | `cliente123` | Cliente       |
+| valentina.lopez@email.com | `cliente123` | Cliente       |
 
 > ⚠️ Las contraseñas del script son hashes BCrypt. En desarrollo puedes usarlas directamente;
 > en producción genera nuevos hashes con `BCrypt.Net.BCrypt.HashPassword("tu_contrasena")`.
@@ -422,6 +422,7 @@ Al iniciar, la consola mostrará:
 ```
 
 Si aparece ❌, verificar que:
+
 - PostgreSQL está corriendo (servicio `postgresql-x64-15` en Windows).
 - La contraseña en `appsettings.json` es correcta.
 - La base de datos `tecnoecommerce` existe.
@@ -463,7 +464,6 @@ Esto cumple el **Principio OCP (Open/Closed)**.
 
 ---
 
-
 ---
 
 ## Modo Visual con Datos de Prueba
@@ -486,27 +486,27 @@ Esto permite iterar sobre la estetica visualmente sin depender del estado de la 
 
 ### Productos mock incluidos
 
-| ID | Producto | Categoria | Precio |
-|----|----------|-----------|--------|
-| 1 | MacBook Air M3 | Laptops | $1,299 USD |
-| 2 | iPhone 15 Pro | Smartphones | $1,199 USD |
-| 3 | Samsung Galaxy S24 | Smartphones | $999 USD |
-| 4 | ASUS VivoBook 15 | Laptops | $899 USD |
-| 5 | LG UltraWide 34" | Monitores | $449 USD |
-| 6 | Keychron K2 V2 | Accesorios | $89 USD |
-| 7 | RTX 4060 8GB | Gaming | $399 USD |
-| 8 | HyperX Cloud III | Gaming | $149 USD |
+| ID  | Producto           | Categoria   | Precio     |
+| --- | ------------------ | ----------- | ---------- |
+| 1   | MacBook Air M3     | Laptops     | $1,299 USD |
+| 2   | iPhone 15 Pro      | Smartphones | $1,199 USD |
+| 3   | Samsung Galaxy S24 | Smartphones | $999 USD   |
+| 4   | ASUS VivoBook 15   | Laptops     | $899 USD   |
+| 5   | LG UltraWide 34"   | Monitores   | $449 USD   |
+| 6   | Keychron K2 V2     | Accesorios  | $89 USD    |
+| 7   | RTX 4060 8GB       | Gaming      | $399 USD   |
+| 8   | HyperX Cloud III   | Gaming      | $149 USD   |
 
 ### Paginas rediseñadas en `feature_frontend`
 
-| Pagina | Archivo | Descripcion |
-|--------|---------|-------------|
-| Inicio | `Pages/Inicio.razor` | Hero, tiles de producto, categorias, reseñas, banner promo |
-| Detalle | `Pages/ProductoDetalle.razor` | Selector de color, specs, cantidad, productos relacionados |
-| Carrito | `Pages/Carrito.razor` | Bolsa de compra stilizada, resumen de orden, confirmacion |
-| Login | `Pages/Login.razor` | Formulario estilo Apple ID, mock auth |
-| Registro | `Pages/Registro.razor` | Creacion de cuenta estilo Apple, validaciones |
-| Mis Pedidos | `Pages/MisPedidos.razor` | Historial con linea de tiempo de 5 pasos |
+| Pagina      | Archivo                       | Descripcion                                                |
+| ----------- | ----------------------------- | ---------------------------------------------------------- |
+| Inicio      | `Pages/Inicio.razor`          | Hero, tiles de producto, categorias, reseñas, banner promo |
+| Detalle     | `Pages/ProductoDetalle.razor` | Selector de color, specs, cantidad, productos relacionados |
+| Carrito     | `Pages/Carrito.razor`         | Bolsa de compra stilizada, resumen de orden, confirmacion  |
+| Login       | `Pages/Login.razor`           | Formulario estilo Apple ID, mock auth                      |
+| Registro    | `Pages/Registro.razor`        | Creacion de cuenta estilo Apple, validaciones              |
+| Mis Pedidos | `Pages/MisPedidos.razor`      | Historial con linea de tiempo de 5 pasos                   |
 
 ### Para usar datos reales
 
