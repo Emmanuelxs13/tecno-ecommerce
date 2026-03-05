@@ -217,7 +217,10 @@ img {
   opacity: 0.82;
   border-radius: 0;
   background: none !important;
-  transition: opacity 0.15s;
+  transition:
+    opacity 0.2s,
+    background 0.2s,
+    color 0.2s;
   text-decoration: none !important;
   white-space: nowrap;
   position: relative;
@@ -232,6 +235,45 @@ img {
 .navbar-tecno .nav-link:hover {
   opacity: 1;
   text-decoration: none !important;
+}
+
+/* Desktop hover — pill + línea indicadora */
+@media (min-width: 992px) {
+  /* Categorías: pill redondeada al hacer hover */
+  .nav-cats .nav-link:hover {
+    background: rgba(0, 0, 0, 0.052) !important;
+    border-radius: 6px;
+  }
+  /* Línea indicadora corta en hover (previsualiza el subrayado activo) */
+  .nav-cats .nav-link:not(.active)::after {
+    content: "";
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 14px;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 2px;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s;
+    opacity: 0;
+  }
+  .nav-cats .nav-link:not(.active):hover::after {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 1;
+  }
+  /* Íconos: fondo circular en hover */
+  .nav-icon-link:hover {
+    background: rgba(0, 0, 0, 0.06) !important;
+    border-radius: 8px;
+  }
+  /* Iniciar sesion hover */
+  .nav-text-link:hover {
+    background: rgba(0, 0, 0, 0.052) !important;
+    border-radius: 6px;
+  }
 }
 .navbar-tecno .nav-link.active {
   opacity: 1;
