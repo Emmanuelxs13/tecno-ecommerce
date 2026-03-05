@@ -150,6 +150,8 @@ TecnoEcommerce.Modelos
 | Sprint 4 | Datos           | ✅ Completado | EF Core + PostgreSQL + repositorios    |
 | Sprint 5 | Integración     | 🔜 Siguiente  | Pruebas end-to-end y refinamiento      |
 
+
+
 Ver [SPRINTS.md](SPRINTS.md) para el detalle completo.
 
 ---
