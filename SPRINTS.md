@@ -120,7 +120,7 @@ Framework: **.NET 9 Web API + Blazor WebAssembly**
 - [x] `MisPedidos.razor` — Historial con línea de tiempo de 5 pasos
 - [x] `NavMenu.razor` — Navbar sticky con layout 3 zonas (marca | categorías centradas | búsqueda+acciones):
   - Estados activos por URL con subrayado azul animado
-  - Badge de carrito en tiempo real con animación *bump*
+  - Badge de carrito en tiempo real con animación _bump_
   - Búsqueda con `oninput`, tecla Enter/Escape y botón limpiar
   - Cierre automático del menú móvil via JS Interop (Bootstrap 5 Collapse)
   - Hover con pill background, línea indicadora deslizante e íconos con fondo circular

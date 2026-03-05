@@ -217,7 +217,10 @@ img {
   opacity: 0.82;
   border-radius: 0;
   background: none !important;
-  transition: opacity 0.2s, background 0.2s, color 0.2s;
+  transition:
+    opacity 0.2s,
+    background 0.2s,
+    color 0.2s;
   text-decoration: none !important;
   white-space: nowrap;
   position: relative;
@@ -252,7 +255,9 @@ img {
     height: 2px;
     background: rgba(0, 0, 0, 0.22);
     border-radius: 2px;
-    transition: transform 0.2s ease, opacity 0.2s;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s;
     opacity: 0;
   }
   .nav-cats .nav-link:not(.active):hover::after {
