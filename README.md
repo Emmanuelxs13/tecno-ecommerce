@@ -1,5 +1,13 @@
 ﻿# TecnoEcommerce
 
+## Autores
+
+- Juan Esteban Correa
+- Andrés Quiroz Gómez
+- Emmanuel Berrío
+
+---
+
 Plataforma de comercio electrónico desarrollada con **.NET 9** aplicando la arquitectura **Modelo - Vista - Controlador (MVC)**, distribuida en cuatro proyectos .NET independientes que separan claramente las responsabilidades del sistema.
 
 ---
@@ -95,10 +103,10 @@ TecnoEcommerce.Modelos
 
 ### TecnoEcommerce.Datos
 
-| Carpeta         | Contenido                                      |
-| --------------- | ---------------------------------------------- |
-| `Contexto/`     | `TecnoEcommerceContexto` (DbContext, Sprint 4) |
-| `Repositorios/` | Repositorios EF Core (Sprint 4)                |
+| Carpeta         | Contenido                                                                                                  |
+| --------------- | ---------------------------------------------------------------------------------------------------------- |
+| `Contexto/`     | `TiendaContexto` (DbContext)                                                                               |
+| `Repositorios/` | `RepositorioEfCore<T>`, `ProductoRepositorioEfCore`, `CarritoRepositorioEfCore`, `PedidoRepositorioEfCore` |
 
 ### TecnoEcommerce.API
 
@@ -139,8 +147,10 @@ TecnoEcommerce.Modelos
 | Sprint 1 | Modelos         | ✅ Completado | Entidades, Enumeraciones, Interfaces   |
 | Sprint 2 | API / Servicios | ✅ Completado | Implementación de servicios de negocio |
 | Sprint 3 | Web (Blazor)    | ✅ Completado | UI completa, servicios API, CORS       |
-| Sprint 4 | Datos           | ✅ Siguiente  | EF Core + PostgreSQL + migraciones     |
-| Sprint 5 | Integración     | 🔜 Pendiente  | Pruebas end-to-end y refinamiento      |
+| Sprint 4 | Datos           | ✅ Completado | EF Core + PostgreSQL + repositorios    |
+| Sprint 5 | Integración     | 🔜 Siguiente  | Pruebas end-to-end y refinamiento      |
+
+
 
 Ver [SPRINTS.md](SPRINTS.md) para el detalle completo.
 
@@ -154,9 +164,9 @@ Ver [SPRINTS.md](SPRINTS.md) para el detalle completo.
 - Visual Studio 2022 (17.8+) o VS Code con extensión C#
 - Un navegador moderno (Chrome, Edge, Firefox)
 
-> **Nota:** En este Sprint 3 la API usa repositorios **en memoria**.
-> No se necesita instalar ninguna base de datos para probar la aplicación.
-> Los datos se reinician cada vez que se detiene la API.
+> **Nota:** La rama `main` usa los repositorios **EF Core + PostgreSQL** (Sprint 4 completo).
+> Para ejecutar localmente necesitás PostgreSQL corriendo y la cadena de conexión configurada en `appsettings.json`.
+> La rama `feature_frontend` usa datos mock para demostración visual.
 
 ---
 
@@ -310,9 +320,9 @@ Configurada en `TecnoEcommerce.API/appsettings.json` (se activa en Sprint 4):
 
 ## Estado del Proyecto
 
-> **Sprint 4 completado** — Migración a EF Core + PostgreSQL. Los repositorios en memoria han sido
-> reemplazados por repositorios EF Core conectados a PostgreSQL.
-> Próximo: Sprint 5 — Autenticación JWT + pruebas end-to-end.
+> **Sprint 4 completado** — Capa de datos implementada con EF Core 9 + Npgsql + PostgreSQL. Los repositorios en memoria han sido
+> reemplazados por repositorios EF Core. El esquema se gestiona con los scripts SQL en `database/`.
+> Próximo: **Sprint 5** — Integración API ↔ base de datos + pruebas end-to-end.
 
 ---
 
