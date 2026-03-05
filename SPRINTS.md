@@ -112,54 +112,57 @@ Framework: **.NET 9 Web API + Blazor WebAssembly**
 
 > Rediseño visual completo inspirado en apple.com/co con datos mock para demostración de UI/UX.
 
-- [x] Sistema de diseño en `app.css` (~1 900 líneas): paleta `#0071e3` / `#1d1d1f` / `#f5f5f7`, tipografía SF Pro, border-radius y sombras consistentes
+- [x] Sistema de diseño en `app.css` (~2 400 líneas): paleta `#0071e3` / `#1d1d1f` / `#f5f5f7`, tipografía SF Pro, border-radius y sombras consistentes
 - [x] `Inicio.razor` — Hero oscuro, tiles de producto, sección de categorías, reseñas, banner promo
 - [x] `ProductoDetalle.razor` — Selector de color, specs técnicas, cantidad, productos relacionados
-- [x] `Carrito.razor` — Bolsa de compra estilizada, resumen de orden Apple-style
+- [x] `Carrito.razor` — Bolsa de compra rediseñada: hero degradado, cards de producto con categoría / color / controles +/−, barra de progreso de envío gratis en tiempo real, resumen sticky con subtotal + impuestos + total, estado vacío con accesos rápidos, confirmación de pedido con número
+- [x] `Categoria.razor` _(nuevo)_ — Página dedicada por categoría (`/categoria/{slug}`): hero con gradiente de color único, catálogo filtrado + orden, breadcrumb y sección de "Otras categorías"
 - [x] `Login.razor` + `Registro.razor` — Formularios estilo Apple ID con validaciones visuales
 - [x] `MisPedidos.razor` — Historial con línea de tiempo de 5 pasos
 - [x] `NavMenu.razor` — Navbar sticky con layout 3 zonas (marca | categorías centradas | búsqueda+acciones):
-  - Estados activos por URL con subrayado azul animado
-  - Badge de carrito en tiempo real con animación _bump_
+  - Estados activos por URL con subrayado azul animado; rutas de categoría migradas a `/categoria/{slug}`
+  - Ícono de carrito siempre visible: **pill azul** con etiqueta "Carrito" para usuarios no autenticados, badge contador con animación _bump_ para usuarios autenticados
+  - Nombre del usuario + dropdown (Mis pedidos / Mi carrito / Cerrar sesión) al estar autenticado; se ocultan Iniciar sesión y Registrarse
   - Búsqueda con `oninput`, tecla Enter/Escape y botón limpiar
   - Cierre automático del menú móvil via JS Interop (Bootstrap 5 Collapse)
   - Hover con pill background, línea indicadora deslizante e íconos con fondo circular
   - Suscripción a `SesionServicio.OnCambio`, `CarritoApiServicio.OnCambioCarrito` y `NavigationManager.LocationChanged`
   - Patrón `IDisposable` con desuscripción de los 3 eventos
+- [x] **Lazy Load / Reveal** — `IntersectionObserver` (threshold 0.06) registrado en `index.html` como `window.initHeroLazyLoad`; clases `hero-lazy` / `hero-visible` con `opacity + translateY` y `transition-delay` escalonado; aplicado a **todas las secciones** de `Inicio.razor` y `Categoria.razor` (`OnAfterRenderAsync`); respeta `prefers-reduced-motion`
 
 ---
 
-## Sprint 4 — Capa de Datos (EF Core + Repositorios)
+## Sprint 4 — Capa de Datos (EF Core + Repositorios) ✅
 
 **Proyecto**: `TecnoEcommerce.Datos`  
 **Objetivo**: Conectar con PostgreSQL mediante Entity Framework Core y Npgsql.
 
-### Instalación de paquetes NuGet
+### Paquetes NuGet instalados
 
-```bash
-dotnet add TecnoEcommerce.Datos package Microsoft.EntityFrameworkCore
-dotnet add TecnoEcommerce.Datos package Npgsql.EntityFrameworkCore.PostgreSQL
-dotnet add TecnoEcommerce.Datos package Microsoft.EntityFrameworkCore.Tools
-dotnet add TecnoEcommerce.API package Microsoft.EntityFrameworkCore.Design
+```xml
+Microsoft.EntityFrameworkCore                9.0.2
+Microsoft.EntityFrameworkCore.Relational     9.0.2
+Microsoft.EntityFrameworkCore.Design         9.0.2
+Npgsql.EntityFrameworkCore.PostgreSQL        9.0.4
+BCrypt.Net-Next                              4.0.3
 ```
 
 ### Contexto (`Contexto/`)
 
-- [ ] `TecnoEcommerceContexto.cs` — DbContext con DbSets de todas las entidades
+- [x] `TiendaContexto.cs` — DbContext con DbSets de todas las entidades (`Usuarios`, `Categorias`, `Productos`, `Carritos`, `ItemsCarrito`, `Pedidos`, `DetallesPedido`, `Envios`, `Resenias`, `Pagos`); configuración Fluent API con nombres de tabla en snake_case (convención PostgreSQL), índice único en `email`, relaciones con `.Include()` / `.ThenInclude()`, conversión de enumeraciones a `short`
 
 ### Repositorios (`Repositorios/`)
 
-- [ ] `Repositorio.cs` — Implementación genérica de IRepositorio<T>
-- [ ] `ProductoRepositorio.cs` — Repositorio específico de productos
-- [ ] `CarritoRepositorio.cs` — Repositorio específico de carrito
-- [ ] `PedidoRepositorio.cs` — Repositorio específico de pedidos
+- [x] `RepositorioEfCore.cs` — Implementación genérica de `IRepositorio<T>` con EF Core (`AsNoTracking`, `FindAsync`, `SaveChangesAsync`); reemplaza `RepositorioEnMemoria<T>` del Sprint 3 sin cambiar los servicios (OCP + DIP)
+- [x] `ProductoRepositorioEfCore.cs` — Eager loading de `Categoria` en todas las consultas; métodos de filtrado por categoría y búsqueda por nombre con `ILIKE`
+- [x] `CarritoRepositorioEfCore.cs` — Carga de `Items → Producto` con `.Include().ThenInclude()`; lógica de upsert (si el producto ya existe incrementa cantidad)
+- [x] `PedidoRepositorioEfCore.cs` — Carga de detalles + productos por pedido; consulta de historial por `UsuarioId`
 
-### Migraciones
+### Esquema de base de datos
 
-```bash
-dotnet ef migrations add MigracionInicial --project TecnoEcommerce.Datos --startup-project TecnoEcommerce.API
-dotnet ef database update --project TecnoEcommerce.Datos --startup-project TecnoEcommerce.API
-```
+- [x] `database/01_crear_esquema.sql` — DDL completo: tablas, secuencias, claves foráneas y restricciones en PostgreSQL
+- [x] `database/02_datos_semilla.sql` — Datos iniciales de categorías, productos y usuario administrador
+- [ ] Migración EF (`dotnet ef migrations add`) — pendiente; el esquema se gestiona directamente con los archivos SQL
 
 ---
 
