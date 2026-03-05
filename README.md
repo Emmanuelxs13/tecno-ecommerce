@@ -139,7 +139,7 @@ TecnoEcommerce.Modelos
 | Sprint 1 | Modelos         | ✅ Completado | Entidades, Enumeraciones, Interfaces   |
 | Sprint 2 | API / Servicios | ✅ Completado | Implementación de servicios de negocio |
 | Sprint 3 | Web (Blazor)    | ✅ Completado | UI completa, servicios API, CORS       |
-| Sprint 4 | Datos           | 🔜 Siguiente  | EF Core + PostgreSQL + migraciones     |
+| Sprint 4 | Datos           | ✅ Siguiente  | EF Core + PostgreSQL + migraciones     |
 | Sprint 5 | Integración     | 🔜 Pendiente  | Pruebas end-to-end y refinamiento      |
 
 Ver [SPRINTS.md](SPRINTS.md) para el detalle completo.
