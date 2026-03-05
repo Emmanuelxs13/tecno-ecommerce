@@ -4,7 +4,7 @@
 
 - Juan Esteban Correa
 - Andrés Quiroz Gómez
-- Emmanuel Berrío
+- Emmanuel Berrio
 
 ---
 
