@@ -3,36 +3,37 @@
 @using TecnoEcommerce.Modelos.DTOs
 
 @inject NavigationManager Navegacion
+@inject IJSRuntime JS
 
 <PageTitle>TecnoEcommerce — Tecnología para tu vida</PageTitle>
 
 <!-- ═══════════════════ HERO ═══════════════════ -->
 <div class="full-bleed">
-    <section class="apple-hero py-5">
+    <section class="apple-hero py-5" id="hero-section">
         <div class="container" style="max-width:980px">
             <div class="row align-items-center gy-4">
                 <div class="col-lg-7 text-lg-start text-center">
-                    <div class="apple-hero-eyebrow mb-2">
+                    <div class="apple-hero-eyebrow mb-2 hero-lazy" style="transition-delay:.05s">
                         <i class="bi bi-lightning-charge-fill me-1"></i> NUEVA TEMPORADA 2026
                     </div>
-                    <h1 class="apple-hero-title mb-3">
+                    <h1 class="apple-hero-title mb-3 hero-lazy" style="transition-delay:.15s">
                         Tecnología que<br/>
                         <span style="color:#89d4f5">transforma</span><br/>
                         tu mundo.
                     </h1>
-                    <p class="apple-hero-sub">
+                    <p class="apple-hero-sub hero-lazy" style="transition-delay:.28s">
                         Laptops, smartphones, gaming y accesorios premium.<br/>
                         Precios competitivos y envío express a todo el país.
                     </p>
-                    <div class="hero-cta-group">
+                    <div class="hero-cta-group hero-lazy" style="transition-delay:.38s">
                         <a href="#catalogo" class="btn-apple btn-apple-white">
                             <i class="bi bi-grid-fill"></i> Ver catálogo
                         </a>
-                        <a href="/?cat=laptops" class="btn-apple btn-apple-ghost" style="color:#fff;border-color:rgba(255,255,255,.4)">
+                        <a href="/categoria/laptops" class="btn-apple btn-apple-ghost" style="color:#fff;border-color:rgba(255,255,255,.4)">
                             <i class="bi bi-laptop"></i> Laptops
                         </a>
                     </div>
-                    <div class="hero-stats mt-4">
+                    <div class="hero-stats mt-4 hero-lazy" style="transition-delay:.48s">
                         <div class="hero-stat">
                             <div class="hero-stat-num">10K+</div>
                             <div class="hero-stat-label">Clientes felices</div>
@@ -47,7 +48,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-5 d-flex justify-content-center">
+                <div class="col-lg-5 d-flex justify-content-center hero-lazy" style="transition-delay:.2s">
                     <div style="position:relative;text-align:center">
                         <div style="font-size:11rem;opacity:.15;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><i class="bi bi-laptop"></i></div>
                         <div class="hero-floating-card mb-3 position-relative">
@@ -72,7 +73,7 @@
 </div>
 
 <!-- ═══════════════════ TRUST STRIP ═══════════════════ -->
-<div class="full-bleed">
+<div class="full-bleed hero-lazy">
     <div class="trust-strip">
         <div class="trust-item">
             <div class="trust-item-icon"><i class="bi bi-truck"></i></div>
@@ -94,7 +95,7 @@
 </div>
 
 <!-- ═══════════════════ PRODUCTOS DESTACADOS (tiles tipo Apple.com) ═══════════════════ -->
-<section class="py-4">
+<section class="py-4 hero-lazy">
     <div class="section-header mt-4 mb-3">
         <h2 class="section-title">Descubre lo más nuevo</h2>
         <a href="#catalogo" class="btn-ver-todo">Ver todo <i class="bi bi-arrow-right"></i></a>
@@ -158,7 +159,7 @@
 </section>
 
 <!-- ═══════════════════ CATEGORÍAS ═══════════════════ -->
-<section class="py-3">
+<section class="py-3 hero-lazy">
     <div class="section-header">
         <h2 class="section-title">Explorar por categoría</h2>
     </div>
@@ -180,7 +181,7 @@
 </section>
 
 <!-- ═══════════════════ PROMO BANNER ═══════════════════ -->
-<div class="promo-banner">
+<div class="promo-banner hero-lazy">
     <div>
         <div style="font-size:.8rem;color:#89d4f5;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.4rem">
             <i class="bi bi-lightning-charge-fill me-1"></i> Oferta especial
@@ -199,7 +200,7 @@
 </div>
 
 <!-- ═══════════════════ CATALOGO ═══════════════════ -->
-<section id="catalogo" class="py-3">
+<section id="catalogo" class="py-3 hero-lazy">
     <div class="section-header">
         <h2 class="section-title">Catálogo <span class="title-accent">completo</span></h2>
         <span class="result-count">@_productosFiltrados.Count productos</span>
@@ -291,7 +292,7 @@
 </section>
 
 <!-- ═══════════════════ RESEÑAS ═══════════════════ -->
-<section class="resenas-section py-4">
+<section class="resenas-section py-4 hero-lazy">
     <div class="section-header">
         <h2 class="section-title">Lo que dicen nuestros <span class="title-accent">clientes</span></h2>
     </div>
@@ -339,7 +340,7 @@
 </section>
 
 <!-- ═══════════════════ RECOMENDADOS ═══════════════════ -->
-<section class="recomendados-section py-3">
+<section class="recomendados-section py-3 hero-lazy">
     <div class="section-header">
         <h2 class="section-title">También te puede interesar</h2>
     </div>
@@ -460,6 +461,12 @@
 
     [SupplyParameterFromQuery(Name = "cat")]
     public string? CatParam { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JS.InvokeVoidAsync("initHeroLazyLoad");
+    }
 
     protected override void OnParametersSet()
     {

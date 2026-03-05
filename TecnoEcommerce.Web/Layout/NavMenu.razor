@@ -29,19 +29,19 @@
                     <a class="nav-link @CategoriaActiva(string.Empty)" href="/" @onclick="CerrarMenuMovil">Inicio</a>
                 </li>
                 <li>
-                    <a class="nav-link @CategoriaActiva("laptops")" href="/?cat=laptops" @onclick="CerrarMenuMovil">Laptops</a>
+                    <a class="nav-link @CategoriaActiva("laptops")" href="/categoria/laptops" @onclick="CerrarMenuMovil">Laptops</a>
                 </li>
                 <li>
-                    <a class="nav-link @CategoriaActiva("smartphones")" href="/?cat=smartphones" @onclick="CerrarMenuMovil">Smartphones</a>
+                    <a class="nav-link @CategoriaActiva("smartphones")" href="/categoria/smartphones" @onclick="CerrarMenuMovil">Smartphones</a>
                 </li>
                 <li>
-                    <a class="nav-link @CategoriaActiva("gaming")" href="/?cat=gaming" @onclick="CerrarMenuMovil">Gaming</a>
+                    <a class="nav-link @CategoriaActiva("gaming")" href="/categoria/gaming" @onclick="CerrarMenuMovil">Gaming</a>
                 </li>
                 <li>
-                    <a class="nav-link @CategoriaActiva("accesorios")" href="/?cat=accesorios" @onclick="CerrarMenuMovil">Accesorios</a>
+                    <a class="nav-link @CategoriaActiva("accesorios")" href="/categoria/accesorios" @onclick="CerrarMenuMovil">Accesorios</a>
                 </li>
                 <li>
-                    <a class="nav-link @CategoriaActiva("monitores")" href="/?cat=monitores" @onclick="CerrarMenuMovil">Monitores</a>
+                    <a class="nav-link @CategoriaActiva("monitores")" href="/categoria/monitores" @onclick="CerrarMenuMovil">Monitores</a>
                 </li>
             </ul>
 
@@ -135,6 +135,16 @@
                                 Registrarse
                             </a>
                         </li>
+                        <li>
+                            <a class="nav-link nav-icon-link nav-cart-guest"
+                               href="/carrito"
+                               title="Mi carrito"
+                               @onclick="CerrarMenuMovil">
+                                <span class="nav-cart-wrap">
+                                    <i class="bi bi-bag3"></i>
+                                </span>
+                            </a>
+                        </li>
                     }
                 </ul>
 
@@ -199,8 +209,14 @@
     {
         var uri = Navegacion.Uri;
         if (string.IsNullOrEmpty(cat))
-            return uri.Contains("cat=") ? "" : (uri.EndsWith("/") || uri.Contains("/#") ? "active" : "");
-        return uri.Contains("cat=" + cat, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+        {
+            // Activo en inicio solo si no estamos en una subcategoria
+            return uri.Contains("/categoria/") ? "" :
+                   (uri.EndsWith("/") || !uri.Contains("/login") && !uri.Contains("/registro")
+                     && !uri.Contains("/carrito") && !uri.Contains("/producto/")
+                     && !uri.Contains("/mis-pedidos") ? "active" : "");
+        }
+        return uri.Contains("/categoria/" + cat, StringComparison.OrdinalIgnoreCase) ? "active" : "";
     }
 
     private void TeclaSearch(KeyboardEventArgs e)

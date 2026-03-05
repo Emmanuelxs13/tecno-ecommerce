@@ -1,0 +1,285 @@
+@page "/categoria/{Slug}"
+@using TecnoEcommerce.Web.Servicios
+@using TecnoEcommerce.Modelos.DTOs
+
+@inject NavigationManager Navegacion
+@inject IJSRuntime JS
+
+<PageTitle>@(_meta?.Nombre ?? Slug) — TecnoEcommerce</PageTitle>
+
+@if (_meta is null)
+{
+    <!-- Categoría no encontrada -->
+    <div class="container py-5 text-center">
+        <div style="font-size:4rem;opacity:.25"><i class="bi bi-question-circle"></i></div>
+        <h2 class="mt-3">Categoría no encontrada</h2>
+        <p class="text-muted">La categoría <strong>@Slug</strong> no existe.</p>
+        <a href="/" class="btn-apple btn-apple-primary mt-3">
+            <i class="bi bi-arrow-left"></i> Volver al inicio
+        </a>
+    </div>
+}
+else
+{
+    <!-- ═══ HERO DE CATEGORÍA ═══ -->
+    <div class="full-bleed">
+        <section class="cat-hero hero-lazy" style="--cat-color:@_meta.Color">
+            <div class="container" style="max-width:980px">
+                <nav class="cat-breadcrumb hero-lazy" style="transition-delay:.05s">
+                    <a href="/">Inicio</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>@_meta.Nombre</span>
+                </nav>
+                <div class="cat-hero-body hero-lazy" style="transition-delay:.15s">
+                    <div class="cat-hero-icon">
+                        <i class="@_meta.Icono"></i>
+                    </div>
+                    <div>
+                        <h1 class="cat-hero-title">@_meta.Nombre</h1>
+                        <p class="cat-hero-sub">@_meta.Descripcion</p>
+                        <span class="cat-hero-badge">@_productos.Count productos</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ═══ FILTROS ═══ -->
+    <section class="container py-4" style="max-width:1280px">
+        <div class="catalog-filters mb-4">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input class="form-control" type="search"
+                       placeholder="Buscar en @_meta.Nombre…"
+                       @bind="_busqueda" @bind:event="oninput" />
+            </div>
+            <select class="form-select" @bind="_ordenFiltro">
+                <option value="">Ordenar por</option>
+                <option value="precio_asc">Precio: menor a mayor</option>
+                <option value="precio_desc">Precio: mayor a menor</option>
+                <option value="nombre">Nombre A-Z</option>
+            </select>
+            @if (!string.IsNullOrEmpty(_busqueda) || !string.IsNullOrEmpty(_ordenFiltro))
+            {
+                <button class="btn-apple btn-apple-ghost" @onclick="LimpiarFiltros" title="Limpiar filtros">
+                    <i class="bi bi-x-circle"></i>
+                </button>
+            }
+        </div>
+
+        <!-- Resultados -->
+        @if (_productosFiltrados.Count == 0)
+        {
+            <div class="empty-state py-5">
+                <i class="bi bi-search"></i>
+                <p class="mt-2">
+                    No se encontraron productos en esta búsqueda.<br />
+                    <button class="btn btn-link p-0" @onclick="LimpiarFiltros">Limpiar filtros</button>
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="section-header mb-3">
+                <h2 class="section-title">Todos los <span class="title-accent">@_meta.Nombre</span></h2>
+                <span class="result-count">@_productosFiltrados.Count productos</span>
+            </div>
+            <div class="row g-4">
+                @foreach (var p in _productosFiltrados)
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-3 fade-in-up">
+                        <div class="producto-card h-100 cursor-pointer" @onclick="() => VerDetalle(p.Id)">
+                            <div class="card-img-wrapper">
+                                <img class="card-img-top" src="@p.ImagenUrl" alt="@p.Nombre"
+                                     loading="lazy"
+                                     onerror="this.src='https://placehold.co/400x300/f5f5f7/0071e3?text=TecnoE'" />
+                                @if (p.EsNuevo)
+                                {
+                                    <span class="producto-badge badge-nuevo">Nuevo</span>
+                                }
+                                @if (p.DescuentoPct > 0)
+                                {
+                                    <span class="producto-badge badge-oferta" style="top:@(p.EsNuevo?"34px":"10px")">-@p.DescuentoPct%</span>
+                                }
+                                <button class="btn-wishlist @(_wishlist.Contains(p.Id) ? "active" : "")"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => ToggleWishlist(p.Id)"
+                                        title="Lista de deseos">
+                                    <i class="bi @(_wishlist.Contains(p.Id) ? "bi-heart-fill" : "bi-heart")"></i>
+                                </button>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <div class="producto-categoria-badge">@p.Categoria</div>
+                                <h3 class="mb-1">@p.Nombre</h3>
+                                <p class="text-muted mb-2" style="font-size:.82rem;flex:1">@p.Descripcion</p>
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="rating-stars">★★★★@(p.Rating >= 4.5 ? "★" : "☆")</span>
+                                    <span class="rating-score">(@p.Resenas)</span>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="producto-precio">$@p.Precio.ToString("N0")</span>
+                                    @if (p.PrecioOriginal > 0)
+                                    {
+                                        <span style="font-size:.78rem;color:var(--apple-gray);text-decoration:line-through">$@p.PrecioOriginal.ToString("N0")</span>
+                                    }
+                                </div>
+                                <button class="btn-apple btn-apple-primary mt-3"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => AgregarAlCarrito(p)">
+                                    <i class="bi bi-cart3"></i> Agregar al carrito
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <!-- ═══ OTRAS CATEGORÍAS ═══ -->
+    <section class="container pb-5" style="max-width:1280px">
+        <div class="section-header mb-3">
+            <h2 class="section-title">Otras categorías</h2>
+        </div>
+        <div class="row g-3">
+            @foreach (var cat in _categorias.Where(c => c.Slug != Slug))
+            {
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                    <div class="categoria-card" @onclick="() => IrCategoria(cat.Slug)">
+                        <div class="cat-icon-wrap @cat.IconClass">
+                            <i class="@cat.Icono"></i>
+                        </div>
+                        <div style="font-size:.83rem;font-weight:600">@cat.Nombre</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- Toast -->
+@if (_mostrarToast)
+{
+    <div class="toast-container-custom">
+        <div class="toast-item toast-success">
+            <span class="toast-icon"><i class="bi bi-check-circle-fill" style="color:#34c759"></i></span>
+            <span class="toast-text">@_mensajeToast</span>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Slug { get; set; } = string.Empty;
+
+    // ─── Mock data (igual que Inicio) ────────────────────────────
+    private record MockProducto(int Id, string Nombre, string Categoria, string CategoriaSlug,
+        decimal Precio, decimal PrecioOriginal, string Descripcion, string ImagenUrl,
+        bool EsNuevo, int DescuentoPct, double Rating, int Resenas);
+
+    private record MockCategoria(string Nombre, string Slug, string Icono, string IconClass, int Cantidad);
+
+    private record CatMeta(string Nombre, string Icono, string Color, string Descripcion);
+
+    private static readonly Dictionary<string, CatMeta> _catMetas = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["laptops"]     = new("Laptops",     "bi bi-laptop",     "#0071e3", "Potencia y portabilidad en perfecta armonía. Desde ultrabooks hasta workstations."),
+        ["smartphones"] = new("Smartphones", "bi bi-phone",      "#06b6d4", "Conectividad, cámara y rendimiento en la palma de tu mano."),
+        ["gaming"]      = new("Gaming",      "bi bi-controller", "#7c3aed", "Hardware y periféricos para llevar tu juego al siguiente nivel."),
+        ["monitores"]   = new("Monitores",   "bi bi-display",    "#059669", "Pantallas de alta resolución para trabajo, diseño y entretenimiento."),
+        ["accesorios"]  = new("Accesorios",  "bi bi-keyboard",   "#d97706", "Teclados, ratones, auriculares y más para completar tu setup."),
+        ["componentes"] = new("Componentes", "bi bi-cpu",        "#dc2626", "CPUs, GPUs y componentes para construir o actualizar tu PC."),
+    };
+
+    private static readonly List<MockProducto> _todosProductos = new()
+    {
+        new(1,  "MacBook Air M3",    "Laptops",     "laptops",     1299m, 1399m, "Chip M3, 8GB RAM, SSD 256GB, pantalla Liquid Retina 13.6\"",     "https://placehold.co/400x300/1d1d1f/ffffff?text=MacBook+Air",  true,  7,  4.9, 3241),
+        new(2,  "iPhone 15 Pro",     "Smartphones", "smartphones", 1199m, 0,     "Chip A17 Pro, cámara 48MP, Dynamic Island, carcasa de titanio",  "https://placehold.co/400x300/3d3d3d/ffffff?text=iPhone+15+Pro", true,  0,  4.8, 5102),
+        new(3,  "Samsung Galaxy S24","Smartphones", "smartphones", 999m,  1099m, "Snapdragon 8 Gen 3, 256GB, Galaxy AI, cámara 50MP",             "https://placehold.co/400x300/0a1628/ffffff?text=Galaxy+S24",   false, 9,  4.7, 2874),
+        new(4,  "ASUS VivoBook 15",  "Laptops",     "laptops",     899m,  0,     "Intel Core i7 13th Gen, 16GB RAM, SSD 512GB, FHD IPS",           "https://placehold.co/400x300/0071e3/ffffff?text=ASUS+VivoBook", false, 0,  4.5,  987),
+        new(5,  "LG UltraWide 34\"", "Monitores",   "monitores",   449m,  499m,  "Panel IPS, 100Hz, WQHD 3440×1440, HDR10, AMD FreeSync",          "https://placehold.co/400x300/059669/ffffff?text=LG+UltraWide",  false, 10, 4.6,  654),
+        new(6,  "Keychron K2 V2",    "Accesorios",  "accesorios",  89m,   0,     "Teclado mecánico TKL, switches Gateron Brown, RGB, inalámbrico", "https://placehold.co/400x300/d97706/ffffff?text=Keychron+K2",  true,  0,  4.8, 1432),
+        new(7,  "RTX 4060 8GB",      "Gaming",      "gaming",      399m,  449m,  "GPU Nvidia Ada Lovelace, DLSS 3, 4K gaming, 8GB GDDR6X",         "https://placehold.co/400x300/7c3aed/ffffff?text=RTX+4060",     false, 11, 4.7, 2103),
+        new(8,  "HyperX Cloud III",  "Gaming",      "gaming",      149m,  0,     "Auriculares gaming, DTS Headphone:X, micrófono retráctil, USB-C","https://placehold.co/400x300/dc2626/ffffff?text=HyperX+III",   true,  0,  4.6,  876),
+        new(9,  "Xiaomi 14 Ultra",   "Smartphones", "smartphones", 1099m, 0,     "Snapdragon 8 Gen 3, cámara Leica 50MP, carga 90W inalámbrica",   "https://placehold.co/400x300/ff6900/ffffff?text=Xiaomi+14",    true,  0,  4.7,  623),
+        new(10, "Dell XPS 15",       "Laptops",     "laptops",     1799m, 1999m, "Intel Core Ultra 7, OLED 3.5K, 32GB RAM, RTX 4060",             "https://placehold.co/400x300/0071e3/ffffff?text=Dell+XPS+15",  false, 10, 4.8, 1140),
+        new(11, "BenQ MOBIUZ 27\"",  "Monitores",   "monitores",   329m,  0,     "IPS 170Hz, 1ms, QHD 2560×1440, HDR400, FreeSync Premium Pro",   "https://placehold.co/400x300/059669/ffffff?text=BenQ+MOBIUZ",  true,  0,  4.6,  445),
+        new(12, "Logitech G Pro X",  "Gaming",      "gaming",      179m,  199m,  "Ratón gaming 25K DPI, switch Lightforce, 95h batería, alámbrico/inalámbrico", "https://placehold.co/400x300/7c3aed/ffffff?text=G+Pro+X", false, 10, 4.7, 987),
+    };
+
+    private static readonly List<MockCategoria> _categorias = new()
+    {
+        new("Laptops",     "laptops",     "bi bi-laptop",     "cat-icon-blue",   48),
+        new("Smartphones", "smartphones", "bi bi-phone",      "cat-icon-cyan",   62),
+        new("Gaming",      "gaming",      "bi bi-controller", "cat-icon-purple", 35),
+        new("Monitores",   "monitores",   "bi bi-display",    "cat-icon-green",  24),
+        new("Accesorios",  "accesorios",  "bi bi-keyboard",   "cat-icon-yellow", 80),
+        new("Componentes", "componentes", "bi bi-cpu",        "cat-icon-red",    29),
+    };
+
+    // ─── State ────────────────────────────────────────────────────
+    private CatMeta? _meta;
+    private List<MockProducto> _productos = new();
+    private string _busqueda     = string.Empty;
+    private string _ordenFiltro  = string.Empty;
+    private bool   _mostrarToast = false;
+    private string _mensajeToast = string.Empty;
+    private readonly HashSet<int> _wishlist = new();
+
+    private List<MockProducto> _productosFiltrados =>
+        _productos
+            .Where(p => string.IsNullOrEmpty(_busqueda) ||
+                        p.Nombre.Contains(_busqueda, StringComparison.OrdinalIgnoreCase) ||
+                        p.Descripcion.Contains(_busqueda, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(p => _ordenFiltro switch {
+                "precio_asc"  => (object)(int)p.Precio,
+                "precio_desc" => (object)(int)(-p.Precio),
+                "nombre"      => (object)p.Nombre,
+                _             => (object)p.Id
+            }).ToList();
+
+    protected override void OnParametersSet()
+    {
+        _catMetas.TryGetValue(Slug ?? "", out _meta);
+        _productos = _todosProductos
+            .Where(p => p.CategoriaSlug.Equals(Slug, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        _busqueda    = string.Empty;
+        _ordenFiltro = string.Empty;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JS.InvokeVoidAsync("initHeroLazyLoad");
+    }
+
+    private void VerDetalle(int id) => Navegacion.NavigateTo($"/producto/{id}");
+    private void IrCategoria(string slug) => Navegacion.NavigateTo($"/categoria/{slug}");
+
+    private void LimpiarFiltros()
+    {
+        _busqueda    = string.Empty;
+        _ordenFiltro = string.Empty;
+    }
+
+    private void ToggleWishlist(int id)
+    {
+        if (_wishlist.Contains(id)) _wishlist.Remove(id);
+        else _wishlist.Add(id);
+    }
+
+    private async Task AgregarAlCarrito(MockProducto p)
+    {
+        await MostrarToast($"✓ {p.Nombre} añadido al carrito");
+    }
+
+    private async Task MostrarToast(string msg)
+    {
+        _mensajeToast = msg;
+        _mostrarToast = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        _mostrarToast = false;
+        StateHasChanged();
+    }
+}
