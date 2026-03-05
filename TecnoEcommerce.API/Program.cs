@@ -1,9 +1,12 @@
 // ================================================================
 // TecnoEcommerce - Punto de entrada de la API
+// Sprint 4: PostgreSQL + Entity Framework Core
 // Arquitectura: Modelo - Vista - Controlador (MVC)
 // ================================================================
-using TecnoEcommerce.API.Repositorios;
+using Microsoft.EntityFrameworkCore;
 using TecnoEcommerce.API.Servicios;
+using TecnoEcommerce.Datos.Contexto;
+using TecnoEcommerce.Datos.Repositorios;
 using TecnoEcommerce.Modelos.Entidades;
 using TecnoEcommerce.Modelos.Interfaces;
 
@@ -16,8 +19,8 @@ builder.Services.AddControllers();
 
 // -----------------------------------------------
 // Configurar CORS para permitir peticiones desde
-// el cliente Blazor WebAssembly (Sprint 3).
-// En producción restrict los orígenes al dominio real.
+// el cliente Blazor WebAssembly.
+// En producción restringe los orígenes al dominio real.
 // -----------------------------------------------
 builder.Services.AddCors(opciones =>
 {
@@ -39,41 +42,56 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // -----------------------------------------------
-// Repositorios en memoria (Singleton para que los datos
-// persistan durante toda la sesión de prueba).
-// Sprint 4 reemplazará estas implementaciones con EF Core + PostgreSQL.
+// EF Core + PostgreSQL
+// La cadena de conexión se lee de appsettings.json
+// (clave "ConexionPrincipal").
 // -----------------------------------------------
-builder.Services.AddSingleton<IRepositorio<Usuario>>(
-    new RepositorioEnMemoria<Usuario>(u => u.Id, (u, id) => u.Id = id));
-builder.Services.AddSingleton<IRepositorio<Categoria>>(
-    new RepositorioEnMemoria<Categoria>(c => c.Id, (c, id) => c.Id = id));
-builder.Services.AddSingleton<IRepositorio<Envio>, EnvioRepositorioEnMemoria>();
-builder.Services.AddSingleton<IProductoRepositorio, ProductoRepositorioEnMemoria>();
-builder.Services.AddSingleton<ICarritoRepositorio, CarritoRepositorioEnMemoria>();
-builder.Services.AddSingleton<IPedidoRepositorio, PedidoRepositorioEnMemoria>();
+builder.Services.AddDbContext<TiendaContexto>(opciones =>
+    opciones.UseNpgsql(
+        builder.Configuration.GetConnectionString("ConexionPrincipal"),
+        npgsql => npgsql.MigrationsAssembly("TecnoEcommerce.Datos")));
+
+// -----------------------------------------------
+// Repositorios EF Core (Scoped: una instancia por petición HTTP).
+// Reemplazan a las implementaciones en memoria del Sprint 3.
+// Principio OCP: los servicios no se modifican, solo se cambia
+// la implementación concreta registrada en el contenedor DI.
+// -----------------------------------------------
+builder.Services.AddScoped<IRepositorio<Usuario>,   RepositorioEfCore<Usuario>>();
+builder.Services.AddScoped<IRepositorio<Categoria>, RepositorioEfCore<Categoria>>();
+builder.Services.AddScoped<IRepositorio<Envio>,     RepositorioEfCore<Envio>>();
+builder.Services.AddScoped<IProductoRepositorio,    ProductoRepositorioEfCore>();
+builder.Services.AddScoped<ICarritoRepositorio,     CarritoRepositorioEfCore>();
+builder.Services.AddScoped<IPedidoRepositorio,      PedidoRepositorioEfCore>();
 
 // -----------------------------------------------
 // Servicios de negocio (Scoped: una instancia por petición HTTP).
 // Principio DIP: se registran las interfaces, no las implementaciones concretas.
 // -----------------------------------------------
-builder.Services.AddScoped<IUsuarioServicio, UsuarioServicio>();
+builder.Services.AddScoped<IUsuarioServicio,  UsuarioServicio>();
 builder.Services.AddScoped<IProductoServicio, ProductoServicio>();
-builder.Services.AddScoped<ICategoriaServicio, CategoriaServicio>();
-builder.Services.AddScoped<ICarritoServicio, CarritoServicio>();
-builder.Services.AddScoped<IPedidoServicio, PedidoServicio>();
-builder.Services.AddScoped<IPagoServicio, PagoSimuladoServicio>();
-builder.Services.AddScoped<IEnvioServicio, EnvioSimuladoServicio>();
+builder.Services.AddScoped<ICategoriaServicio,CategoriaServicio>();
+builder.Services.AddScoped<ICarritoServicio,  CarritoServicio>();
+builder.Services.AddScoped<IPedidoServicio,   PedidoServicio>();
+builder.Services.AddScoped<IPagoServicio,     PagoSimuladoServicio>();
+builder.Services.AddScoped<IEnvioServicio,    EnvioSimuladoServicio>();
 
 var app = builder.Build();
 
 // -----------------------------------------------
-// Cargar datos iniciales de prueba (categorías + productos)
+// Verificar conexión a la base de datos al arrancar.
+// La estructura de tablas se crea manualmente con los
+// scripts SQL ubicados en la carpeta /database/.
 // -----------------------------------------------
-using (var scope = app.Services.CreateScope())
+if (app.Environment.IsDevelopment())
 {
-    var categorias = scope.ServiceProvider.GetRequiredService<IRepositorio<Categoria>>();
-    var productos  = scope.ServiceProvider.GetRequiredService<IProductoRepositorio>();
-    await DatosSemilla.CargarAsync(categorias, productos);
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<TiendaContexto>();
+    var puedeConectar = await db.Database.CanConnectAsync();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation(puedeConectar
+        ? "✅ Conexión a PostgreSQL establecida correctamente."
+        : "❌ No se pudo conectar a PostgreSQL. Verifique la cadena de conexión en appsettings.json.");
 }
 
 // -----------------------------------------------
@@ -101,3 +119,4 @@ app.MapControllers();
 // Ejecutar la aplicación
 // -----------------------------------------------
 app.Run();
+
