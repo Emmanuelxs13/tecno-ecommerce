@@ -3,7 +3,7 @@
 ## Autores
 
 - Juan Esteban Correa
-- Andrés Quiroz Gómez
+- Andrés Quiroz Gómez 
 - Emmanuel Berrio
 
 ---
