@@ -2,7 +2,7 @@
 
 ## Autores
 
-- Juan Esteban Correa
+- Juan Esteban Correa Cano
 - Andrés Quiroz Gómez 
 - Emmanuel Berrio
 
