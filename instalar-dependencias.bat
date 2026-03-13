@@ -14,7 +14,7 @@ dotnet --version >nul 2>&1
 if %ERRORLEVEL% neq 0 (
     echo.
     echo  ERROR: .NET SDK no encontrado.
-    echo  Descargalo desde: https://dotnet.microsoft.com/download/dotnet/9
+    echo  Descargalo desde: https://dotnet.microsoft.com/download/dotnet/10
     echo.
     pause
     exit /b 1
@@ -43,21 +43,21 @@ REM ─── Detalle de paquetes por proyecto ───────────
 echo [3/5] Paquetes instalados por proyecto:
 echo.
 echo  TecnoEcommerce.API
-echo   - Microsoft.AspNetCore.OpenApi       v9.0.0
-echo   - Swashbuckle.AspNetCore             v6.9.0
-echo   - Microsoft.EntityFrameworkCore.Design v9.0.2
-echo   - BCrypt.Net-Next                    v4.0.3
+echo   - Microsoft.AspNetCore.OpenApi       v10.0.5
+echo   - Swashbuckle.AspNetCore             v10.1.5
+echo   - Microsoft.EntityFrameworkCore.Design v10.0.5
+echo   - BCrypt.Net-Next                    v4.1.0
 echo.
 echo  TecnoEcommerce.Datos
-echo   - Microsoft.EntityFrameworkCore          v9.0.2
-echo   - Microsoft.EntityFrameworkCore.Relational v9.0.2
-echo   - Microsoft.EntityFrameworkCore.Design   v9.0.2
-echo   - Npgsql.EntityFrameworkCore.PostgreSQL  v9.0.4
-echo   - BCrypt.Net-Next                        v4.0.3
+echo   - Microsoft.EntityFrameworkCore          v10.0.5
+echo   - Microsoft.EntityFrameworkCore.Relational v10.0.5
+echo   - Microsoft.EntityFrameworkCore.Design   v10.0.5
+echo   - Npgsql.EntityFrameworkCore.PostgreSQL  v10.0.1
+echo   - BCrypt.Net-Next                        v4.1.0
 echo.
 echo  TecnoEcommerce.Web (Blazor WASM)
-echo   - Microsoft.AspNetCore.Components.WebAssembly           v9.0.0
-echo   - Microsoft.AspNetCore.Components.WebAssembly.DevServer v9.0.0
+echo   - Microsoft.AspNetCore.Components.WebAssembly           v10.0.5
+echo   - Microsoft.AspNetCore.Components.WebAssembly.DevServer v10.0.5
 echo.
 
 REM ─── Instalar herramienta dotnet-ef (opcional, para migraciones) ──

@@ -4,17 +4,17 @@ Este documento explica cómo descargar e instalar todas las dependencias NuGet d
 
 ---
 
-## Requisito previo: .NET 9 SDK
+## Requisito previo: .NET 10 SDK
 
-Asegúrate de tener instalado el **.NET 9 SDK** antes de continuar.
+Asegúrate de tener instalado el **.NET 10 SDK** antes de continuar.
 
 ```bash
 dotnet --version
-# Debe mostrar 9.x.x
+# Debe mostrar 10.x.x
 ```
 
 Si no está instalado, descárgalo desde:
-**https://dotnet.microsoft.com/download/dotnet/9**
+**https://dotnet.microsoft.com/download/dotnet/10**
 
 ---
 
@@ -58,7 +58,7 @@ Ambos scripts realizan los mismos 5 pasos automáticamente:
 
 | Paso | Acción                                                               |
 | ---- | -------------------------------------------------------------------- |
-| 1    | Verifica que .NET 9 SDK esté instalado                               |
+| 1    | Verifica que .NET 10 SDK esté instalado                              |
 | 2    | Ejecuta `dotnet restore` para restaurar todos los paquetes NuGet     |
 | 3    | Muestra un resumen de los paquetes instalados por proyecto           |
 | 4    | Instala la herramienta `dotnet-ef` globalmente si no está presente   |
@@ -70,7 +70,7 @@ Ambos scripts realizan los mismos 5 pasos automáticamente:
 
 Si prefieres ejecutar los comandos paso a paso:
 
-### Paso 1 — Verificar .NET 9 SDK
+### Paso 1 — Verificar .NET 10 SDK
 
 ```bash
 dotnet --version
@@ -114,27 +114,27 @@ Si no hay errores, las dependencias están instaladas y el proyecto está listo 
 
 | Paquete                                | Versión | Descripción                    |
 | -------------------------------------- | ------- | ------------------------------ |
-| `Microsoft.AspNetCore.OpenApi`         | 9.0.0   | Soporte OpenAPI / Swagger      |
-| `Swashbuckle.AspNetCore`               | 6.9.0   | Swagger UI                     |
-| `Microsoft.EntityFrameworkCore.Design` | 9.0.2   | Herramientas de diseño EF Core |
-| `BCrypt.Net-Next`                      | 4.0.3   | Hash de contraseñas            |
+| `Microsoft.AspNetCore.OpenApi`         | 10.0.5  | Soporte OpenAPI / Swagger      |
+| `Swashbuckle.AspNetCore`               | 10.1.5  | Swagger UI                     |
+| `Microsoft.EntityFrameworkCore.Design` | 10.0.5  | Herramientas de diseño EF Core |
+| `BCrypt.Net-Next`                      | 4.1.0   | Hash de contraseñas            |
 
 ### TecnoEcommerce.Datos
 
 | Paquete                                    | Versión | Descripción                       |
 | ------------------------------------------ | ------- | --------------------------------- |
-| `Microsoft.EntityFrameworkCore`            | 9.0.2   | ORM principal                     |
-| `Microsoft.EntityFrameworkCore.Relational` | 9.0.2   | Soporte relacional EF Core        |
-| `Microsoft.EntityFrameworkCore.Design`     | 9.0.2   | Herramientas de diseño EF Core    |
-| `Npgsql.EntityFrameworkCore.PostgreSQL`    | 9.0.4   | Proveedor PostgreSQL para EF Core |
-| `BCrypt.Net-Next`                          | 4.0.3   | Hash de contraseñas               |
+| `Microsoft.EntityFrameworkCore`            | 10.0.5  | ORM principal                     |
+| `Microsoft.EntityFrameworkCore.Relational` | 10.0.5  | Soporte relacional EF Core        |
+| `Microsoft.EntityFrameworkCore.Design`     | 10.0.5  | Herramientas de diseño EF Core    |
+| `Npgsql.EntityFrameworkCore.PostgreSQL`    | 10.0.1  | Proveedor PostgreSQL para EF Core |
+| `BCrypt.Net-Next`                          | 4.1.0   | Hash de contraseñas               |
 
 ### TecnoEcommerce.Web (Blazor WebAssembly)
 
 | Paquete                                                 | Versión | Descripción                   |
 | ------------------------------------------------------- | ------- | ----------------------------- |
-| `Microsoft.AspNetCore.Components.WebAssembly`           | 9.0.0   | Runtime Blazor WASM           |
-| `Microsoft.AspNetCore.Components.WebAssembly.DevServer` | 9.0.0   | Servidor de desarrollo Blazor |
+| `Microsoft.AspNetCore.Components.WebAssembly`           | 10.0.5  | Runtime Blazor WASM           |
+| `Microsoft.AspNetCore.Components.WebAssembly.DevServer` | 10.0.5  | Servidor de desarrollo Blazor |
 
 ### TecnoEcommerce.Modelos
 
@@ -166,7 +166,7 @@ TecnoEcommerce.Modelos
 ### `dotnet` no se reconoce como comando
 
 .NET SDK no está instalado o no está en el PATH del sistema.
-Descargar desde: https://dotnet.microsoft.com/download/dotnet/9
+Descargar desde: https://dotnet.microsoft.com/download/dotnet/10
 
 ### Error de restauración NuGet (sin internet / red corporativa)
 

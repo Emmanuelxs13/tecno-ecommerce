@@ -56,14 +56,14 @@ try {
 }
 catch {
     Write-Fail ".NET SDK no encontrado."
-    Write-Host "  Descargalo desde: https://dotnet.microsoft.com/download/dotnet/9" -ForegroundColor White
+    Write-Host "  Descargalo desde: https://dotnet.microsoft.com/download/dotnet/10" -ForegroundColor White
     exit 1
 }
 
-# Advertir si la version no es 9.x
-if ($dotnetVersion -notmatch "^9\.") {
-    Write-Warn "Se recomienda .NET 9 SDK. Version detectada: $dotnetVersion"
-    Write-Host "  Descarga .NET 9 en: https://dotnet.microsoft.com/download/dotnet/9" -ForegroundColor White
+# Advertir si la version no es 10.x
+if ($dotnetVersion -notmatch "^10\.") {
+    Write-Warn "Se recomienda .NET 10 SDK. Version detectada: $dotnetVersion"
+    Write-Host "  Descarga .NET 10 en: https://dotnet.microsoft.com/download/dotnet/10" -ForegroundColor White
 }
 
 Write-Host ""
@@ -89,21 +89,21 @@ Write-Host ""
 
 $paquetes = @(
     @{ Proyecto = "TecnoEcommerce.API"; Paquetes = @(
-        "Microsoft.AspNetCore.OpenApi              v9.0.0",
-        "Swashbuckle.AspNetCore                   v6.9.0",
-        "Microsoft.EntityFrameworkCore.Design      v9.0.2",
-        "BCrypt.Net-Next                           v4.0.3"
+        "Microsoft.AspNetCore.OpenApi              v10.0.5",
+        "Swashbuckle.AspNetCore                   v10.1.5",
+        "Microsoft.EntityFrameworkCore.Design      v10.0.5",
+        "BCrypt.Net-Next                           v4.1.0"
     )},
     @{ Proyecto = "TecnoEcommerce.Datos"; Paquetes = @(
-        "Microsoft.EntityFrameworkCore             v9.0.2",
-        "Microsoft.EntityFrameworkCore.Relational  v9.0.2",
-        "Microsoft.EntityFrameworkCore.Design      v9.0.2",
-        "Npgsql.EntityFrameworkCore.PostgreSQL     v9.0.4",
-        "BCrypt.Net-Next                           v4.0.3"
+        "Microsoft.EntityFrameworkCore             v10.0.5",
+        "Microsoft.EntityFrameworkCore.Relational  v10.0.5",
+        "Microsoft.EntityFrameworkCore.Design      v10.0.5",
+        "Npgsql.EntityFrameworkCore.PostgreSQL     v10.0.1",
+        "BCrypt.Net-Next                           v4.1.0"
     )},
     @{ Proyecto = "TecnoEcommerce.Web (Blazor WASM)"; Paquetes = @(
-        "Microsoft.AspNetCore.Components.WebAssembly           v9.0.0",
-        "Microsoft.AspNetCore.Components.WebAssembly.DevServer v9.0.0"
+        "Microsoft.AspNetCore.Components.WebAssembly           v10.0.5",
+        "Microsoft.AspNetCore.Components.WebAssembly.DevServer v10.0.5"
     )}
 )
 
@@ -118,8 +118,8 @@ foreach ($item in $paquetes) {
 # ─── Paso 4: Instalar dotnet-ef ───────────────────────────────────────────────
 Write-Step "4/5" "Verificando dotnet-ef (herramienta EF Core CLI)..."
 
-$efCheck = dotnet ef 2>&1
-if ($LASTEXITCODE -ne 0) {
+$efToolInstalled = dotnet tool list --global | Select-String '^dotnet-ef\s'
+if (-not $efToolInstalled) {
     Write-Host "  dotnet-ef no encontrado. Instalando globalmente..." -ForegroundColor Yellow
     dotnet tool install --global dotnet-ef
     if ($LASTEXITCODE -ne 0) {
@@ -129,7 +129,10 @@ if ($LASTEXITCODE -ne 0) {
         Write-OK "dotnet-ef instalado correctamente."
     }
 } else {
-    $efVersion = dotnet ef --version 2>&1 | Select-Object -First 1
+    $efVersion = dotnet tool list --global |
+        Select-String '^dotnet-ef\s' |
+        ForEach-Object { ($_ -split '\s+')[1] } |
+        Select-Object -First 1
     Write-OK "dotnet-ef ya esta instalado. Version: $efVersion"
 }
 
