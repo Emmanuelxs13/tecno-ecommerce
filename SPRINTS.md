@@ -1,7 +1,7 @@
 # Plan de Sprints — TecnoEcommerce
 
 Arquitectura: **Modelo - Vista - Controlador (MVC)**  
-Framework: **.NET 9 Web API + Blazor WebAssembly**
+Framework: **.NET 10 Web API + Blazor WebAssembly**
 
 ---
 
@@ -140,11 +140,11 @@ Framework: **.NET 9 Web API + Blazor WebAssembly**
 ### Paquetes NuGet instalados
 
 ```xml
-Microsoft.EntityFrameworkCore                9.0.2
-Microsoft.EntityFrameworkCore.Relational     9.0.2
-Microsoft.EntityFrameworkCore.Design         9.0.2
-Npgsql.EntityFrameworkCore.PostgreSQL        9.0.4
-BCrypt.Net-Next                              4.0.3
+Microsoft.EntityFrameworkCore                10.0.5
+Microsoft.EntityFrameworkCore.Relational     10.0.5
+Microsoft.EntityFrameworkCore.Design         10.0.5
+Npgsql.EntityFrameworkCore.PostgreSQL        10.0.1
+BCrypt.Net-Next                              4.1.0
 ```
 
 ### Contexto (`Contexto/`)
@@ -182,8 +182,8 @@ BCrypt.Net-Next                              4.0.3
 
 ### Swagger / Scalar
 
-- [x] Configurar Swagger (`Swashbuckle.AspNetCore 6.9.0`) con título y versión en `Program.cs`
-- [x] Resolver conflicto de versión `Microsoft.OpenApi` (downgrade desde 10.1.4 → 6.9.0)
+- [x] Configurar Swagger (`Swashbuckle.AspNetCore 10.1.5`) con título y versión en `Program.cs`
+- [x] Mantener la documentación OpenAPI actualizada con las versiones de .NET 10
 
 ---
 

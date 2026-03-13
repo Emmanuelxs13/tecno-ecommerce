@@ -8,7 +8,7 @@
 
 ---
 
-Plataforma de comercio electrónico desarrollada con **.NET 9** aplicando la arquitectura **Modelo - Vista - Controlador (MVC)**, distribuida en cuatro proyectos .NET independientes que separan claramente las responsabilidades del sistema.
+Plataforma de comercio electrónico desarrollada con **.NET 10** aplicando la arquitectura **Modelo - Vista - Controlador (MVC)**, distribuida en cuatro proyectos .NET independientes que separan claramente las responsabilidades del sistema.
 
 ---
 
@@ -130,10 +130,10 @@ TecnoEcommerce.Modelos
 
 | Tecnología            | Versión | Uso                       |
 | --------------------- | ------- | ------------------------- |
-| .NET                  | 9.0     | Framework principal       |
-| ASP.NET Core Web API  | 9.0     | API REST (Controladores)  |
-| Blazor WebAssembly    | 9.0     | Frontend (Vista)          |
-| Entity Framework Core | 9.x     | Acceso a datos (Sprint 4) |
+| .NET                  | 10.0    | Framework principal       |
+| ASP.NET Core Web API  | 10.0    | API REST (Controladores)  |
+| Blazor WebAssembly    | 10.0    | Frontend (Vista)          |
+| Entity Framework Core | 10.x    | Acceso a datos (Sprint 4) |
 | PostgreSQL            | -       | Base de datos (Sprint 4)  |
 | Swagger / Scalar      | -       | Documentación de la API   |
 
@@ -150,8 +150,6 @@ TecnoEcommerce.Modelos
 | Sprint 4 | Datos           | ✅ Completado | EF Core + PostgreSQL + repositorios    |
 | Sprint 5 | Integración     | 🔜 Siguiente  | Pruebas end-to-end y refinamiento      |
 
-
-
 Ver [SPRINTS.md](SPRINTS.md) para el detalle completo.
 
 ---
@@ -160,7 +158,7 @@ Ver [SPRINTS.md](SPRINTS.md) para el detalle completo.
 
 ### Requisitos Previos
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10)
 - Visual Studio 2022 (17.8+) o VS Code con extensión C#
 - Un navegador moderno (Chrome, Edge, Firefox)
 
