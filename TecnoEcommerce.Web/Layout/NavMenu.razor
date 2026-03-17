@@ -70,12 +70,13 @@
                     @if (_autenticado)
                     {
                         <li>
-                            <a class="nav-link nav-icon-link @(_enCarrito ? "active" : "")"
+                            <a class="nav-link nav-cart-guest @(_enCarrito ? "active" : "")"
                                href="/carrito"
                                title="@(_totalItems > 0 ? "Carrito — " + _totalItems + " items" : "Carrito vacio")"
                                @onclick="CerrarMenuMovil">
                                 <span class="nav-cart-wrap">
                                     <i class="bi bi-bag3"></i>
+                                    <span class="nav-cart-label">Carrito</span>
                                     @if (_totalItems > 0)
                                     {
                                         <span class="cart-badge @(_animarBadge ? "cart-badge-bump" : "")">
@@ -87,12 +88,14 @@
                         </li>
 
                         <li class="nav-item dropdown">
-                            <a class="nav-link nav-icon-link dropdown-toggle"
-                               href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="nav-link nav-icon-link dropdown-toggle btn border-0 bg-transparent"
+                               type="button"
+                               aria-expanded="@_menuUsuarioAbierto"
+                               @onclick="ToggleMenuUsuario">
                                 <i class="bi bi-person-circle"></i>
-                                <span class="nav-username d-none d-lg-inline">@_nombreCorto</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <span class="nav-username">@_nombreCorto</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm @(_menuUsuarioAbierto ? "show" : string.Empty)">
                                 <li>
                                     <div class="dropdown-item-text py-2">
                                         <div class="fw-semibold small">@Sesion.UsuarioActual?.Nombre</div>
@@ -101,12 +104,12 @@
                                 </li>
                                 <li><hr class="dropdown-divider my-1" /></li>
                                 <li>
-                                    <a class="dropdown-item" href="/mis-pedidos" @onclick="CerrarMenuMovil">
+                                    <a class="dropdown-item" href="/mis-pedidos" @onclick="CerrarMenuYDropdown">
                                         <i class="bi bi-bag-check me-2 text-primary"></i>Mis pedidos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/carrito" @onclick="CerrarMenuMovil">
+                                    <a class="dropdown-item" href="/carrito" @onclick="CerrarMenuYDropdown">
                                         <i class="bi bi-bag3 me-2 text-primary"></i>Mi carrito
                                         @if (_totalItems > 0)
                                         {
@@ -156,6 +159,7 @@
 
 @code {
     private bool   _autenticado;
+    private bool   _menuUsuarioAbierto;
     private string _terminoBusqueda   = string.Empty;
     private int    _totalItems;
     private bool   _animarBadge;
@@ -175,6 +179,7 @@
     private async void OnSesionCambio()
     {
         _autenticado = Sesion.EstaAutenticado;
+        _menuUsuarioAbierto = false;
         await CargarTotalCarrito();
         await InvokeAsync(StateHasChanged);
     }
@@ -192,6 +197,7 @@
     private async void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
         _autenticado = Sesion.EstaAutenticado;
+        _menuUsuarioAbierto = false;
         await InvokeAsync(StateHasChanged);
     }
 
@@ -232,7 +238,7 @@
         if (!string.IsNullOrWhiteSpace(termino))
         {
             _terminoBusqueda = string.Empty;
-            CerrarMenuMovil();
+            CerrarMenuYDropdown();
             Navegacion.NavigateTo("/?q=" + Uri.EscapeDataString(termino));
         }
     }
@@ -242,8 +248,19 @@
     private void CerrarSesion()
     {
         Sesion.CerrarSesion();
-        CerrarMenuMovil();
+        CerrarMenuYDropdown();
         Navegacion.NavigateTo("/");
+    }
+
+    private void ToggleMenuUsuario()
+    {
+        _menuUsuarioAbierto = !_menuUsuarioAbierto;
+    }
+
+    private void CerrarMenuYDropdown()
+    {
+        _menuUsuarioAbierto = false;
+        CerrarMenuMovil();
     }
 
     private void CerrarMenuMovil()
