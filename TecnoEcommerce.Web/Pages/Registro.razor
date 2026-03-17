@@ -1,7 +1,10 @@
 @page "/registro"
 @using System.ComponentModel.DataAnnotations
+@using TecnoEcommerce.Modelos.DTOs
+@using TecnoEcommerce.Web.Servicios
 
 @inject NavigationManager Navegacion
+@inject UsuarioApiServicio UsuarioServicio
 
 <PageTitle>Crear cuenta — TecnoEcommerce</PageTitle>
 
@@ -22,10 +25,16 @@
 
         <!-- Body -->
         <div class="auth-card-body">
+            @if (!string.IsNullOrEmpty(_errorGlobal))
+            {
+                <div class="alert alert-danger py-2 mb-3" style="font-size:.85rem">
+                    <i class="bi bi-exclamation-circle me-1"></i>@_errorGlobal
+                </div>
+            }
             @if (_registroExitoso)
             {
                 <div class="alert alert-success py-2 mb-3" style="font-size:.85rem">
-                    <i class="bi bi-check-circle-fill me-1"></i>¡Cuenta creada! Redirigiendo al inicio…
+                    <i class="bi bi-check-circle-fill me-1"></i>¡Cuenta creada! Redirigiendo al login…
                 </div>
             }
 
@@ -128,14 +137,41 @@
     private bool _registroExitoso = false;
     private bool _verPwd1 = false;
     private bool _verPwd2 = false;
+    private string _errorGlobal = string.Empty;
 
     private async Task CrearCuenta()
     {
         _cargando = true;
-        await Task.Delay(900);
-        _cargando       = false;
-        _registroExitoso = true;
-        await Task.Delay(1400);
-        Navegacion.NavigateTo("/");
+        _errorGlobal = string.Empty;
+
+        try
+        {
+            var nombreCompleto = $"{_modelo.Nombre.Trim()} {_modelo.Apellido.Trim()}".Trim();
+
+            var registroDto = new RegistroUsuarioDto
+            {
+                Nombre = nombreCompleto,
+                Email = _modelo.Email.Trim(),
+                Contrasena = _modelo.Password
+            };
+
+            var resultado = await UsuarioServicio.RegistrarAsync(registroDto);
+
+            if (resultado is null)
+            {
+                _errorGlobal = "No fue posible crear la cuenta. Intenta nuevamente.";
+                _cargando = false;
+                return;
+            }
+
+            _registroExitoso = true;
+            await Task.Delay(800);
+            Navegacion.NavigateTo("/login");
+        }
+        catch
+        {
+            _errorGlobal = "Error al crear la cuenta. Verifica que el email no esté registrado.";
+            _cargando = false;
+        }
     }
 }

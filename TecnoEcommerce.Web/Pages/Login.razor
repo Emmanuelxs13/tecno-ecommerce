@@ -1,7 +1,10 @@
 @page "/login"
 @using System.ComponentModel.DataAnnotations
+@using TecnoEcommerce.Modelos.DTOs
+@using TecnoEcommerce.Web.Servicios
 
 @inject NavigationManager Navegacion
+@inject UsuarioApiServicio UsuarioServicio
 
 <PageTitle>Iniciar sesión — TecnoEcommerce</PageTitle>
 
@@ -118,11 +121,34 @@
     {
         _cargando = true;
         _errorGlobal = string.Empty;
-        await Task.Delay(900);
-        // Mock: cualquier email/password válidos entran
-        _cargando = false;
-        _loginExitoso = true;
-        await Task.Delay(1200);
-        Navegacion.NavigateTo("/");
+
+        try
+        {
+            var loginDto = new LoginUsuarioDto
+            {
+                Email = _modelo.Email.Trim(),
+                Contrasena = _modelo.Password
+            };
+
+            var resultado = await UsuarioServicio.LoginAsync(loginDto);
+
+            if (resultado is null)
+            {
+                _errorGlobal = "Correo o contraseña incorrectos.";
+                return;
+            }
+
+            _loginExitoso = true;
+            await Task.Delay(800);
+            Navegacion.NavigateTo("/");
+        }
+        catch
+        {
+            _errorGlobal = "No fue posible iniciar sesión. Intenta nuevamente.";
+        }
+        finally
+        {
+            _cargando = false;
+        }
     }
 }

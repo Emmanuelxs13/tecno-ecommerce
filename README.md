@@ -3,8 +3,34 @@
 ## Autores
 
 - Juan Esteban Correa Cano
-- Andrés Quiroz Gómez 
+- Andrés Quiroz Gómez
 - Emmanuel Berrio
+
+---
+
+## 🚀 Inicio Rápido
+
+**¿Quieres empezar ahora mismo?** Ve a [QUICK_START.md](QUICK_START.md) para instrucciones paso a paso.
+
+```powershell
+# Windows (PowerShell)
+.\setup-postgres.ps1
+dotnet run
+```
+
+```bash
+# Linux/Mac
+chmod +x setup-postgres.sh
+./setup-postgres.sh
+dotnet run
+```
+
+**Documentación importante:**
+
+- 📖 [Guía de inicio rápido](QUICK_START.md)
+- 🗄️ [Configuración de PostgreSQL](POSTGRESQL_SETUP.md)
+- 🔌 [API endpoints con ejemplos](API_ENDPOINTS.md)
+- 📋 [Plan de sprints](SPRINTS.md)
 
 ---
 
@@ -307,7 +333,6 @@ Configurada en `TecnoEcommerce.API/appsettings.json` (se activa en Sprint 4):
 ```
 
 ---
-
 
 ## Estado del Proyecto
 

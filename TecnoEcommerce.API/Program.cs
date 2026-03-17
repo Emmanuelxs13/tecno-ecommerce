@@ -4,6 +4,7 @@
 // Arquitectura: Modelo - Vista - Controlador (MVC)
 // ================================================================
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using TecnoEcommerce.API.Servicios;
 using TecnoEcommerce.Datos.Contexto;
 using TecnoEcommerce.Datos.Repositorios;
@@ -51,6 +52,8 @@ builder.Services.AddDbContext<TiendaContexto>(opciones =>
         builder.Configuration.GetConnectionString("ConexionPrincipal"),
         npgsql => npgsql.MigrationsAssembly("TecnoEcommerce.Datos")));
 
+var cadenaConexion = builder.Configuration.GetConnectionString("ConexionPrincipal");
+
 // -----------------------------------------------
 // Repositorios EF Core (Scoped: una instancia por petición HTTP).
 // Reemplazan a las implementaciones en memoria del Sprint 3.
@@ -86,12 +89,34 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<TiendaContexto>();
-    var puedeConectar = await db.Database.CanConnectAsync();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    logger.LogInformation(puedeConectar
-        ? "✅ Conexión a PostgreSQL establecida correctamente."
-        : "❌ No se pudo conectar a PostgreSQL. Verifique la cadena de conexión en appsettings.json.");
+
+    try
+    {
+        await using var conexion = new NpgsqlConnection(cadenaConexion);
+        await conexion.OpenAsync();
+        logger.LogInformation("✅ Conexión a PostgreSQL establecida correctamente.");
+    }
+    catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.InvalidPassword)
+    {
+        logger.LogError(ex,
+            "❌ PostgreSQL rechazó la autenticación (28P01). Si no tienes contraseña, configura autenticación local trust en pg_hba.conf o usa un usuario con contraseña.");
+    }
+    catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.InvalidCatalogName)
+    {
+        logger.LogError(ex,
+            "❌ La base de datos 'tecnoecommerce' no existe (3D000). Ejecuta setup-postgres.ps1 para crear esquema y datos semilla.");
+    }
+    catch (NpgsqlException ex) when (ex.Message.Contains("No password has been provided", StringComparison.OrdinalIgnoreCase))
+    {
+        logger.LogError(ex,
+            "❌ PostgreSQL exige contraseña (SASL/SCRAM). Debes definir Password en la cadena de conexión o cambiar autenticación local a trust en pg_hba.conf (solo desarrollo).");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex,
+            "❌ Error al conectar a PostgreSQL. Verifica host, puerto, servicio activo y autenticación local en pg_hba.conf.");
+    }
 }
 
 // -----------------------------------------------

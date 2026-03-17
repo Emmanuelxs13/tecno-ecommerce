@@ -1,0 +1,348 @@
+{
+  "info": {
+    "_postman_id": "9de41fd4-3515-4a72-85d7-4a2ef8ad3c19",
+    "name": "TecnoEcommerce API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección lista para probar los endpoints de TecnoEcommerce.API en local"
+  },
+  "item": [
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Registrar usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"email\": \"juan@correo.com\",\n  \"contrasena\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/registro",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "usuarios", "registro"]
+            },
+            "description": "Crea un usuario nuevo"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@correo.com\",\n  \"contrasena\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "usuarios", "login"]
+            },
+            "description": "Autentica un usuario"
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener perfil por id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "usuarios", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Obtener todos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "productos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener por id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "productos", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener por categoria",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/categoria/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "productos", "categoria", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar por nombre",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/buscar?nombre=mouse",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "productos", "buscar"],
+              "query": [
+                {
+                  "key": "nombre",
+                  "value": "mouse"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Mouse Gamer\",\n  \"descripcion\": \"Mouse óptico RGB\",\n  \"precio\": 149900,\n  \"stock\": 20,\n  \"imagenUrl\": \"https://picsum.photos/300\",\n  \"categoriaId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "productos"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Obtener todas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener por id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear categoria",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Periféricos\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Carrito",
+      "item": [
+        {
+          "name": "Obtener carrito",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/carrito/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "carrito", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Agregar item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productoId\": 1,\n  \"cantidad\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/carrito/1/items",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "carrito", "1", "items"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar cantidad item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/carrito/1/items/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "carrito", "1", "items", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar item",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/carrito/1/items/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "carrito", "1", "items", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Vaciar carrito",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/carrito/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "carrito", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "Crear pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"direccionEntrega\": \"Calle 10 # 20-30, Medellín, Colombia\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pedidos", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mis pedidos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos/mis-pedidos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pedidos", "mis-pedidos", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener pedido por id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos/1/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pedidos", "1", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5247",
+      "type": "string"
+    }
+  ]
+}
