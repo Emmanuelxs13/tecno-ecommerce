@@ -453,6 +453,10 @@ img {
   box-shadow: 0 8px 36px rgba(0, 0, 0, 0.18);
   padding: 0.5rem 0;
 }
+.navbar-tecno .dropdown-menu .dropdown-item,
+.navbar-tecno .dropdown-menu .dropdown-item-text {
+  color: #000 !important;
+}
 .dropdown-item:hover {
   background: var(--apple-light);
   color: var(--apple-dark);
