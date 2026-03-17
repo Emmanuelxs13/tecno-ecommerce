@@ -308,13 +308,6 @@ Configurada en `TecnoEcommerce.API/appsettings.json` (se activa en Sprint 4):
 
 ---
 
-## Autores
-
-- Juan Esteban Correa
-- Andrés Quiroz Gómez
-- Emmanuel Berrío
-
----
 
 ## Estado del Proyecto
 
